@@ -30,7 +30,7 @@ func handleGetAllJourneys(w http.ResponseWriter, r *http.Request, context model.
 
 	for _, journey := range context.Journeys().GetAll() {
 		if journeyMatchesConditions(journey, getDefaultConditions(r)) {
-			responseItems = append(responseItems, convertSimpleJourney(journey))
+			responseItems = append(responseItems, convertJourney(journey))
 		}
 	}
 
