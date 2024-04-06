@@ -1,0 +1,9 @@
+.idea
+*.iml
+.gtfs
+.mala
+.gov
+bin
+cover.out
+coverage.html
+compatibility/diffs

@@ -1,0 +1,5 @@
+route_id,route_short_name,route_long_name,route_type
+1,1,Vatiala - Pirkkala,3
+1A,1A,Vatiala - Pirkkala (lentoasema),3
+3A,3A,Etelä-Hervanta - Lentävänniemi,3
+-1,-1,Foobar,3
