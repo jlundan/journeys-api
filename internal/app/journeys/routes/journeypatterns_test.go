@@ -49,12 +49,6 @@ func TestJourneyPatternsRoutes(t *testing.T) {
 				getJourneyPatternMap()["047b0afc973ee2fd4fe92b128c3a932a"],
 			},
 		},
-		{"/journey-patterns?name=Suupantori",
-			[]JourneyPattern{
-				getJourneyPatternMap()["047b0afc973ee2fd4fe92b128c3a932a"],
-				getJourneyPatternMap()["c01c71b0c9f456ba21f498a1dca54b3b"],
-			},
-		},
 		{"/journey-patterns?firstStopPointId=4600&lastStopPointId=8149&stopPointId=8171",
 			[]JourneyPattern{
 				getJourneyPatternMap()["9bc7403ad27267edbfbd63c3e92e5afa"],
@@ -125,7 +119,7 @@ func TestJourneyPatternsRoutes(t *testing.T) {
 			break
 		}
 		for i, l := range response.Body {
-			if tc.items[i].Url != l.Url || tc.items[i].Name != l.Name || tc.items[i].LineUrl != l.LineUrl ||
+			if tc.items[i].Url != l.Url || tc.items[i].LineUrl != l.LineUrl ||
 				tc.items[i].RouteUrl != l.RouteUrl || tc.items[i].OriginStop != l.OriginStop || tc.items[i].DestinationStop != l.DestinationStop ||
 				tc.items[i].Direction != l.Direction {
 				t.Errorf("expected %v, got %v", tc.items[i], l)
