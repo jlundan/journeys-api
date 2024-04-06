@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/gorilla/mux"
@@ -9,14 +10,21 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"reflect"
 	"testing"
 )
 
 var mockFilterObject, originalFilterObject func(r interface{}, properties string) (interface{}, error)
 var fakeMarshal, originalMarshal func(_ interface{}) ([]byte, error)
 
+type FieldDiff struct {
+	Tag       string
+	FieldName string
+	Expected  interface{}
+	Got       interface{}
+}
+
 func init() {
-	_ = os.Setenv("JOURNEYS_BASE_URL", "http://localhost:5678")
 	_ = os.Setenv("JOURNEYS_GTFS_PATH", "testdata/tre1/gtfs")
 
 	mockFilterObject = func(r interface{}, properties string) (interface{}, error) {
@@ -342,33 +350,46 @@ func getJourneyMap() map[string]Journey {
 	return result
 }
 
-func journeysMatch(a Journey, b Journey) bool {
-	if a.Url != b.Url || a.LineUrl != b.LineUrl || a.RouteUrl != b.RouteUrl || a.JourneyPatternUrl != b.JourneyPatternUrl ||
-		a.DepartureTime != b.DepartureTime || a.ArrivalTime != b.ArrivalTime || a.HeadSign != b.HeadSign ||
-		a.WheelchairAccessible != b.WheelchairAccessible || a.GtfsInfo != b.GtfsInfo || len(a.DayTypes) != len(b.DayTypes) ||
-		a.ActivityUrl != b.ActivityUrl || len(a.DayTypeExceptions) != len(b.DayTypeExceptions) || len(a.Calls) != len(b.Calls) {
-		return false
+func compareJourneys(a, b interface{}, tag string) ([]FieldDiff, error) {
+	var diffs []FieldDiff
+
+	if reflect.TypeOf(a) != reflect.TypeOf(b) {
+		return diffs, errors.New("structs are of different types")
 	}
 
-	for i := range a.DayTypes {
-		if a.DayTypes[i] != b.DayTypes[i] {
-			return false
+	va := reflect.ValueOf(a)
+	vb := reflect.ValueOf(b)
+
+	for i := 0; i < va.NumField(); i++ {
+		fieldA := va.Field(i)
+		fieldB := vb.Field(i)
+
+		if !reflect.DeepEqual(fieldA.Interface(), fieldB.Interface()) {
+			diffs = append(diffs, FieldDiff{
+				Tag:       tag,
+				FieldName: va.Type().Field(i).Name,
+				Expected:  fieldA.Interface(),
+				Got:       fieldB.Interface(),
+			})
 		}
 	}
 
-	for i := range a.DayTypeExceptions {
-		if a.DayTypeExceptions[i] != b.DayTypeExceptions[i] {
-			return false
-		}
-	}
+	return diffs, nil
+}
 
-	for i := range a.Calls {
-		if a.Calls[i] != b.Calls[i] {
-			return false
+func printFieldDiffs(t *testing.T, diffs []FieldDiff) {
+	for _, diff := range diffs {
+		var expectedJSON, expectedErr = json.Marshal(diff.Expected)
+		if expectedErr != nil {
+			t.Fatalf("Failed to marshal expected JSON: %v", expectedErr)
 		}
-	}
+		var gotJSON, gotErr = json.Marshal(diff.Got)
+		if gotErr != nil {
+			t.Fatalf("Failed to marshal expected JSON: %v", gotErr)
+		}
 
-	return true
+		t.Error(fmt.Sprintf("Tag: %v, field: %v\n expected: \n%v \ngot: \n%v", diff.Tag, diff.FieldName, string(expectedJSON), string(gotJSON)))
+	}
 }
 
 func lineUrl(name string) string {
