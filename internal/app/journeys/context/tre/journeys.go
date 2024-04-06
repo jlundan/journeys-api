@@ -181,7 +181,7 @@ func buildJourneys(g GTFSContext, lines Lines, routes Routes, stopPoints StopPoi
 			},
 			DayTypes:          cMapItem.dayTypes,
 			DayTypeExceptions: cdMapItem,
-			Calls:             tripIdToJourneyCalls[trip.Id],
+			Calls:             calls,
 			Line:              line,
 			JourneyPattern:    jp,
 			ValidFrom:         cMapItem.startDate,
