@@ -169,6 +169,8 @@ func LoadAgencies(csvReader *csv.Reader) ([]*Agency, []error) {
 
 		if agencyUrl == nil {
 			rowErrs = append(rowErrs, createFileRowError(AgenciesFileName, agency.lineNumber, "agency_url must be specified"))
+		} else if *agencyUrl == "" {
+			rowErrs = append(rowErrs, createFileRowError(AgenciesFileName, agency.lineNumber, "agency_url must not be empty"))
 		} else {
 			agency.Url = *agencyUrl
 		}
