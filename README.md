@@ -6,7 +6,11 @@ You can find more information about the project in the [ITS Factory Wiki](https:
 <i>You should consider this application as alpha-state for now. It is not yet ready for production use. You should be able to test it locally though.</i>
 
 ## Running the server
-Currently, Tampere GTFS config is available. To run the server with Tampere GTFS config, run the following command:
+First, download the dependencies:
+```bash
+go mod download
+```
+Start the server:
 ```bash
 go run cmd/journeys/journeys.go
 ```
@@ -19,7 +23,7 @@ The command reads following environment variables:
 | JOURNEYS_BASE_URL    | the base of the outputted URLs in responses                  |
 | JOURNEYS_VA_BASE_URL | the base of the outputted vehicle activity URLs in responses |
 
-The GTFS files for the Tampere region can be downloaded from [ITS Factory](https://data.itsfactory.fi/journeys/files/gtfs/).
+The GTFS files for the Tampere region can be downloaded from [ITS Factory](https://data.itsfactory.fi/journeys/files/gtfs/). We currently use the Tampere GTFS files for development, but you should be able to use other cities' GTFS files as well. 
 
 There is also a Makefile command which uses defaults for the environment variables:
 ```bash
