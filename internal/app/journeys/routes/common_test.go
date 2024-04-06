@@ -396,7 +396,7 @@ func stopPointUrl(name string) string {
 }
 
 func journeyActivityUrl(name string) string {
-	return fmt.Sprintf("%v/vehicle-activity/%v", os.Getenv("JOURNEYS_BASE_URL"), name)
+	return fmt.Sprintf("%v/vehicle-activity/%v", os.Getenv("JOURNEYS_VA_BASE_URL"), name)
 }
 
 type responseWriterMock struct {
