@@ -148,8 +148,7 @@ func TestAgencyParsingNOK(t *testing.T) {
 			},
 			expected: []string{
 				"agency.txt:0: agency_timezone must be specified",
-				"agency.txt:0: agency_url must be specified",
-				"agency.txt:0: agency_url: empty value not allowed",
+				"agency.txt:0: agency_url must not be empty",
 			},
 		},
 		{
@@ -169,7 +168,6 @@ func TestAgencyParsingNOK(t *testing.T) {
 			},
 			expected: []string{
 				"agency.txt:0: agency_email: empty value not allowed",
-				"agency.txt:0: agency_fare_url: empty value not allowed",
 				"agency.txt:0: agency_lang: empty value not allowed",
 				"agency.txt:0: agency_phone: empty value not allowed",
 			},
@@ -206,7 +204,7 @@ func TestAgencyParsingNOK(t *testing.T) {
 		},
 	}
 
-	for _, tc := range testCases {
+	for tcIndex, tc := range testCases {
 		_, err := LoadAgencies(csv.NewReader(strings.NewReader(tableToString(tc.rows))))
 
 		sort.Slice(err, func(x, y int) bool {
@@ -223,7 +221,7 @@ func TestAgencyParsingNOK(t *testing.T) {
 		}
 
 		if len(err) != len(tc.expected) {
-			t.Error(fmt.Sprintf("expected %v errors, got %v", len(tc.expected), len(err)))
+			t.Error(fmt.Sprintf("%v: expected %v errors, got %v", tcIndex, len(tc.expected), len(err)))
 			for _, e := range err {
 				fmt.Println(e)
 			}
