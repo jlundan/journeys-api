@@ -17,84 +17,87 @@ type Agency struct {
 	lineNumber int
 }
 
-func ExtractAgencies(input *csv.Reader, output *csv.Writer, agencies map[string]struct{}) []error {
-	errs := make([]error, 0)
+// jlundan 6.4.2024 commenting code below out for now, since we have no use for it (yet). This was used in the prototype
+// to extract agencies from the GTFS file, but that functionality is not imported yet.
 
-	headers, err := ReadHeaderRow(input)
-	if err != nil {
-		errs = append(errs, createFileError(AgenciesFileName, fmt.Sprintf("read error: %v", err.Error())))
-		return errs
-	}
-
-	if headers == nil { // EOF
-		// This means empty file -> no errors and nothing to extract
-		return nil
-	}
-
-	err = writeHeaderRow(headers, output)
-	if err != nil {
-		errs = append(errs, err)
-		return errs
-	}
-
-	// GTFS states that agency_id should be present if multiple agencies are used in the data set. If the agency_id
-	// is not present, we either have invalid data set or data set with single agency. In any case, we cannot proceed
-	// since anything we extract would be based on the agency_id field.
-	var idHeaderPos uint8
-	if agencyIdPos, hasAgencyId := headers["agency_id"]; hasAgencyId {
-		idHeaderPos = agencyIdPos
-	} else {
-		errs = append(errs, createFileError(AgenciesFileName, "cannot extract agency without agency_id column"))
-		return errs
-	}
-
-	// Before extracting the agency, we should check that we actually have multiple agencies declared in the file.
-	// If we do not, then it does not make sense to extract anything, since the extract result would be exactly the
-	// same data set. To do this, we keep track of the agencies we read, and compare each to the previous agency_id
-	// we read and check if it is the same. When we have finished the file, we know if any of the agency_ids were
-	// different from the previous one (did not have single agency id). While we are checking this, we also store
-	// the rows (for efficiency), so we can write those out if we actually had multiple agencies in the file.
-	hadSingleAgency := true
-	previousAgency := ""
-	rows := make([][]string, 0)
-	for {
-		row, rErr := ReadDataRow(input)
-		if rErr != nil {
-			errs = append(errs, createFileError(AgenciesFileName, fmt.Sprintf("%v", rErr.Error())))
-			continue
-		}
-
-		if row == nil { // EOF
-			break
-		}
-
-		if previousAgency != "" && previousAgency != row[idHeaderPos] {
-			hadSingleAgency = false
-		}
-		previousAgency = row[idHeaderPos]
-
-		if _, shouldBeExtracted := agencies[row[idHeaderPos]]; shouldBeExtracted {
-			rows = append(rows, row)
-		}
-	}
-
-	if hadSingleAgency {
-		errs = append(errs, createFileError(AgenciesFileName, "only one agency specified - no need to extract anything"))
-		return errs
-	}
-
-	for _, row := range rows {
-		wErr := output.Write(row)
-		if wErr != nil {
-			output.Flush()
-			errs = append(errs, wErr)
-			return errs
-		}
-		output.Flush()
-	}
-
-	return nil
-}
+//func ExtractAgencies(input *csv.Reader, output *csv.Writer, agencies map[string]struct{}) []error {
+//	errs := make([]error, 0)
+//
+//	headers, err := ReadHeaderRow(input)
+//	if err != nil {
+//		errs = append(errs, createFileError(AgenciesFileName, fmt.Sprintf("read error: %v", err.Error())))
+//		return errs
+//	}
+//
+//	if headers == nil { // EOF
+//		// This means empty file -> no errors and nothing to extract
+//		return nil
+//	}
+//
+//	err = writeHeaderRow(headers, output)
+//	if err != nil {
+//		errs = append(errs, err)
+//		return errs
+//	}
+//
+//	// GTFS states that agency_id should be present if multiple agencies are used in the data set. If the agency_id
+//	// is not present, we either have invalid data set or data set with single agency. In any case, we cannot proceed
+//	// since anything we extract would be based on the agency_id field.
+//	var idHeaderPos uint8
+//	if agencyIdPos, hasAgencyId := headers["agency_id"]; hasAgencyId {
+//		idHeaderPos = agencyIdPos
+//	} else {
+//		errs = append(errs, createFileError(AgenciesFileName, "cannot extract agency without agency_id column"))
+//		return errs
+//	}
+//
+//	// Before extracting the agency, we should check that we actually have multiple agencies declared in the file.
+//	// If we do not, then it does not make sense to extract anything, since the extract result would be exactly the
+//	// same data set. To do this, we keep track of the agencies we read, and compare each to the previous agency_id
+//	// we read and check if it is the same. When we have finished the file, we know if any of the agency_ids were
+//	// different from the previous one (did not have single agency id). While we are checking this, we also store
+//	// the rows (for efficiency), so we can write those out if we actually had multiple agencies in the file.
+//	hadSingleAgency := true
+//	previousAgency := ""
+//	rows := make([][]string, 0)
+//	for {
+//		row, rErr := ReadDataRow(input)
+//		if rErr != nil {
+//			errs = append(errs, createFileError(AgenciesFileName, fmt.Sprintf("%v", rErr.Error())))
+//			continue
+//		}
+//
+//		if row == nil { // EOF
+//			break
+//		}
+//
+//		if previousAgency != "" && previousAgency != row[idHeaderPos] {
+//			hadSingleAgency = false
+//		}
+//		previousAgency = row[idHeaderPos]
+//
+//		if _, shouldBeExtracted := agencies[row[idHeaderPos]]; shouldBeExtracted {
+//			rows = append(rows, row)
+//		}
+//	}
+//
+//	if hadSingleAgency {
+//		errs = append(errs, createFileError(AgenciesFileName, "only one agency specified - no need to extract anything"))
+//		return errs
+//	}
+//
+//	for _, row := range rows {
+//		wErr := output.Write(row)
+//		if wErr != nil {
+//			output.Flush()
+//			errs = append(errs, wErr)
+//			return errs
+//		}
+//		output.Flush()
+//	}
+//
+//	return nil
+//}
 
 func LoadAgencies(csvReader *csv.Reader) ([]*Agency, []error) {
 	agencies := make([]*Agency, 0)
