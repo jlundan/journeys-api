@@ -1,7 +1,7 @@
 # journeys-api
 
 Journeys API serves GTFS data as JSON. This project was originally created for City of Tampere, but is now open sourced.
-You can find more information about the project in the [ITS Factory Wiki](https://wiki.itsfactory.fi/index.php/Journeys_API), where the current closed source API is discussed. This open source version of the API tries to match the proprietary version as much of possible.
+You can find more information about the project in the [ITS Factory Wiki](https://wiki.itsfactory.fi/index.php/Journeys_API), where the current closed source API is discussed. This open source version of the API tries to match the proprietary version as much as possible.
 
 <i>You should consider this application as alpha-state for now. It is not yet ready for production use. You should be able to test it locally though.</i>
 
