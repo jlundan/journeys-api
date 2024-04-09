@@ -58,6 +58,9 @@ func lineMatchesConditions(line *model.Line, conditions map[string]string) bool 
 	if line == nil {
 		return false
 	}
+	if conditions == nil {
+		return true
+	}
 
 	for k, v := range conditions {
 		switch k {
