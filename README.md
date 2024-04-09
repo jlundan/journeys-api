@@ -41,17 +41,21 @@ Using the Makefile is not required, you can run the server with `go` command and
 ## Endpoint compatibility
 You should expect endpoint compatibility with the proprietary Journeys API according to the following table:
 
-| Endpoint          | Status               | Notes                         |
-|-------------------|----------------------|-------------------------------|
-| /lines            | Partially compatible | Returned lines are not sorted |
-| /lines/:lineId    | Fully compatible     | -                             |
-| /routes           | Unverified           | Not verified yet              |
-| /journey-patterns | Unverified           | Not verified yet              |
-| /journeys         | Unverified           | Not verified yet              |
-| /stop-points      | Unverified           | Not verified yet              |
-| /municipalities   | Unverified           | Not verified yet              |
-| /vehicle-activity | n/a                  | Not supported currently       |
-| /routes           | Unverified           | Not verified yet              |
+| Endpoint                            | Status               | Notes                         |
+|-------------------------------------|----------------------|-------------------------------|
+| /lines                              | Partially compatible | Returned lines are not sorted |
+| /routes                             | Unverified           | Not verified yet              |
+| /journey-patterns                   | Unverified           | Not verified yet              |
+| /journeys                           | Unverified           | Not verified yet              |
+| /stop-points                        | Unverified           | Not verified yet              |
+| /municipalities                     | Unverified           | Not verified yet              |
+| /lines/:lineId                      | Fully compatible     | -                             |
+| /routes/:routeId                    | Unverified           | Not verified yet              |
+| /journey-patterns/:journeyPatternId | Unverified           | Not verified yet              |
+| /journeys/:journeyId                | Unverified           | Not verified yet              |
+| /stop-points/:stopPointId           | Unverified           | Not verified yet              |
+| /municipalities/:municipalityId     | Unverified           | Not verified yet              |
+| /vehicle-activity                   | n/a                  | Not supported currently       |
 
 Please note:
 * You should not expect response object properties to be in the same order as in the proprietary API
