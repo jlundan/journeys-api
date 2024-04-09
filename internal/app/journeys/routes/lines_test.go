@@ -37,8 +37,8 @@ func TestLineMatchesConditions(t *testing.T) {
 
 func TestGetLines(t *testing.T) {
 	testCases := []struct {
-		target string
-		items  []Line
+		url           string
+		responseItems []Line
 	}{
 		{"/lines", []Line{
 			{lineUrl("-1"), "-1", "Foobar"},
@@ -74,12 +74,12 @@ func TestGetLines(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		r, w, ctx := initializeTest(t)
-		InjectLineRoutes(r, ctx)
+		router, recorder, ctx := initializeTest(t)
+		InjectLineRoutes(router, ctx)
 
-		linesResponse := triggerGetLinesRequest(t, r, w, tc.target)
+		linesResponse := triggerGetLinesRequest(t, router, recorder, tc.url)
 
-		dataSize := len(tc.items)
+		dataSize := len(tc.responseItems)
 		if success := validateCommonResponseFields(t, linesResponse.Status, linesResponse.Data, uint16(dataSize)); !success {
 			break
 		}
@@ -88,8 +88,8 @@ func TestGetLines(t *testing.T) {
 			break
 		}
 		for i, line := range linesResponse.Body {
-			if tc.items[i] != line {
-				t.Errorf("expected %v, got %v", tc.items[i], line)
+			if tc.responseItems[i] != line {
+				t.Errorf("expected %v, got %v", tc.responseItems[i], line)
 				break
 			}
 		}
@@ -102,11 +102,11 @@ type lineSuccessResponse struct {
 	Body   []Line         `json:"body"`
 }
 
-func triggerGetLinesRequest(t *testing.T, r *mux.Router, w *httptest.ResponseRecorder, target string) lineSuccessResponse {
-	serveHttp(t, r, w, target)
+func triggerGetLinesRequest(t *testing.T, router *mux.Router, recorder *httptest.ResponseRecorder, target string) lineSuccessResponse {
+	serveHttp(t, router, recorder, target)
 
 	var response lineSuccessResponse
-	err := json.Unmarshal(w.Body.Bytes(), &response)
+	err := json.Unmarshal(recorder.Body.Bytes(), &response)
 	if err != nil {
 		t.Error(err)
 	}
