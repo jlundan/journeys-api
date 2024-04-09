@@ -60,4 +60,4 @@ You should expect endpoint compatibility with the proprietary Journeys API accor
 Please note:
 * You should not expect the response object properties to be in the same order as in the proprietary API
 * You should expect the response array items to be in the same order as in the proprietary API, unless otherwise noted
-* You should not expect the response page sizes to match the proprietary API. We aim to return all items in one page, however the paging information is maintained for backwards compatibility.
+* You should not expect the response page sizes to match the proprietary API. We aim to return all items in one page, however the paging information is maintained for backwards compatibility
