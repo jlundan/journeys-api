@@ -81,6 +81,7 @@ func TestGetLines(t *testing.T) {
 
 		dataSize := len(tc.responseItems)
 		if success := validateCommonResponseFields(t, linesResponse.Status, linesResponse.Data, uint16(dataSize)); !success {
+			t.Errorf("common response fields validation failed")
 			break
 		}
 		if len(linesResponse.Body) != dataSize {
