@@ -37,3 +37,22 @@ Using the Makefile is not required, you can run the server with `go` command and
 ## Updating module versions
 1. Update the version of the package in the `go.mod` file
 2. Run `go get -u <package-name>` to update the package
+
+## Endpoint compatibility
+You should expect endpoint compatibility with the proprietary Journeys API according to the following table:
+
+| Endpoint          | Status               | Notes                         |
+|-------------------|----------------------|-------------------------------|
+| /lines            | Partially compatible | Returned lines are not sorted |
+| /lines/:lineId    | Fully compatible     | -                             |
+| /routes           | Unverified           | Not verified yet              |
+| /journey-patterns | Unverified           | Not verified yet              |
+| /journeys         | Unverified           | Not verified yet              |
+| /stop-points      | Unverified           | Not verified yet              |
+| /municipalities   | Unverified           | Not verified yet              |
+| /vehicle-activity | n/a                  | Not supported currently       |
+| /routes           | Unverified           | Not verified yet              |
+
+Please note:
+* You should not expect response object properties to be in the same order as in the proprietary API
+* You should expect response array items to be in the same order as in the proprietary API, unless otherwise noted
