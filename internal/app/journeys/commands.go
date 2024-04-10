@@ -89,7 +89,7 @@ var mainCommand = &cobra.Command{
 
 		var port string
 		if os.Getenv("JOURNEYS_PORT") == "" {
-			port = "5678"
+			port = "8080"
 		}
 
 		startServer(r, port)
