@@ -105,8 +105,10 @@ var mainCommand = &cobra.Command{
 		routes.InjectRouteRoutes(r, ctx)
 
 		var port string
-		if os.Getenv("JOURNEYS_PORT") == "" {
+		if val := os.Getenv("JOURNEYS_PORT"); val == "" {
 			port = "8080"
+		} else {
+			port = val
 		}
 
 		startServer(r, port)
