@@ -31,7 +31,9 @@ func corsMiddleware(next http.Handler) http.Handler {
 }
 
 func init() {
-	mc = memcache.New("localhost:11211")
+	if os.Getenv("MEMCACHED_URL") != "" {
+		mc = memcache.New(os.Getenv("MEMCACHED_URL"))
+	}
 }
 
 func cacheMiddleware(next http.Handler) http.Handler {
@@ -96,7 +98,10 @@ var mainCommand = &cobra.Command{
 
 		r := mux.NewRouter()
 		r.Use(corsMiddleware)
-		r.Use(cacheMiddleware)
+		if mc != nil {
+			log.Println("Using memcached")
+			r.Use(cacheMiddleware)
+		}
 		routes.InjectMunicipalityRoutes(r, ctx)
 		routes.InjectLineRoutes(r, ctx)
 		routes.InjectJourneyPatternRoutes(r, ctx)
