@@ -50,6 +50,7 @@ type JourneyPattern struct {
 	Name       string
 	StopPoints []*StopPoint
 	Route      *Route
+	Journeys   []*Journey
 }
 
 type StopPoint struct {

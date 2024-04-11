@@ -203,6 +203,8 @@ func buildJourneys(g GTFSContext, lines Lines, routes Routes, stopPoints StopPoi
 			journey.Route.JourneyPatterns = append(journey.Route.JourneyPatterns, jp)
 		}
 
+		journeyPatternsById[jp.Id].Journeys = append(journeyPatternsById[jp.Id].Journeys, &journey)
+
 		byActivityId[activityId] = &journey
 		all = append(all, &journey)
 		byId[trip.Id] = &journey

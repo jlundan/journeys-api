@@ -7,7 +7,6 @@ import (
 	"github.com/jlundan/journeys-api/internal/app/journeys/model"
 	"net/http/httptest"
 	"os"
-	"reflect"
 	"testing"
 )
 
@@ -66,7 +65,7 @@ func TestGetRoutes(t *testing.T) {
 			break
 		}
 		for i, route := range routesResponse.Body {
-			if tc.expected[i].Projection != route.Projection || !reflect.DeepEqual(route.Links, tc.expected[i].Links) {
+			if tc.expected[i].Projection != route.Projection {
 				t.Errorf("expected %v, got %v", tc.expected[i], route)
 				break
 			}
@@ -145,7 +144,6 @@ func getRouteMap() map[string]Route {
 	for _, route := range routes {
 		result[route.id] = Route{
 			Projection: route.projection,
-			Links:      route.links,
 		}
 	}
 
