@@ -38,8 +38,8 @@ func TestLineMatchesConditions(t *testing.T) {
 
 func TestGetLines(t *testing.T) {
 	testCases := []struct {
-		url           string
-		responseItems []Line
+		url   string
+		items []Line
 	}{
 		{"/lines", []Line{
 			{lineUrl("-1"), "-1", "Foobar"},
@@ -84,22 +84,24 @@ func TestGetLines(t *testing.T) {
 		router, recorder, ctx := initializeTest(t)
 		InjectLineRoutes(router, ctx)
 
-		linesResponse := triggerGetLinesRequest(t, router, recorder, tc.url)
+		serverResponse := triggerGetLinesRequest(t, router, recorder, tc.url)
+		expectedResponse := lineSuccessResponse{
+			Status: "success",
+			Data: apiSuccessData{
+				Headers: apiHeaders{
+					Paging: apiHeadersPaging{
+						StartIndex: 0,
+						PageSize:   uint16(len(tc.items)),
+						MoreData:   false,
+					},
+				},
+			},
+			Body: tc.items,
+		}
 
-		dataSize := len(tc.responseItems)
-		if success := validateCommonResponseFields(t, linesResponse.Status, linesResponse.Data, uint16(dataSize)); !success {
-			t.Errorf("common response fields validation failed")
+		if !cmp.Equal(serverResponse, expectedResponse) {
+			t.Errorf("entities are not equal: %s", cmp.Diff(serverResponse, expectedResponse))
 			break
-		}
-		if len(linesResponse.Body) != dataSize {
-			t.Errorf("expected %v, got %v", dataSize, len(linesResponse.Body))
-			break
-		}
-		for i, line := range linesResponse.Body {
-			if !cmp.Equal(tc.responseItems[i], line) {
-				t.Errorf("entities are not equal: %s", cmp.Diff(tc.responseItems[i], line))
-				break
-			}
 		}
 	}
 }
