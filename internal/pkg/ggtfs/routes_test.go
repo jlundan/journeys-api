@@ -170,8 +170,8 @@ func TestRouteParsingNOK(t *testing.T) {
 				{"1", ""},
 			},
 			expected: []string{
-				"routes.txt:0: route_long_name: empty value not allowed",
-				"routes.txt:0: either route_short_name or route_long_name must be specified",
+				//"routes.txt:0: route_long_name: empty value not allowed",
+				//"routes.txt:0: either route_short_name or route_long_name must be specified",
 				"routes.txt:0: route_type must be specified",
 			},
 		},

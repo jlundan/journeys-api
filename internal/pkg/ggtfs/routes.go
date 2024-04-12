@@ -132,7 +132,8 @@ func LoadRoutes(csvReader *csv.Reader) ([]*Route, []error) {
 			case "route_short_name":
 				route.ShortName = handleStringField(row[column], RoutesFileName, name, index, &rowErrs)
 			case "route_long_name":
-				route.LongName = handleStringField(row[column], RoutesFileName, name, index, &rowErrs)
+				//route.LongName = handleStringField(row[column], RoutesFileName, name, index, &rowErrs)
+				route.LongName = &row[column]
 			case "route_desc":
 				route.Desc = handleStringField(row[column], RoutesFileName, name, index, &rowErrs)
 			case "route_url":
