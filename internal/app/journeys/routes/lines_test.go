@@ -62,6 +62,12 @@ func TestGetLines(t *testing.T) {
 		{"/lines?name=1&exclude-fields=description", []Line{
 			{lineUrl("1"), "1", ""},
 		}},
+		{"/lines?exclude-fields=name", []Line{
+			{lineUrl("-1"), "", "Foobar"},
+			{lineUrl("1"), "", "Vatiala - Pirkkala"},
+			{lineUrl("1A"), "", "Vatiala - Pirkkala (lentoasema)"},
+			{lineUrl("3A"), "", "Etelä-Hervanta - Lentävänniemi"},
+		}},
 		{"/lines/1A", []Line{
 			{lineUrl("1A"), "1A", "Vatiala - Pirkkala (lentoasema)"},
 		}},
