@@ -99,44 +99,6 @@ func convertJourney(j *model.Journey) Journey {
 	}
 }
 
-func convertSimpleJourney(j *model.Journey) SimpleJourney {
-	dayTypeExceptions := makeDayTypeExceptions(j)
-
-	var lineId, routeId, journeyPatternId string
-
-	if j.Line != nil {
-		lineId = j.Line.Name
-	}
-	if j.Route != nil {
-		routeId = j.Route.Id
-	}
-	if j.JourneyPattern != nil {
-		journeyPatternId = j.JourneyPattern.Id
-	}
-
-	var gtfsInfo JourneyGtfsInfo
-
-	if j.GtfsInfo != nil {
-		gtfsInfo = JourneyGtfsInfo{TripId: j.GtfsInfo.TripId}
-	}
-
-	return SimpleJourney{
-		Url:                  fmt.Sprintf("%v%v/%v", os.Getenv("JOURNEYS_BASE_URL"), journeysPrefix, j.Id),
-		ActivityUrl:          fmt.Sprintf("%v%v/%v", os.Getenv("JOURNEYS_VA_BASE_URL"), "/vehicle-activity", j.ActivityId),
-		HeadSign:             j.HeadSign,
-		Direction:            j.Direction,
-		WheelchairAccessible: j.WheelchairAccessible,
-		GtfsInfo:             gtfsInfo,
-		JourneyPatternUrl:    fmt.Sprintf("%v%v/%v", os.Getenv("JOURNEYS_BASE_URL"), journeyPatternPrefix, journeyPatternId),
-		LineUrl:              fmt.Sprintf("%v%v/%v", os.Getenv("JOURNEYS_BASE_URL"), linePrefix, lineId),
-		RouteUrl:             fmt.Sprintf("%v%v/%v", os.Getenv("JOURNEYS_BASE_URL"), routePrefix, routeId),
-		DayTypes:             j.DayTypes,
-		DayTypeExceptions:    dayTypeExceptions,
-		DepartureTime:        j.DepartureTime,
-		ArrivalTime:          j.ArrivalTime,
-	}
-}
-
 func journeyMatchesConditions(journey *model.Journey, conditions map[string]string) bool {
 	now := time.Now()
 	curDay := fmt.Sprintf("%d-%02d-%02d", now.Year(), now.Month(), now.Day())
@@ -256,23 +218,6 @@ type Journey struct {
 	DayTypes             []string           `json:"dayTypes"`
 	DayTypeExceptions    []DayTypeException `json:"dayTypeExceptions"`
 	Calls                []JourneyCall      `json:"calls"`
-}
-
-type SimpleJourney struct {
-	Url                  string             `json:"url"`
-	ActivityUrl          string             `json:"activityUrl"`
-	LineUrl              string             `json:"lineUrl"`
-	RouteUrl             string             `json:"routeUrl"`
-	JourneyPatternUrl    string             `json:"journeyPatternUrl"`
-	DepartureTime        string             `json:"departureTime"`
-	ArrivalTime          string             `json:"arrivalTime"`
-	HeadSign             string             `json:"headSign"`
-	Direction            string             `json:"directionId"`
-	WheelchairAccessible bool               `json:"wheelchairAccessible"`
-	GtfsInfo             JourneyGtfsInfo    `json:"gtfs"`
-	DayTypes             []string           `json:"dayTypes"`
-	DayTypeExceptions    []DayTypeException `json:"dayTypeExceptions"`
-	//Calls                []JourneyCall      `json:"calls"`
 }
 
 type JourneyGtfsInfo struct {
