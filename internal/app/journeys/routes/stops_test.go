@@ -32,35 +32,36 @@ func TestStopPointMatchesConditions(t *testing.T) {
 }
 
 func TestStopPointRoutes(t *testing.T) {
+	var stopPointMap = getStopPointMap()
 	testCases := []struct {
 		target        string
 		items         []StopPoint
 		errorExpected bool
 	}{
 		{"/stop-points",
-			[]StopPoint{getStopPointMap()["3607"], getStopPointMap()["3615"], getStopPointMap()["4600"],
-				getStopPointMap()["7015"], getStopPointMap()["7017"], getStopPointMap()["8149"], getStopPointMap()["8171"]}, false},
+			[]StopPoint{stopPointMap["3607"], stopPointMap["3615"], stopPointMap["4600"],
+				stopPointMap["7015"], stopPointMap["7017"], stopPointMap["8149"], stopPointMap["8171"]}, false},
 		{"/stop-points?tariffZone=B",
-			[]StopPoint{getStopPointMap()["3607"], getStopPointMap()["3615"], getStopPointMap()["4600"],
-				getStopPointMap()["7015"], getStopPointMap()["7017"], getStopPointMap()["8171"]}, false,
+			[]StopPoint{stopPointMap["3607"], stopPointMap["3615"], stopPointMap["4600"],
+				stopPointMap["7015"], stopPointMap["7017"], stopPointMap["8171"]}, false,
 		},
 		{"/stop-points?municipalityName=Tampere",
-			[]StopPoint{getStopPointMap()["3607"], getStopPointMap()["3615"]}, false,
+			[]StopPoint{stopPointMap["3607"], stopPointMap["3615"]}, false,
 		},
 		{"/stop-points?municipalityShortName=837",
-			[]StopPoint{getStopPointMap()["3607"], getStopPointMap()["3615"]}, false,
+			[]StopPoint{stopPointMap["3607"], stopPointMap["3615"]}, false,
 		},
 		{"/stop-points?location=61.4445,23.87235",
-			[]StopPoint{getStopPointMap()["3615"]}, false,
+			[]StopPoint{stopPointMap["3615"]}, false,
 		},
 		{"/stop-points?location=61,23:62,23.8",
-			[]StopPoint{getStopPointMap()["7015"], getStopPointMap()["7017"]}, false,
+			[]StopPoint{stopPointMap["7015"], stopPointMap["7017"]}, false,
 		},
 		{"/stop-points?name=Pirkkala",
-			[]StopPoint{getStopPointMap()["7015"]}, false,
+			[]StopPoint{stopPointMap["7015"]}, false,
 		},
 		{"/stop-points?name=Sudenkorennontie&shortName=81",
-			[]StopPoint{getStopPointMap()["8149"]}, false,
+			[]StopPoint{stopPointMap["8149"]}, false,
 		},
 		{"/stop-points?shortName=4600&exclude-fields=name,shortName,municipality.shortName", []StopPoint{
 			{
@@ -76,7 +77,7 @@ func TestStopPointRoutes(t *testing.T) {
 			},
 		}, false},
 		{"/stop-points/4600", []StopPoint{
-			getStopPointMap()["4600"],
+			stopPointMap["4600"],
 		}, false},
 		{"/stop-points/foobar", []StopPoint{}, false},
 		{"/stop-points?location=6123:62,23.8", []StopPoint{}, true},
