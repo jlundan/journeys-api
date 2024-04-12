@@ -25,7 +25,7 @@ type FieldDiff struct {
 }
 
 func init() {
-	_ = os.Setenv("JOURNEYS_GTFS_PATH", "testdata/tre1/gtfs")
+	_ = os.Setenv("JOURNEYS_GTFS_PATH", "testdata/tre/gtfs")
 
 	mockFilterObject = func(r interface{}, properties string) (interface{}, error) {
 		return nil, errors.New("foo")
