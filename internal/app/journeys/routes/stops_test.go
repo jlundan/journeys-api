@@ -3,6 +3,7 @@ package routes
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/google/go-cmp/cmp"
 	"github.com/gorilla/mux"
 	"github.com/jlundan/journeys-api/internal/app/journeys/model"
 	"net/http/httptest"
@@ -111,8 +112,8 @@ func TestStopPointRoutes(t *testing.T) {
 			break
 		}
 		for i, l := range response.Body {
-			if tc.items[i] != l {
-				t.Errorf("expected %v, got %v", tc.items[i], l)
+			if !cmp.Equal(tc.items[i], l) {
+				t.Errorf("entities are not equal: %s", cmp.Diff(tc.items[i], l))
 				break
 			}
 		}
