@@ -3,6 +3,7 @@ package routes
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/google/go-cmp/cmp"
 	"github.com/gorilla/mux"
 	"github.com/jlundan/journeys-api/internal/app/journeys/model"
 	"net/http/httptest"
@@ -57,20 +58,23 @@ func TestMunicipalitiesRoutes(t *testing.T) {
 		InjectMunicipalityRoutes(r, ctx)
 
 		response := getMunicipalitySuccessResponse(t, r, w, tc.target)
+		expectedResponse := municipalitySuccessResponse{
+			Status: "success",
+			Data: apiSuccessData{
+				Headers: apiHeaders{
+					Paging: apiHeadersPaging{
+						StartIndex: 0,
+						PageSize:   uint16(len(tc.items)),
+						MoreData:   false,
+					},
+				},
+			},
+			Body: tc.items,
+		}
 
-		dataSize := len(tc.items)
-		if success := validateCommonResponseFields(t, response.Status, response.Data, uint16(dataSize)); !success {
+		if !cmp.Equal(response, expectedResponse) {
+			t.Errorf("entities are not equal: %s", cmp.Diff(response, expectedResponse))
 			break
-		}
-		if len(response.Body) != dataSize {
-			t.Errorf("expected %v, got %v", dataSize, len(response.Body))
-			break
-		}
-		for i, l := range response.Body {
-			if tc.items[i] != l {
-				t.Errorf("expected %v, got %v", tc.items[i], l)
-				break
-			}
 		}
 	}
 }
