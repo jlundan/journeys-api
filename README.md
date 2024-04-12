@@ -47,7 +47,7 @@ You should expect endpoint compatibility with the proprietary Journeys API accor
 | /routes                             | Unverified           | Not verified yet              |
 | /journey-patterns                   | Unverified           | Not verified yet              |
 | /journeys                           | Unverified           | Not verified yet              |
-| /stop-points                        | Unverified           | Not verified yet              |
+| /stop-points                        | Fully compatible     | -                             |
 | /municipalities                     | Unverified           | Not verified yet              |
 | /lines/:lineId                      | Fully compatible     | -                             |
 | /routes/:routeId                    | Unverified           | Not verified yet              |
