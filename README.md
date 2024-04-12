@@ -41,23 +41,25 @@ Using the Makefile is not required, you can run the server with `go` command and
 ## Endpoint compatibility
 You should expect endpoint compatibility with the proprietary Journeys API according to the following table:
 
-| Endpoint                            | Status               | Notes                         |
-|-------------------------------------|----------------------|-------------------------------|
-| /lines                              | Partially compatible | Returned lines are not sorted |
-| /routes                             | Unverified           | Not verified yet              |
-| /journey-patterns                   | Unverified           | Not verified yet              |
-| /journeys                           | Unverified           | Not verified yet              |
-| /stop-points                        | Fully compatible     | -                             |
-| /municipalities                     | Unverified           | Not verified yet              |
-| /lines/:lineId                      | Fully compatible     | -                             |
-| /routes/:routeId                    | Unverified           | Not verified yet              |
-| /journey-patterns/:journeyPatternId | Unverified           | Not verified yet              |
-| /journeys/:journeyId                | Unverified           | Not verified yet              |
-| /stop-points/:stopPointId           | Unverified           | Not verified yet              |
-| /municipalities/:municipalityId     | Unverified           | Not verified yet              |
-| /vehicle-activity                   | n/a                  | Not supported currently       |
+| Endpoint                            | Status             | Notes                   |
+|-------------------------------------|--------------------|-------------------------|
+| /lines                              | Fully compatible   | -                       |
+| /routes                             | Unverified         | Not verified yet        |
+| /journey-patterns                   | Unverified         | Not verified yet        |
+| /journeys                           | Fully compatible   | -                       |
+| /stop-points                        | Fully compatible   | -                       |
+| /municipalities                     | Fully compatible   | -                       |
+| /lines/:lineId                      | Fully compatible   | -                       |
+| /routes/:routeId                    | Unverified         | Not verified yet        |
+| /journey-patterns/:journeyPatternId | Unverified         | Not verified yet        |
+| /journeys/:journeyId                | Fully compatible   | -                       |
+| /stop-points/:stopPointId           | Fully compatible   | -                       |
+| /municipalities/:municipalityId     | Fully compatible   | -                       |
+| /vehicle-activity                   | n/a                | Not supported currently |
+| /stop-monitoring                    | n/a                | Not supported currently |
+| /files/gtfs                         | n/a                | Not supported currently |
 
 Please note:
 * You should not expect the response object properties to be in the same order as in the proprietary API
-* You should expect the response array items to be in the same order as in the proprietary API, unless otherwise noted
+* You should not expect the response array items to be in the same order as in the proprietary API
 * You should not expect the response page sizes to match the proprietary API. We aim to return all items in one page, however the paging information is maintained for backwards compatibility
