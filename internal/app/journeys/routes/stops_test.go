@@ -101,21 +101,24 @@ func TestStopPointRoutes(t *testing.T) {
 			continue
 		}
 
-		response := getStopPointSuccessResponse(t, r, w, tc.target)
+		serverResponse := getStopPointSuccessResponse(t, r, w, tc.target)
+		expectedResponse := stopPointSuccessResponse{
+			Status: "success",
+			Data: apiSuccessData{
+				Headers: apiHeaders{
+					Paging: apiHeadersPaging{
+						StartIndex: 0,
+						PageSize:   uint16(len(tc.items)),
+						MoreData:   false,
+					},
+				},
+			},
+			Body: tc.items,
+		}
 
-		dataSize := len(tc.items)
-		if success := validateCommonResponseFields(t, response.Status, response.Data, uint16(dataSize)); !success {
+		if !cmp.Equal(serverResponse, expectedResponse) {
+			t.Errorf("entities are not equal: %s", cmp.Diff(serverResponse, expectedResponse))
 			break
-		}
-		if len(response.Body) != dataSize {
-			t.Errorf("expected %v, got %v", dataSize, len(response.Body))
-			break
-		}
-		for i, l := range response.Body {
-			if !cmp.Equal(tc.items[i], l) {
-				t.Errorf("entities are not equal: %s", cmp.Diff(tc.items[i], l))
-				break
-			}
 		}
 	}
 }
