@@ -3,6 +3,7 @@ package routes
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/google/go-cmp/cmp"
 	"github.com/gorilla/mux"
 	"github.com/jlundan/journeys-api/internal/app/journeys/model"
 	"net/http/httptest"
@@ -95,8 +96,8 @@ func TestGetLines(t *testing.T) {
 			break
 		}
 		for i, line := range linesResponse.Body {
-			if tc.responseItems[i] != line {
-				t.Errorf("expected %v, got %v", tc.responseItems[i], line)
+			if !cmp.Equal(tc.responseItems[i], line) {
+				t.Errorf("entities are not equal: %s", cmp.Diff(tc.responseItems[i], line))
 				break
 			}
 		}
