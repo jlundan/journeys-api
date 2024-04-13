@@ -42,10 +42,7 @@ func buildRoutes(g GTFSContext) Routes {
 		route := &model.Route{
 			Id:            shapeId,
 			GeoProjection: projection,
-			//Line:            nil,
-			//Name:            "",
-			//JourneyPatterns: nil,
-			//Journeys:        nil,
+			// Line, Name , JourneyPatterns and Journeys are populated while building journeys
 		}
 
 		all = append(all, route)
