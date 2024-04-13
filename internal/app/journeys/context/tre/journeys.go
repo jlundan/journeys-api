@@ -88,7 +88,7 @@ func buildJourneys(g GTFSContext, lines Lines, routes Routes, stopPoints StopPoi
 		// of the JourneyCalls in relation to their respective trip ids. Each trip will be converted to a Journey later on,
 		// so we can simply just assign the collected JourneyCalls to the Journey via the trip id since each trip matches to a Journey.
 
-		stopListHash := stopArrayToMd5(stArr)
+		stopListHash := stopPointIdsToMd5(stArr)
 
 		var jp *model.JourneyPattern
 		if !utils.StringArrayContainsItem(usedHashes, stopListHash) {
@@ -297,7 +297,7 @@ func buildCalendarDatesMap(g GTFSContext) map[string][]*model.DayTypeException {
 	return result
 }
 
-func stopArrayToMd5(arr []*ggtfs.StopTime) string {
+func stopPointIdsToMd5(arr []*ggtfs.StopTime) string {
 	bucket := md5.New()
 	for _, v := range arr {
 		bucket.Write([]byte(v.StopId))
