@@ -121,14 +121,12 @@ func routeMatchesConditions(route *model.Route, conditions map[string]string) bo
 }
 
 type Route struct {
-	Projection string `json:"geographicCoordinateProjection"`
-	//	Direction       string   `json:"direction"`
+	Projection      string                `json:"geographicCoordinateProjection"`
 	Url             string                `json:"url"`
 	Name            string                `json:"name"`
 	LineUrl         string                `json:"lineUrl"`
 	JourneyPatterns []RouteJourneyPattern `json:"journeyPatterns"`
 	Journeys        []RouteJourney        `json:"journeys"`
-	//Links      	map[string]string 	`json:"links"`
 }
 
 type RouteJourneyPattern struct {
