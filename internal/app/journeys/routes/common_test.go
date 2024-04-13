@@ -350,11 +350,11 @@ func getJourneyMap() map[string]Journey {
 	return result
 }
 
-func compareJourneys(a, b interface{}, tag string) ([]FieldDiff, error) {
-	var diffs []FieldDiff
+func compareVariables(a, b interface{}, tag string, diffs *[]FieldDiff) error {
+	//fmt.Println("cmp: ", a, b)
 
 	if reflect.TypeOf(a) != reflect.TypeOf(b) {
-		return diffs, errors.New("structs are of different types")
+		return errors.New("structs are of different types")
 	}
 
 	va := reflect.ValueOf(a)
@@ -364,8 +364,13 @@ func compareJourneys(a, b interface{}, tag string) ([]FieldDiff, error) {
 		fieldA := va.Field(i)
 		fieldB := vb.Field(i)
 
-		if !reflect.DeepEqual(fieldA.Interface(), fieldB.Interface()) {
-			diffs = append(diffs, FieldDiff{
+		if fieldA.Kind() == reflect.Struct && fieldB.Kind() == reflect.Struct {
+			err := compareVariables(fieldA.Interface(), fieldB.Interface(), tag, diffs)
+			if err != nil {
+				return err
+			}
+		} else if !reflect.DeepEqual(fieldA.Interface(), fieldB.Interface()) {
+			*diffs = append(*diffs, FieldDiff{
 				Tag:       tag,
 				FieldName: va.Type().Field(i).Name,
 				Expected:  fieldA.Interface(),
@@ -374,7 +379,25 @@ func compareJourneys(a, b interface{}, tag string) ([]FieldDiff, error) {
 		}
 	}
 
-	return diffs, nil
+	return nil
+}
+
+func compareObjectsViaJson(expected, got interface{}, index int, t *testing.T) {
+	gotJson, err1 := json.MarshalIndent(got, "", "  ")
+	if err1 != nil {
+		t.Error(err1)
+		return
+	}
+
+	expectedJson, err2 := json.MarshalIndent(expected, "", "  ")
+	if err2 != nil {
+		t.Error(err2)
+		return
+	}
+
+	if string(expectedJson) != string(gotJson) {
+		t.Errorf("(%v) expected: \n%v\ngot:\n%v", index, string(expectedJson), string(gotJson))
+	}
 }
 
 func printFieldDiffs(t *testing.T, diffs []FieldDiff) {

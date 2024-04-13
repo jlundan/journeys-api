@@ -153,14 +153,15 @@ func TestJourneysRoutes(t *testing.T) {
 			break
 		}
 		for i, l := range response.Body {
-			var diff, err = compareJourneys(tc.items[i], l, tc.target)
+			var diffs []FieldDiff
+			var err = compareVariables(tc.items[i], l, tc.target, &diffs)
 			if err != nil {
 				t.Error(err)
 				break
 			}
 
-			if len(diff) > 0 {
-				printFieldDiffs(t, diff)
+			if len(diffs) > 0 {
+				printFieldDiffs(t, diffs)
 				break
 			}
 		}
