@@ -42,14 +42,14 @@ You should expect endpoint compatibility with the proprietary Journeys API accor
 | Endpoint                            | Status             | Notes                   |
 |-------------------------------------|--------------------|-------------------------|
 | /lines                              | Fully compatible   | -                       |
-| /routes                             | Unverified         | Not verified yet        |
-| /journey-patterns                   | Unverified         | Not verified yet        |
+| /routes                             | Fully compatible   | -                       |
+| /journey-patterns                   | Fully compatible   | -                       |
 | /journeys                           | Fully compatible   | -                       |
 | /stop-points                        | Fully compatible   | -                       |
 | /municipalities                     | Fully compatible   | -                       |
 | /lines/:lineId                      | Fully compatible   | -                       |
-| /routes/:routeId                    | Unverified         | Not verified yet        |
-| /journey-patterns/:journeyPatternId | Unverified         | Not verified yet        |
+| /routes/:routeId                    | Fully compatible   | -                       |
+| /journey-patterns/:journeyPatternId | Fully compatible   | -                       |
 | /journeys/:journeyId                | Fully compatible   | -                       |
 | /stop-points/:stopPointId           | Fully compatible   | -                       |
 | /municipalities/:municipalityId     | Fully compatible   | -                       |
