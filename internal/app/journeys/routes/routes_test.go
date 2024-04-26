@@ -50,12 +50,11 @@ func TestGetRoutes(t *testing.T) {
 		},
 	}
 
-	for i, tc := range testCases {
+	for _, tc := range testCases {
 		r, w, ctx := initializeTest(t)
 		InjectRouteRoutes(r, ctx)
 
-		serverResponse := sendRoutesRequest(t, r, w, tc.target)
-
+		gotResponse := sendRoutesRequest(t, r, w, tc.target)
 		expectedResponse := routeSuccessResponse{
 			Status: "success",
 			Data: apiSuccessData{
@@ -70,7 +69,18 @@ func TestGetRoutes(t *testing.T) {
 			Body: tc.items,
 		}
 
-		compareObjectsViaJson(expectedResponse, serverResponse, i, t)
+		var diffs []FieldDiff
+		initialTag := fmt.Sprintf("%v:Response", tc.target)
+		var err = compareVariables(expectedResponse, gotResponse, initialTag, &diffs, false)
+		if err != nil {
+			t.Error(err)
+			break
+		}
+
+		if len(diffs) > 0 {
+			printFieldDiffs(t, diffs)
+			break
+		}
 	}
 }
 

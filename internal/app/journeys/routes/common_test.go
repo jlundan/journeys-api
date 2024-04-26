@@ -3,7 +3,6 @@
 package routes
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/gorilla/mux"
@@ -12,19 +11,11 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
-	"reflect"
 	"testing"
 )
 
 var mockFilterObject, originalFilterObject func(r interface{}, properties string) (interface{}, error)
 var fakeMarshal, originalMarshal func(_ interface{}) ([]byte, error)
-
-type FieldDiff struct {
-	Tag       string
-	FieldName string
-	Expected  interface{}
-	Got       interface{}
-}
 
 func init() {
 	_ = os.Setenv("JOURNEYS_GTFS_PATH", "testdata/tre/gtfs")
@@ -85,30 +76,6 @@ func TestSendResponseFail(t *testing.T) {
 	}
 	w.Reset()
 
-}
-
-func validateCommonResponseFields(t *testing.T, status string, data apiSuccessData, dataSize uint16) bool {
-	if status != "success" {
-		t.Errorf("expected response status to be success, got %v", status)
-		return false
-	}
-
-	if data.Headers.Paging.StartIndex != 0 {
-		t.Errorf("expected response startIndex to be 0, got %v", data.Headers.Paging.StartIndex)
-		return false
-	}
-
-	if data.Headers.Paging.PageSize != dataSize {
-		t.Errorf("expected response data size to be %v, got %v", dataSize, data.Headers.Paging.PageSize)
-		return false
-	}
-
-	if data.Headers.Paging.MoreData != false {
-		t.Errorf("expected response moredata to be false, got %v", data.Headers.Paging.MoreData)
-		return false
-	}
-
-	return true
 }
 
 func initializeTest(t *testing.T) (*mux.Router, *httptest.ResponseRecorder, model.Context) {
@@ -189,7 +156,7 @@ func getMunicipalityMap() map[string]Municipality {
 func getJourneyPatternMap() map[string]JourneyPattern {
 	result := make(map[string]JourneyPattern)
 
-	stopPoints := []struct {
+	journeyPatterns := []struct {
 		id              string
 		line            string
 		route           string
@@ -198,25 +165,70 @@ func getJourneyPatternMap() map[string]JourneyPattern {
 		name            string
 		direction       string
 		stopPoints      []StopPoint
+		journeys        []JourneyPatternJourney
 	}{
 		{"047b0afc973ee2fd4fe92b128c3a932a", "1", "1504270174600", "7017",
 			"7015", "Suupantori - Pirkkala", "1",
-			[]StopPoint{getStopPointMap()["7017"], getStopPointMap()["7015"]}},
+			[]StopPoint{getStopPointMap()["7017"], getStopPointMap()["7015"]},
+			[]JourneyPatternJourney{
+				{
+					Url:               "http://localhost:5678/journeys/7020205685",
+					JourneyPatternUrl: "http://localhost:5678/journey-patterns/047b0afc973ee2fd4fe92b128c3a932a",
+					DepartureTime:     "14:43:00",
+					ArrivalTime:       "14:44:45",
+					HeadSign:          "Vatiala",
+					DayTypes:          []string{"monday", "tuesday", "wednesday", "thursday", "friday"},
+					DayTypeExceptions: []DayTypeException{{"2021-04-05", "2021-04-05", "yes"}, {"2021-05-13", "2021-05-13", "no"}},
+				},
+			}},
 
 		{"65f51d2f85284af2fad1305c0ce71033", "3A", "1517136151028", "3615",
 			"3607", "Näyttelijänkatu - Lavastajanpolku", "0",
-			[]StopPoint{getStopPointMap()["3615"], getStopPointMap()["3607"]}},
+			[]StopPoint{getStopPointMap()["3615"], getStopPointMap()["3607"]},
+			[]JourneyPatternJourney{
+				{
+					Url:               "http://localhost:5678/journeys/7024545685",
+					JourneyPatternUrl: "http://localhost:5678/journey-patterns/65f51d2f85284af2fad1305c0ce71033",
+					DepartureTime:     "07:20:00",
+					ArrivalTime:       "07:21:00",
+					HeadSign:          "Lentävänniemi",
+					DayTypes:          []string{"monday", "tuesday", "wednesday", "thursday", "friday"},
+					DayTypeExceptions: []DayTypeException{{"2021-04-05", "2021-04-05", "yes"}, {"2021-05-13", "2021-05-13", "no"}},
+				},
+			}},
 
 		{"9bc7403ad27267edbfbd63c3e92e5afa", "1A", "1501146007035", "4600",
 			"8149", "Vatiala - Sudenkorennontie", "0",
-			[]StopPoint{getStopPointMap()["4600"], getStopPointMap()["8171"], getStopPointMap()["8149"]}},
+			[]StopPoint{getStopPointMap()["4600"], getStopPointMap()["8171"], getStopPointMap()["8149"]},
+			[]JourneyPatternJourney{
+				{
+					Url:               "http://localhost:5678/journeys/7020295685",
+					JourneyPatternUrl: "http://localhost:5678/journey-patterns/9bc7403ad27267edbfbd63c3e92e5afa",
+					DepartureTime:     "06:30:00",
+					ArrivalTime:       "06:32:30",
+					HeadSign:          "Lentoasema",
+					DayTypes:          []string{"monday", "tuesday", "wednesday", "thursday", "friday"},
+					DayTypeExceptions: []DayTypeException{{"2021-04-05", "2021-04-05", "yes"}, {"2021-05-13", "2021-05-13", "no"}},
+				},
+			}},
 
 		{"c01c71b0c9f456ba21f498a1dca54b3b", "-1", "111111111", "3615",
 			"7017", "Näyttelijänkatu - Suupantori", "0",
-			[]StopPoint{getStopPointMap()["3615"], getStopPointMap()["7017"]}},
+			[]StopPoint{getStopPointMap()["3615"], getStopPointMap()["7017"]},
+			[]JourneyPatternJourney{
+				{
+					Url:               "http://localhost:5678/journeys/111111111",
+					JourneyPatternUrl: "http://localhost:5678/journey-patterns/c01c71b0c9f456ba21f498a1dca54b3b",
+					DepartureTime:     "07:20:00",
+					ArrivalTime:       "07:21:00",
+					HeadSign:          "Foobar",
+					DayTypes:          []string{"monday", "tuesday", "wednesday", "thursday", "friday"},
+					DayTypeExceptions: []DayTypeException{},
+				},
+			}},
 	}
 
-	for _, tc := range stopPoints {
+	for _, tc := range journeyPatterns {
 		result[tc.id] = JourneyPattern{
 			Url:             journeyPatternUrl(tc.id),
 			LineUrl:         lineUrl(tc.line),
@@ -226,6 +238,7 @@ func getJourneyPatternMap() map[string]JourneyPattern {
 			Direction:       tc.direction,
 			Name:            tc.name,
 			StopPoints:      tc.stopPoints,
+			Journeys:        tc.journeys,
 		}
 	}
 
@@ -350,71 +363,6 @@ func getJourneyMap() map[string]Journey {
 	}
 
 	return result
-}
-
-func compareVariables(a, b interface{}, tag string, diffs *[]FieldDiff) error {
-	//fmt.Println("cmp: ", a, b)
-
-	if reflect.TypeOf(a) != reflect.TypeOf(b) {
-		return errors.New("structs are of different types")
-	}
-
-	va := reflect.ValueOf(a)
-	vb := reflect.ValueOf(b)
-
-	for i := 0; i < va.NumField(); i++ {
-		fieldA := va.Field(i)
-		fieldB := vb.Field(i)
-
-		if fieldA.Kind() == reflect.Struct && fieldB.Kind() == reflect.Struct {
-			err := compareVariables(fieldA.Interface(), fieldB.Interface(), tag, diffs)
-			if err != nil {
-				return err
-			}
-		} else if !reflect.DeepEqual(fieldA.Interface(), fieldB.Interface()) {
-			*diffs = append(*diffs, FieldDiff{
-				Tag:       tag,
-				FieldName: va.Type().Field(i).Name,
-				Expected:  fieldA.Interface(),
-				Got:       fieldB.Interface(),
-			})
-		}
-	}
-
-	return nil
-}
-
-func compareObjectsViaJson(expected, got interface{}, index int, t *testing.T) {
-	gotJson, err1 := json.MarshalIndent(got, "", "  ")
-	if err1 != nil {
-		t.Error(err1)
-		return
-	}
-
-	expectedJson, err2 := json.MarshalIndent(expected, "", "  ")
-	if err2 != nil {
-		t.Error(err2)
-		return
-	}
-
-	if string(expectedJson) != string(gotJson) {
-		t.Errorf("(%v) expected: \n%v\ngot:\n%v", index, string(expectedJson), string(gotJson))
-	}
-}
-
-func printFieldDiffs(t *testing.T, diffs []FieldDiff) {
-	for _, diff := range diffs {
-		var expectedJSON, expectedErr = json.Marshal(diff.Expected)
-		if expectedErr != nil {
-			t.Fatalf("Failed to marshal expected JSON: %v", expectedErr)
-		}
-		var gotJSON, gotErr = json.Marshal(diff.Got)
-		if gotErr != nil {
-			t.Fatalf("Failed to marshal expected JSON: %v", gotErr)
-		}
-
-		t.Error(fmt.Sprintf("Tag: %v, field: %v\n expected: \n%v \ngot: \n%v", diff.Tag, diff.FieldName, string(expectedJSON), string(gotJSON)))
-	}
 }
 
 func lineUrl(name string) string {

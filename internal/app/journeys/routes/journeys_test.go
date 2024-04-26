@@ -144,28 +144,32 @@ func TestJourneysRoutes(t *testing.T) {
 		r, w, ctx := initializeTest(t)
 		InjectJourneyRoutes(r, ctx)
 
-		response := getJourneySuccessResponse(t, r, w, tc.target)
+		gotResponse := getJourneySuccessResponse(t, r, w, tc.target)
+		expectedResponse := journeySuccessResponse{
+			Status: "success",
+			Data: apiSuccessData{
+				Headers: apiHeaders{
+					Paging: apiHeadersPaging{
+						StartIndex: 0,
+						PageSize:   uint16(len(tc.items)),
+						MoreData:   false,
+					},
+				},
+			},
+			Body: tc.items,
+		}
 
-		dataSize := len(tc.items)
-		if success := validateCommonResponseFields(t, response.Status, response.Data, uint16(dataSize)); !success {
+		var diffs []FieldDiff
+		initialTag := fmt.Sprintf("%v:Response", tc.target)
+		var err = compareVariables(expectedResponse, gotResponse, initialTag, &diffs, false)
+		if err != nil {
+			t.Error(err)
 			break
 		}
-		if len(response.Body) != dataSize {
-			t.Errorf("expected %v, got %v", dataSize, len(response.Body))
-			break
-		}
-		for i, l := range response.Body {
-			var diffs []FieldDiff
-			var err = compareVariables(tc.items[i], l, tc.target, &diffs)
-			if err != nil {
-				t.Error(err)
-				break
-			}
 
-			if len(diffs) > 0 {
-				printFieldDiffs(t, diffs)
-				break
-			}
+		if len(diffs) > 0 {
+			printFieldDiffs(t, diffs)
+			break
 		}
 	}
 }

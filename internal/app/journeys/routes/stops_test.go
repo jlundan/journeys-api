@@ -5,7 +5,6 @@ package routes
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/google/go-cmp/cmp"
 	"github.com/gorilla/mux"
 	"github.com/jlundan/journeys-api/internal/app/journeys/model"
 	"net/http/httptest"
@@ -103,7 +102,7 @@ func TestStopPointRoutes(t *testing.T) {
 			continue
 		}
 
-		serverResponse := getStopPointSuccessResponse(t, r, w, tc.target)
+		gotResponse := getStopPointSuccessResponse(t, r, w, tc.target)
 		expectedResponse := stopPointSuccessResponse{
 			Status: "success",
 			Data: apiSuccessData{
@@ -118,8 +117,16 @@ func TestStopPointRoutes(t *testing.T) {
 			Body: tc.items,
 		}
 
-		if !cmp.Equal(serverResponse, expectedResponse) {
-			t.Errorf("entities are not equal: %s", cmp.Diff(serverResponse, expectedResponse))
+		var diffs []FieldDiff
+		initialTag := fmt.Sprintf("%v:Response", tc.target)
+		var err = compareVariables(expectedResponse, gotResponse, initialTag, &diffs, false)
+		if err != nil {
+			t.Error(err)
+			break
+		}
+
+		if len(diffs) > 0 {
+			printFieldDiffs(t, diffs)
 			break
 		}
 	}
