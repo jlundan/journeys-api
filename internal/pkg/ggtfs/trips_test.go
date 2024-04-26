@@ -1,3 +1,5 @@
+//go:build ggtfs_tests || all_tests
+
 package ggtfs
 
 import (

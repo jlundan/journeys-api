@@ -1,3 +1,5 @@
+//go:build journeys_journeys_tests || journeys_tests || all_tests
+
 package routes
 
 import (
