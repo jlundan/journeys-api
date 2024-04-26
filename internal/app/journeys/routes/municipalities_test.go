@@ -5,7 +5,6 @@ package routes
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/google/go-cmp/cmp"
 	"github.com/gorilla/mux"
 	"github.com/jlundan/journeys-api/internal/app/journeys/model"
 	"net/http/httptest"
@@ -59,7 +58,7 @@ func TestMunicipalitiesRoutes(t *testing.T) {
 		r, w, ctx := initializeTest(t)
 		InjectMunicipalityRoutes(r, ctx)
 
-		response := getMunicipalitySuccessResponse(t, r, w, tc.target)
+		gotResponse := getMunicipalitySuccessResponse(t, r, w, tc.target)
 		expectedResponse := municipalitySuccessResponse{
 			Status: "success",
 			Data: apiSuccessData{
@@ -74,8 +73,16 @@ func TestMunicipalitiesRoutes(t *testing.T) {
 			Body: tc.items,
 		}
 
-		if !cmp.Equal(response, expectedResponse) {
-			t.Errorf("entities are not equal: %s", cmp.Diff(response, expectedResponse))
+		var diffs []FieldDiff
+		initialTag := fmt.Sprintf("%v:Response", tc.target)
+		var err = compareVariables(expectedResponse, gotResponse, initialTag, &diffs, false)
+		if err != nil {
+			t.Error(err)
+			break
+		}
+
+		if len(diffs) > 0 {
+			printFieldDiffs(t, diffs)
 			break
 		}
 	}

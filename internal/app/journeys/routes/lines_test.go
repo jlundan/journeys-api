@@ -5,7 +5,6 @@ package routes
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/google/go-cmp/cmp"
 	"github.com/gorilla/mux"
 	"github.com/jlundan/journeys-api/internal/app/journeys/model"
 	"net/http/httptest"
@@ -86,7 +85,7 @@ func TestGetLines(t *testing.T) {
 		router, recorder, ctx := initializeTest(t)
 		InjectLineRoutes(router, ctx)
 
-		serverResponse := triggerGetLinesRequest(t, router, recorder, tc.url)
+		gotResponse := triggerGetLinesRequest(t, router, recorder, tc.url)
 		expectedResponse := lineSuccessResponse{
 			Status: "success",
 			Data: apiSuccessData{
@@ -101,8 +100,16 @@ func TestGetLines(t *testing.T) {
 			Body: tc.items,
 		}
 
-		if !cmp.Equal(serverResponse, expectedResponse) {
-			t.Errorf("entities are not equal: %s", cmp.Diff(serverResponse, expectedResponse))
+		var diffs []FieldDiff
+		initialTag := fmt.Sprintf("%v:Response", tc.url)
+		var err = compareVariables(expectedResponse, gotResponse, initialTag, &diffs, false)
+		if err != nil {
+			t.Error(err)
+			break
+		}
+
+		if len(diffs) > 0 {
+			printFieldDiffs(t, diffs)
 			break
 		}
 	}

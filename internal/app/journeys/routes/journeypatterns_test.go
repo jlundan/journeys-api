@@ -89,6 +89,17 @@ func TestJourneyPatternsRoutes(t *testing.T) {
 							},
 						},
 					},
+					Journeys: []JourneyPatternJourney{
+						{
+							Url:               "http://localhost:5678/journeys/7020205685",
+							JourneyPatternUrl: "http://localhost:5678/journey-patterns/047b0afc973ee2fd4fe92b128c3a932a",
+							DepartureTime:     "14:43:00",
+							ArrivalTime:       "14:44:45",
+							HeadSign:          "Vatiala",
+							DayTypes:          []string{"monday", "tuesday", "wednesday", "thursday", "friday"},
+							DayTypeExceptions: []DayTypeException{{"2021-04-05", "2021-04-05", "yes"}, {"2021-05-13", "2021-05-13", "no"}},
+						},
+					},
 				},
 			},
 		},
@@ -110,30 +121,32 @@ func TestJourneyPatternsRoutes(t *testing.T) {
 		r, w, ctx := initializeTest(t)
 		InjectJourneyPatternRoutes(r, ctx)
 
-		response := getJourneyPatternSuccessResponse(t, r, w, tc.target)
+		gotResponse := getJourneyPatternSuccessResponse(t, r, w, tc.target)
+		expectedResponse := journeyPatternSuccessResponse{
+			Status: "success",
+			Data: apiSuccessData{
+				Headers: apiHeaders{
+					Paging: apiHeadersPaging{
+						StartIndex: 0,
+						PageSize:   uint16(len(tc.items)),
+						MoreData:   false,
+					},
+				},
+			},
+			Body: tc.items,
+		}
 
-		dataSize := len(tc.items)
-		if success := validateCommonResponseFields(t, response.Status, response.Data, uint16(dataSize)); !success {
+		var diffs []FieldDiff
+		initialTag := fmt.Sprintf("%v:Response", tc.target)
+		var err = compareVariables(expectedResponse, gotResponse, initialTag, &diffs, false)
+		if err != nil {
+			t.Error(err)
 			break
 		}
-		if len(response.Body) != dataSize {
-			t.Errorf("expected %v, got %v", dataSize, len(response.Body))
-			break
-		}
-		for i, l := range response.Body {
-			if tc.items[i].Url != l.Url || tc.items[i].LineUrl != l.LineUrl ||
-				tc.items[i].RouteUrl != l.RouteUrl || tc.items[i].OriginStop != l.OriginStop || tc.items[i].DestinationStop != l.DestinationStop ||
-				tc.items[i].Direction != l.Direction {
-				t.Errorf("expected %v, got %v", tc.items[i], l)
-				break
-			}
 
-			for z := range tc.items[i].StopPoints {
-				if tc.items[i].StopPoints[z] != l.StopPoints[z] {
-					t.Errorf("expected %v, got %v", tc.items[i].StopPoints[z], l.StopPoints[z])
-					break
-				}
-			}
+		if len(diffs) > 0 {
+			printFieldDiffs(t, diffs)
+			break
 		}
 	}
 }
