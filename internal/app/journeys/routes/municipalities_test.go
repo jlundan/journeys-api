@@ -88,6 +88,28 @@ func TestMunicipalitiesRoutes(t *testing.T) {
 	}
 }
 
+func getMunicipalityMap() map[string]Municipality {
+	municipalities := make(map[string]Municipality)
+	municipalities["211"] = Municipality{
+		Url:       municipalityUrl("211"),
+		ShortName: "211",
+		Name:      "Kangasala",
+	}
+
+	municipalities["604"] = Municipality{
+		Url:       municipalityUrl("604"),
+		ShortName: "604",
+		Name:      "Pirkkala",
+	}
+
+	municipalities["837"] = Municipality{
+		Url:       municipalityUrl("837"),
+		ShortName: "837",
+		Name:      "Tampere",
+	}
+	return municipalities
+}
+
 type municipalitySuccessResponse struct {
 	Status string         `json:"status"`
 	Data   apiSuccessData `json:"data"`

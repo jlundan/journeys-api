@@ -151,6 +151,98 @@ func TestJourneyPatternsRoutes(t *testing.T) {
 	}
 }
 
+func getJourneyPatternMap() map[string]JourneyPattern {
+	result := make(map[string]JourneyPattern)
+
+	journeyPatterns := []struct {
+		id              string
+		line            string
+		route           string
+		originStop      string
+		destinationStop string
+		name            string
+		direction       string
+		stopPoints      []StopPoint
+		journeys        []JourneyPatternJourney
+	}{
+		{"047b0afc973ee2fd4fe92b128c3a932a", "1", "1504270174600", "7017",
+			"7015", "Suupantori - Pirkkala", "1",
+			[]StopPoint{getStopPointMap()["7017"], getStopPointMap()["7015"]},
+			[]JourneyPatternJourney{
+				{
+					Url:               "http://localhost:5678/journeys/7020205685",
+					JourneyPatternUrl: "http://localhost:5678/journey-patterns/047b0afc973ee2fd4fe92b128c3a932a",
+					DepartureTime:     "14:43:00",
+					ArrivalTime:       "14:44:45",
+					HeadSign:          "Vatiala",
+					DayTypes:          []string{"monday", "tuesday", "wednesday", "thursday", "friday"},
+					DayTypeExceptions: []DayTypeException{{"2021-04-05", "2021-04-05", "yes"}, {"2021-05-13", "2021-05-13", "no"}},
+				},
+			}},
+
+		{"65f51d2f85284af2fad1305c0ce71033", "3A", "1517136151028", "3615",
+			"3607", "Näyttelijänkatu - Lavastajanpolku", "0",
+			[]StopPoint{getStopPointMap()["3615"], getStopPointMap()["3607"]},
+			[]JourneyPatternJourney{
+				{
+					Url:               "http://localhost:5678/journeys/7024545685",
+					JourneyPatternUrl: "http://localhost:5678/journey-patterns/65f51d2f85284af2fad1305c0ce71033",
+					DepartureTime:     "07:20:00",
+					ArrivalTime:       "07:21:00",
+					HeadSign:          "Lentävänniemi",
+					DayTypes:          []string{"monday", "tuesday", "wednesday", "thursday", "friday"},
+					DayTypeExceptions: []DayTypeException{{"2021-04-05", "2021-04-05", "yes"}, {"2021-05-13", "2021-05-13", "no"}},
+				},
+			}},
+
+		{"9bc7403ad27267edbfbd63c3e92e5afa", "1A", "1501146007035", "4600",
+			"8149", "Vatiala - Sudenkorennontie", "0",
+			[]StopPoint{getStopPointMap()["4600"], getStopPointMap()["8171"], getStopPointMap()["8149"]},
+			[]JourneyPatternJourney{
+				{
+					Url:               "http://localhost:5678/journeys/7020295685",
+					JourneyPatternUrl: "http://localhost:5678/journey-patterns/9bc7403ad27267edbfbd63c3e92e5afa",
+					DepartureTime:     "06:30:00",
+					ArrivalTime:       "06:32:30",
+					HeadSign:          "Lentoasema",
+					DayTypes:          []string{"monday", "tuesday", "wednesday", "thursday", "friday"},
+					DayTypeExceptions: []DayTypeException{{"2021-04-05", "2021-04-05", "yes"}, {"2021-05-13", "2021-05-13", "no"}},
+				},
+			}},
+
+		{"c01c71b0c9f456ba21f498a1dca54b3b", "-1", "111111111", "3615",
+			"7017", "Näyttelijänkatu - Suupantori", "0",
+			[]StopPoint{getStopPointMap()["3615"], getStopPointMap()["7017"]},
+			[]JourneyPatternJourney{
+				{
+					Url:               "http://localhost:5678/journeys/111111111",
+					JourneyPatternUrl: "http://localhost:5678/journey-patterns/c01c71b0c9f456ba21f498a1dca54b3b",
+					DepartureTime:     "07:20:00",
+					ArrivalTime:       "07:21:00",
+					HeadSign:          "Foobar",
+					DayTypes:          []string{"monday", "tuesday", "wednesday", "thursday", "friday"},
+					DayTypeExceptions: []DayTypeException{},
+				},
+			}},
+	}
+
+	for _, tc := range journeyPatterns {
+		result[tc.id] = JourneyPattern{
+			Url:             journeyPatternUrl(tc.id),
+			LineUrl:         lineUrl(tc.line),
+			RouteUrl:        routeUrl(tc.route),
+			OriginStop:      stopPointUrl(tc.originStop),
+			DestinationStop: stopPointUrl(tc.destinationStop),
+			Direction:       tc.direction,
+			Name:            tc.name,
+			StopPoints:      tc.stopPoints,
+			Journeys:        tc.journeys,
+		}
+	}
+
+	return result
+}
+
 type journeyPatternSuccessResponse struct {
 	Status string           `json:"status"`
 	Data   apiSuccessData   `json:"data"`
