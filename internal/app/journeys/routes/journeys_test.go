@@ -174,6 +174,126 @@ func TestJourneysRoutes(t *testing.T) {
 	}
 }
 
+func getJourneyMap() map[string]Journey {
+	result := make(map[string]Journey)
+
+	journeys := []struct {
+		id                   string
+		line                 string
+		activityId           string
+		route                string
+		journeyPattern       string
+		departureTime        string
+		arrivalTime          string
+		headSign             string
+		directionId          string
+		wheelchairAccessible bool
+		gtfs                 JourneyGtfsInfo
+		dayTypes             []string
+		dayTypeExceptions    []DayTypeException
+		calls                []JourneyCall
+	}{
+		{
+			"111111111",
+			"-1",
+			"-1_0720_7017_3615",
+			"111111111",
+			"c01c71b0c9f456ba21f498a1dca54b3b",
+			"07:20:00",
+			"07:21:00",
+			"Foobar",
+			"0",
+			false,
+			JourneyGtfsInfo{TripId: "111111111"},
+			[]string{"monday", "tuesday", "wednesday", "thursday", "friday"},
+			[]DayTypeException{},
+			[]JourneyCall{
+				{"07:20:00", "07:20:00", getStopPointMap()["3615"]},
+				{"07:21:00", "07:21:00", getStopPointMap()["7017"]},
+			},
+		},
+		{
+			"7020205685",
+			"1",
+			"1_1443_7015_7017",
+			"1504270174600",
+			"047b0afc973ee2fd4fe92b128c3a932a",
+			"14:43:00",
+			"14:44:45",
+			"Vatiala",
+			"1",
+			false,
+			JourneyGtfsInfo{TripId: "7020205685"},
+			[]string{"monday", "tuesday", "wednesday", "thursday", "friday"},
+			[]DayTypeException{{"2021-04-05", "2021-04-05", "yes"}, {"2021-05-13", "2021-05-13", "no"}},
+			[]JourneyCall{
+				{"14:43:00", "14:43:00", getStopPointMap()["7017"]},
+				{"14:44:45", "14:44:45", getStopPointMap()["7015"]},
+			},
+		},
+		{
+			"7020295685",
+			"1A",
+			"1A_0630_8149_4600",
+			"1501146007035",
+			"9bc7403ad27267edbfbd63c3e92e5afa",
+			"06:30:00",
+			"06:32:30",
+			"Lentoasema",
+			"0",
+			false,
+			JourneyGtfsInfo{TripId: "7020295685"},
+			[]string{"monday", "tuesday", "wednesday", "thursday", "friday"},
+			[]DayTypeException{{"2021-04-05", "2021-04-05", "yes"}, {"2021-05-13", "2021-05-13", "no"}},
+			[]JourneyCall{
+				{"06:30:00", "06:30:00", getStopPointMap()["4600"]},
+				{"06:31:30", "06:31:30", getStopPointMap()["8171"]},
+				{"06:32:30", "06:32:30", getStopPointMap()["8149"]},
+			},
+		},
+		{
+			"7024545685",
+			"3A",
+			"3A_0720_3607_3615",
+			"1517136151028",
+			"65f51d2f85284af2fad1305c0ce71033",
+			"07:20:00",
+			"07:21:00",
+			"Lentävänniemi",
+			"0",
+			false,
+			JourneyGtfsInfo{TripId: "7024545685"},
+			[]string{"monday", "tuesday", "wednesday", "thursday", "friday"},
+			[]DayTypeException{{"2021-04-05", "2021-04-05", "yes"}, {"2021-05-13", "2021-05-13", "no"}},
+			[]JourneyCall{
+				{"07:20:00", "07:20:00", getStopPointMap()["3615"]},
+				{"07:21:00", "07:21:00", getStopPointMap()["3607"]},
+			},
+		},
+	}
+
+	for _, tc := range journeys {
+		result[tc.id] = Journey{
+			Url:                  journeyUrl(tc.id),
+			ActivityUrl:          journeyActivityUrl(tc.activityId),
+			LineUrl:              lineUrl(tc.line),
+			RouteUrl:             routeUrl(tc.route),
+			JourneyPatternUrl:    journeyPatternUrl(tc.journeyPattern),
+			DepartureTime:        tc.departureTime,
+			ArrivalTime:          tc.arrivalTime,
+			HeadSign:             tc.headSign,
+			Direction:            tc.directionId,
+			WheelchairAccessible: tc.wheelchairAccessible,
+			GtfsInfo:             tc.gtfs,
+			DayTypes:             tc.dayTypes,
+			DayTypeExceptions:    tc.dayTypeExceptions,
+			Calls:                tc.calls,
+		}
+	}
+
+	return result
+}
+
 type journeySuccessResponse struct {
 	Status string         `json:"status"`
 	Data   apiSuccessData `json:"data"`

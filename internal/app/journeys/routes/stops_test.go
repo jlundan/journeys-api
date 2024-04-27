@@ -132,6 +132,39 @@ func TestStopPointRoutes(t *testing.T) {
 	}
 }
 
+func getStopPointMap() map[string]StopPoint {
+	result := make(map[string]StopPoint)
+
+	stopPoints := []struct {
+		id           string
+		name         string
+		location     string
+		tariffZone   string
+		municipality Municipality
+	}{
+		{"4600", "Vatiala", "61.47561,23.97756", "B", getMunicipalityMap()["211"]},
+		{"8171", "Vällintie", "61.48067,23.97002", "B", getMunicipalityMap()["211"]},
+		{"8149", "Sudenkorennontie", "61.47979,23.96166", "C", getMunicipalityMap()["211"]},
+		{"7017", "Suupantori", "61.46546,23.64219", "B", getMunicipalityMap()["604"]},
+		{"7015", "Pirkkala", "61.4659,23.64734", "B", getMunicipalityMap()["604"]},
+		{"3615", "Näyttelijänkatu", "61.4445,23.87235", "B", getMunicipalityMap()["837"]},
+		{"3607", "Lavastajanpolku", "61.44173,23.86961", "B", getMunicipalityMap()["837"]},
+	}
+
+	for _, tc := range stopPoints {
+		result[tc.id] = StopPoint{
+			Url:          stopPointUrl(tc.id),
+			ShortName:    tc.id,
+			Name:         tc.name,
+			Location:     tc.location,
+			TariffZone:   tc.tariffZone,
+			Municipality: tc.municipality,
+		}
+	}
+
+	return result
+}
+
 type stopPointSuccessResponse struct {
 	Status string         `json:"status"`
 	Data   apiSuccessData `json:"data"`
