@@ -67,9 +67,9 @@ func ExtractStops(input *csv.Reader, output *csv.Writer, stopIds map[string]stru
 		levelIdPos = nil
 	}
 
-	parentStationIdMap := make(map[string]struct{}, 0)
-	levelIdMap := make(map[string]struct{}, 0)
-	discardedRows := make(map[string]*[]string, 0)
+	parentStationIdMap := make(map[string]struct{})
+	levelIdMap := make(map[string]struct{})
+	discardedRows := make(map[string]*[]string)
 	for {
 		row, rErr := ReadDataRow(input)
 		if rErr != nil {

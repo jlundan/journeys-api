@@ -72,9 +72,9 @@ func ExtractTripsByRoutes(input *csv.Reader, output *csv.Writer, routes map[stri
 		return nil, nil, nil, errs
 	}
 
-	tripIdMap := make(map[string]struct{}, 0)
-	serviceIdMap := make(map[string]struct{}, 0)
-	shapeIdMap := make(map[string]struct{}, 0)
+	tripIdMap := make(map[string]struct{})
+	serviceIdMap := make(map[string]struct{})
+	shapeIdMap := make(map[string]struct{})
 	for {
 		row, rErr := ReadDataRow(input)
 		if rErr != nil {

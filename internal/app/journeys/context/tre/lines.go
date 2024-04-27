@@ -23,7 +23,7 @@ func (lines Lines) GetAll() []*model.Line {
 
 func buildLines(g GTFSContext) Lines {
 	var all = make([]*model.Line, 0)
-	var byId = make(map[string]*model.Line, 0)
+	var byId = make(map[string]*model.Line)
 
 	for _, v := range g.Routes {
 		ln := v.LongName

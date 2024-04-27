@@ -27,7 +27,7 @@ func buildStopPoints(g GTFSContext, municipalities Municipalities) StopPoints {
 	var warnings []error
 
 	var all = make([]*model.StopPoint, 0)
-	var byId = make(map[string]*model.StopPoint, 0)
+	var byId = make(map[string]*model.StopPoint)
 
 	for _, stop := range g.Stops {
 

@@ -51,7 +51,7 @@ func ExtractFareAttributesByAgencies(input *csv.Reader, output *csv.Writer, agen
 		return nil, errs
 	}
 
-	fareIdMap := make(map[string]struct{}, 0)
+	fareIdMap := make(map[string]struct{})
 	for {
 		row, rErr := ReadDataRow(input)
 		if rErr != nil {
