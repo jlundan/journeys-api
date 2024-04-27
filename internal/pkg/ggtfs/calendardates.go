@@ -15,56 +15,6 @@ type CalendarDate struct {
 	LineNumber    int
 }
 
-func ExtractCalendarDates(input *csv.Reader, output *csv.Writer, serviceIds map[string]struct{}) []error {
-	errs := make([]error, 0)
-
-	headers, err := ReadHeaderRow(input)
-	if err != nil {
-		errs = append(errs, createFileError(CalendarDatesFileName, fmt.Sprintf("read error: %v", err.Error())))
-		return errs
-	}
-
-	if headers == nil { // EOF
-		return nil
-	}
-
-	err = writeHeaderRow(headers, output)
-	if err != nil {
-		errs = append(errs, err)
-		return errs
-	}
-
-	var idHeaderPos uint8
-	if pos, columnExists := headers["service_id"]; columnExists {
-		idHeaderPos = pos
-	} else {
-		errs = append(errs, createFileError(CalendarDatesFileName, "cannot extract calendar dates without service_id column"))
-		return errs
-	}
-
-	for {
-		row, rErr := ReadDataRow(input)
-		if rErr != nil {
-			errs = append(errs, createFileError(CalendarDatesFileName, fmt.Sprintf("%v", rErr.Error())))
-			continue
-		}
-
-		if row == nil { // EOF
-			break
-		}
-
-		if _, shouldBeExtracted := serviceIds[row[idHeaderPos]]; shouldBeExtracted {
-			wErr := writeDataRow(row, output)
-			if wErr != nil {
-				errs = append(errs, wErr)
-				return errs
-			}
-		}
-	}
-
-	return nil
-}
-
 func LoadCalendarDates(csvReader *csv.Reader) ([]*CalendarDate, []error) {
 	calendarDates := make([]*CalendarDate, 0)
 	errs := make([]error, 0)

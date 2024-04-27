@@ -11,22 +11,6 @@ import (
 	"strings"
 )
 
-func WriteFile(path string, records [][]string) error {
-	f, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
-	if err != nil {
-		return err
-	}
-
-	w := csv.NewWriter(f)
-
-	err = w.WriteAll(records)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func ParseFile(path string, firstLineAsHeaders bool) (map[string]uint8, [][]string, error) {
 	return ParseFileWithDecoderAndDelimiter(path, firstLineAsHeaders, nil, ',')
 }

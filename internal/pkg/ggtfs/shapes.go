@@ -14,56 +14,6 @@ type Shape struct {
 	lineNumber   int
 }
 
-func ExtractShapes(input *csv.Reader, output *csv.Writer, shapeIds map[string]struct{}) []error {
-	errs := make([]error, 0)
-
-	headers, err := ReadHeaderRow(input)
-	if err != nil {
-		errs = append(errs, createFileError(ShapesFileName, fmt.Sprintf("read error: %v", err.Error())))
-		return errs
-	}
-
-	if headers == nil { // EOF
-		return nil
-	}
-
-	err = writeHeaderRow(headers, output)
-	if err != nil {
-		errs = append(errs, err)
-		return errs
-	}
-
-	var idHeaderPos uint8
-	if pos, columnExists := headers["shape_id"]; columnExists {
-		idHeaderPos = pos
-	} else {
-		errs = append(errs, createFileError(ShapesFileName, "cannot extract shapes without shape_id column"))
-		return errs
-	}
-
-	for {
-		row, rErr := ReadDataRow(input)
-		if rErr != nil {
-			errs = append(errs, createFileError(ShapesFileName, fmt.Sprintf("%v", rErr.Error())))
-			continue
-		}
-
-		if row == nil { // EOF
-			break
-		}
-
-		if _, shouldBeExtracted := shapeIds[row[idHeaderPos]]; shouldBeExtracted {
-			wErr := writeDataRow(row, output)
-			if wErr != nil {
-				errs = append(errs, wErr)
-				return errs
-			}
-		}
-	}
-
-	return nil
-}
-
 func LoadShapes(csvReader *csv.Reader) ([]*Shape, []error) {
 	shapes := make([]*Shape, 0)
 	errs := make([]error, 0)
