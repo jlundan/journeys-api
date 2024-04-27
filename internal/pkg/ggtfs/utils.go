@@ -38,29 +38,6 @@ func ReadDataRow(r *csv.Reader) ([]string, error) {
 	return trimmedRow, nil
 }
 
-func writeHeaderRow(headers map[string]uint8, output *csv.Writer) error {
-	headerArr := make([]string, len(headers))
-	for name, position := range headers {
-		headerArr[position] = name
-	}
-	err := output.Write(headerArr)
-	if err != nil {
-		output.Flush()
-		return err
-	}
-	return nil
-}
-
-func writeDataRow(row []string, output *csv.Writer) error {
-	err := output.Write(row)
-	if err != nil {
-		output.Flush()
-		return err
-	}
-	output.Flush()
-	return nil
-}
-
 func StringArrayContainsItem(s []string, e string) bool {
 	for _, a := range s {
 		if a == e {
