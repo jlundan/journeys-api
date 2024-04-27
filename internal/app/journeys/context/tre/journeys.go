@@ -53,14 +53,14 @@ func (journeyPatterns JourneyPatterns) GetAll() []*model.JourneyPattern {
 
 func buildJourneys(g GTFSContext, lines Lines, routes Routes, stopPoints StopPoints) (Journeys, JourneyPatterns) {
 	var all = make([]*model.Journey, 0)
-	var byId = make(map[string]*model.Journey, 0)
-	var byActivityId = make(map[string]*model.Journey, 0)
+	var byId = make(map[string]*model.Journey)
+	var byActivityId = make(map[string]*model.Journey)
 	var allJourneyPatterns = make([]*model.JourneyPattern, 0)
-	var journeyPatternsById = make(map[string]*model.JourneyPattern, 0)
+	var journeyPatternsById = make(map[string]*model.JourneyPattern)
 
-	var tripIdToJourneyPattern = make(map[string]*model.JourneyPattern, 0)
-	var tripIdToJourneyCalls = make(map[string][]*model.JourneyCall, 0)
-	var tripIdToStopTimes = make(map[string][]*ggtfs.StopTime, 0)
+	var tripIdToJourneyPattern = make(map[string]*model.JourneyPattern)
+	var tripIdToJourneyCalls = make(map[string][]*model.JourneyCall)
+	var tripIdToStopTimes = make(map[string][]*ggtfs.StopTime)
 
 	for _, st := range g.StopTimes {
 		tripIdToStopTimes[st.TripId] = append(tripIdToStopTimes[st.TripId], st)
@@ -84,7 +84,7 @@ func buildJourneys(g GTFSContext, lines Lines, routes Routes, stopPoints StopPoi
 		// essentially just a list of model.StopPoints identified by a md5 hash calculated from those StopPoints. We are
 		// iterating through a ggtfs.StopTimes list which means that for JourneyPatterns, we should discard any sequence of stops
 		// we have previously encountered in the file, and create JourneyPattern for each one which we have not seen previously.
-		// We use the stopList hash for that. Each row in the list, on the other hand, maps to a JourneyCall so we keep track
+		// We use the stopList hash for that. Each row in the list, on the other hand, maps to a JourneyCall, so we keep track
 		// of the JourneyCalls in relation to their respective trip ids. Each trip will be converted to a Journey later on,
 		// so we can simply just assign the collected JourneyCalls to the Journey via the trip id since each trip matches to a Journey.
 
@@ -174,7 +174,7 @@ func buildJourneys(g GTFSContext, lines Lines, routes Routes, stopPoints StopPoi
 		journey := model.Journey{
 			Id:                   trip.Id,
 			HeadSign:             *trip.HeadSign,
-			Direction:            strconv.Itoa(int(*trip.DirectionId)),
+			Direction:            strconv.Itoa(*trip.DirectionId),
 			WheelchairAccessible: *trip.WheelchairAccessible == 1,
 			GtfsInfo: &model.JourneyGtfsInfo{
 				TripId: trip.Id,
@@ -247,7 +247,7 @@ type calendarFileRow struct {
 }
 
 func buildCalendarMap(g GTFSContext) map[string]calendarFileRow {
-	result := make(map[string]calendarFileRow, 0)
+	result := make(map[string]calendarFileRow)
 	for _, calendarItem := range g.CalendarItems {
 		days := make([]string, 0)
 		if calendarItem.Monday == 1 {
@@ -285,7 +285,7 @@ func buildCalendarMap(g GTFSContext) map[string]calendarFileRow {
 }
 
 func buildCalendarDatesMap(g GTFSContext) map[string][]*model.DayTypeException {
-	result := make(map[string][]*model.DayTypeException, 0)
+	result := make(map[string][]*model.DayTypeException)
 	for _, calendarDate := range g.CalendarDates {
 		result[calendarDate.ServiceId] = append(result[calendarDate.ServiceId], &model.DayTypeException{
 			From: calendarDate.Date.Format("2006-01-02"),

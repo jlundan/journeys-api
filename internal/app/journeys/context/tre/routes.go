@@ -24,9 +24,9 @@ func (routes Routes) GetAll() []*model.Route {
 
 func buildRoutes(g GTFSContext) Routes {
 	var all = make([]*model.Route, 0)
-	var byId = make(map[string]*model.Route, 0)
+	var byId = make(map[string]*model.Route)
 
-	var shapeIdToCoords = make(map[string][][]float64, 0)
+	var shapeIdToCoords = make(map[string][][]float64)
 	for _, shape := range g.Shapes {
 		if _, ok := shapeIdToCoords[shape.Id]; !ok {
 			shapeIdToCoords[shape.Id] = make([][]float64, 0)

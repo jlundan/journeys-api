@@ -59,7 +59,7 @@ func ExtractRoutesByAgencies(input *csv.Reader, output *csv.Writer, agencies map
 		return nil, errs
 	}
 
-	routeMap := make(map[string]struct{}, 0)
+	routeMap := make(map[string]struct{})
 	for {
 		row, rErr := ReadDataRow(input)
 		if rErr != nil {

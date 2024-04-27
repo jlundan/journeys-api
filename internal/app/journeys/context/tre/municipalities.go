@@ -23,7 +23,7 @@ func (municipalities Municipalities) GetAll() []*model.Municipality {
 
 func buildMunicipalities(m municipalityData) Municipalities {
 	var all = make([]*model.Municipality, 0)
-	var byId = make(map[string]*model.Municipality, 0)
+	var byId = make(map[string]*model.Municipality)
 
 	for _, v := range m.municipalityRows {
 		municipality := model.Municipality{

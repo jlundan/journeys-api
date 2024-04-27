@@ -58,7 +58,7 @@ func ExtractStopTimesByTrips(input *csv.Reader, output *csv.Writer, trips map[st
 		return nil, errs
 	}
 
-	stopIdMap := make(map[string]struct{}, 0)
+	stopIdMap := make(map[string]struct{})
 	for {
 		row, rErr := ReadDataRow(input)
 		if rErr != nil {

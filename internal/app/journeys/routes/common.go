@@ -105,7 +105,7 @@ func createSuccessResponse(body []interface{}, startIndex uint32, pageSize uint1
 }
 
 func getDefaultConditions(r *http.Request) map[string]string {
-	result := make(map[string]string, 0)
+	result := make(map[string]string)
 	for k, v := range r.URL.Query() {
 		if k != "exclude-fields" {
 			result[k] = v[0]
