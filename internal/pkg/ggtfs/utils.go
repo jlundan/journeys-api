@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func ReadHeaderRow(r *csv.Reader) (map[string]uint8, error) {
+func ReadHeaderRow(r *csv.Reader, validHeaders []string) (map[string]uint8, error) {
 	row, err := r.Read()
 	if err == io.EOF {
 		return nil, nil
@@ -17,7 +17,13 @@ func ReadHeaderRow(r *csv.Reader) (map[string]uint8, error) {
 
 	var headers = map[string]uint8{}
 	for index, item := range row {
-		headers[strings.TrimSpace(item)] = uint8(index)
+		h := strings.TrimSpace(item)
+
+		if !StringArrayContainsItem(validHeaders, h) {
+			continue
+		}
+
+		headers[h] = uint8(index)
 	}
 	return headers, nil
 }

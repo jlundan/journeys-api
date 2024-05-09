@@ -21,11 +21,14 @@ type Trip struct {
 	lineNumber           int
 }
 
+var validTripHeaders = []string{"route_id", "service_id", "trip_id", "trip_headsign", "trip_short_name",
+	"direction_id", "block_id", "shape_id", "wheelchair_accessible", "bikes_allowed"}
+
 func LoadTrips(csvReader *csv.Reader) ([]*Trip, []error) {
 	stops := make([]*Trip, 0)
 	errs := make([]error, 0)
 
-	headers, err := ReadHeaderRow(csvReader)
+	headers, err := ReadHeaderRow(csvReader, validTripHeaders)
 	if err != nil {
 		errs = append(errs, createFileError(TripsFileName, fmt.Sprintf("read error: %v", err.Error())))
 		return stops, errs
