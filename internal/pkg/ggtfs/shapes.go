@@ -14,11 +14,14 @@ type Shape struct {
 	lineNumber   int
 }
 
+var validShapeHeaders = []string{"shape_id", "shape_pt_lat", "shape_pt_lon", "shape_pt_sequence",
+	"shape_dist_traveled"}
+
 func LoadShapes(csvReader *csv.Reader) ([]*Shape, []error) {
 	shapes := make([]*Shape, 0)
 	errs := make([]error, 0)
 
-	headers, err := ReadHeaderRow(csvReader)
+	headers, err := ReadHeaderRow(csvReader, validShapeHeaders)
 	if err != nil {
 		errs = append(errs, createFileError(ShapesFileName, fmt.Sprintf("read error: %v", err.Error())))
 		return shapes, errs
