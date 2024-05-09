@@ -44,9 +44,9 @@ func ReadDataRow(r *csv.Reader) ([]string, error) {
 	return trimmedRow, nil
 }
 
-func StringArrayContainsItem(s []string, e string) bool {
-	for _, a := range s {
-		if a == e {
+func StringArrayContainsItem(arr []string, item string) bool {
+	for _, v := range arr {
+		if v == item {
 			return true
 		}
 	}
