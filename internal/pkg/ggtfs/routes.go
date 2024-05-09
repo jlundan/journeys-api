@@ -9,7 +9,7 @@ import (
 
 type Route struct {
 	Id                string
-	AgencyId          *string
+	AgencyId          string
 	ShortName         *string
 	LongName          *string
 	Desc              *string
@@ -67,7 +67,7 @@ func LoadRoutes(csvReader *csv.Reader) ([]*Route, []error) {
 			case "route_id":
 				routeId = handleStringField(row[column], RoutesFileName, name, index, &rowErrs)
 			case "agency_id":
-				route.AgencyId = handleStringField(row[column], RoutesFileName, name, index, &rowErrs)
+				route.AgencyId = row[column] //handleStringField(row[column], RoutesFileName, name, index, &rowErrs)
 			case "route_short_name":
 				route.ShortName = handleStringField(row[column], RoutesFileName, name, index, &rowErrs)
 			case "route_long_name":

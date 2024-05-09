@@ -45,7 +45,7 @@ func TestRouteParsingOK(t *testing.T) {
 
 	expected1 := Route{
 		Id:                id,
-		AgencyId:          &agency,
+		AgencyId:          agency,
 		ShortName:         &shortName,
 		LongName:          &longName,
 		Desc:              &desc,
@@ -63,7 +63,7 @@ func TestRouteParsingOK(t *testing.T) {
 
 	expected2 := Route{
 		Id:                id,
-		AgencyId:          &agency,
+		AgencyId:          agency,
 		ShortName:         &shortName,
 		LongName:          &longName,
 		Desc:              &desc,
@@ -150,7 +150,7 @@ func TestRouteParsingNOK(t *testing.T) {
 				{"1", ""},
 			},
 			expected: []string{
-				"routes.txt:0: agency_id: empty value not allowed",
+				//"routes.txt:0: agency_id: empty value not allowed",
 				"routes.txt:0: either route_short_name or route_long_name must be specified",
 				"routes.txt:0: route_type must be specified",
 			},
@@ -268,7 +268,7 @@ func TestRouteParsingNOK(t *testing.T) {
 		},
 	}
 
-	for _, tc := range testCases {
+	for index, tc := range testCases {
 		_, err := LoadRoutes(csv.NewReader(strings.NewReader(tableToString(tc.rows))))
 
 		if len(err) == 0 {
@@ -285,6 +285,7 @@ func TestRouteParsingNOK(t *testing.T) {
 		})
 
 		if len(err) != len(tc.expected) {
+			fmt.Println(index)
 			t.Error(fmt.Sprintf("expected %v errors, got %v", len(tc.expected), len(err)))
 			for _, e := range err {
 				fmt.Println(e)
@@ -312,11 +313,11 @@ func TestValidateRoutes(t *testing.T) {
 	}{
 		{
 			routes: []*Route{
-				{AgencyId: &agencyId1, lineNumber: 0},
+				{AgencyId: agencyId1, lineNumber: 0},
 			},
 			agencies: []*Agency{
-				{Id: &agencyId1, lineNumber: 0},
-				{Id: &agencyId2, lineNumber: 1},
+				{Id: agencyId1, lineNumber: 0},
+				{Id: agencyId2, lineNumber: 1},
 			},
 			expectedErrors: []string{},
 		},
@@ -329,18 +330,18 @@ func TestValidateRoutes(t *testing.T) {
 				nil,
 			},
 			agencies: []*Agency{
-				{Id: &agencyId2, lineNumber: 0},
-				{Id: &agencyId3, lineNumber: 1},
+				{Id: agencyId2, lineNumber: 0},
+				{Id: agencyId3, lineNumber: 1},
 			},
 			expectedErrors: []string{},
 		},
 		{
 			routes: []*Route{
-				{AgencyId: &agencyId1, lineNumber: 0},
+				{AgencyId: agencyId1, lineNumber: 0},
 			},
 			agencies: []*Agency{
-				{Id: &agencyId2, lineNumber: 0},
-				{Id: &agencyId3, lineNumber: 1},
+				{Id: agencyId2, lineNumber: 0},
+				{Id: agencyId3, lineNumber: 1},
 			},
 			expectedErrors: []string{
 				"routes.txt:0: referenced agency_id not found in agency.txt",
@@ -348,7 +349,7 @@ func TestValidateRoutes(t *testing.T) {
 		},
 		{
 			routes: []*Route{
-				{AgencyId: &agencyId1, lineNumber: 0},
+				{AgencyId: agencyId1, lineNumber: 0},
 			},
 			agencies: []*Agency{
 				nil,
@@ -368,7 +369,7 @@ func TestValidateRoutes(t *testing.T) {
 func routesMatch(r1 Route, r2 Route) bool {
 	// GTFS spec says that Id and type are the only absolutely mandatory field, therefore it is not a pointer (and cannot be nil)
 	return r1.Id == r2.Id &&
-		((r1.AgencyId == nil && r2.AgencyId == nil) || *r1.AgencyId == *r2.AgencyId) &&
+		((r1.AgencyId == "" && r2.AgencyId == "") || r1.AgencyId == r2.AgencyId) &&
 		((r1.ShortName != nil && r2.ShortName != nil) || (r1.LongName != nil && r2.LongName != nil)) && // either short_name or long_name must not be nil
 		((r1.ShortName == nil && r2.ShortName == nil) || *r1.ShortName == *r2.ShortName) &&
 		((r1.LongName == nil && r2.LongName == nil) || *r1.LongName == *r2.LongName) &&
