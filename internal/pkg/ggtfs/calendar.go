@@ -22,11 +22,14 @@ type CalendarItem struct {
 	lineNumber int
 }
 
+var validCalendarHeaders = []string{"service_id", "monday", "tuesday", "wednesday",
+	"thursday", "friday", "saturday", "sunday", "start_date", "end_date"}
+
 func LoadCalendarItems(csvReader *csv.Reader) ([]*CalendarItem, []error) {
 	calendarItems := make([]*CalendarItem, 0)
 	errs := make([]error, 0)
 
-	headers, err := ReadHeaderRow(csvReader)
+	headers, err := ReadHeaderRow(csvReader, validCalendarHeaders)
 	if err != nil {
 		errs = append(errs, createFileError(CalendarFileName, fmt.Sprintf("read error: %v", err.Error())))
 		return calendarItems, errs

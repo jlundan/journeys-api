@@ -15,11 +15,13 @@ type CalendarDate struct {
 	LineNumber    int
 }
 
+var validCalendarDateHeaders = []string{"service_id", "date", "exception_type"}
+
 func LoadCalendarDates(csvReader *csv.Reader) ([]*CalendarDate, []error) {
 	calendarDates := make([]*CalendarDate, 0)
 	errs := make([]error, 0)
 
-	headers, err := ReadHeaderRow(csvReader)
+	headers, err := ReadHeaderRow(csvReader, validCalendarDateHeaders)
 	if err != nil {
 		errs = append(errs, createFileError(CalendarDatesFileName, fmt.Sprintf("read error: %v", err.Error())))
 		return calendarDates, errs

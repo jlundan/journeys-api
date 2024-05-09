@@ -26,11 +26,15 @@ type Stop struct {
 	lineNumber         int
 }
 
+var validStopHeaders = []string{"stop_id", "stop_code", "stop_name", "tts_stop_name", "stop_desc", "stop_lat",
+	"stop_lon", "zone_id", "stop_url", "location_type", "parent_station", "stop_timezone", "wheelchair_boarding",
+	"level_id", "platform_code", "municipality_id"}
+
 func LoadStops(csvReader *csv.Reader) ([]*Stop, []error) {
 	stops := make([]*Stop, 0)
 	errs := make([]error, 0)
 
-	headers, err := ReadHeaderRow(csvReader)
+	headers, err := ReadHeaderRow(csvReader, validStopHeaders)
 	if err != nil {
 		errs = append(errs, createFileError(StopsFileName, fmt.Sprintf("read error: %v", err.Error())))
 		return stops, errs

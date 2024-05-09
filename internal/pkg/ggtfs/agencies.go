@@ -17,11 +17,14 @@ type Agency struct {
 	lineNumber int
 }
 
+var validAgencyHeaders = []string{"agency_id", "agency_name", "agency_url", "agency_timezone",
+	"agency_lang", "agency_phone", "agency_fare_url", "agency_email"}
+
 func LoadAgencies(csvReader *csv.Reader) ([]*Agency, []error) {
 	agencies := make([]*Agency, 0)
 	errs := make([]error, 0)
 
-	headers, err := ReadHeaderRow(csvReader)
+	headers, err := ReadHeaderRow(csvReader, validAgencyHeaders)
 	if err != nil {
 		errs = append(errs, createFileError(AgenciesFileName, fmt.Sprintf("read error: %v", err.Error())))
 		return agencies, errs

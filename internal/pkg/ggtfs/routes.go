@@ -23,11 +23,15 @@ type Route struct {
 	lineNumber        int
 }
 
+var validRouteHeaders = []string{"route_id", "agency_id", "route_short_name", "route_long_name", "route_desc",
+	"route_type", "route_url", "route_color", "route_text_color", "route_sort_order", "continuous_pickup",
+	"continuous_drop_off", "network_id"}
+
 func LoadRoutes(csvReader *csv.Reader) ([]*Route, []error) {
 	routes := make([]*Route, 0)
 	errs := make([]error, 0)
 
-	headers, err := ReadHeaderRow(csvReader)
+	headers, err := ReadHeaderRow(csvReader, validRouteHeaders)
 	if err != nil {
 		errs = append(errs, createFileError(RoutesFileName, fmt.Sprintf("read error: %v", err.Error())))
 		return routes, errs
