@@ -23,11 +23,16 @@ type StopTime struct {
 	lineNumber        int
 }
 
+var validStopTimeHeaders = []string{"trip_id", "arrival_time", "departure_time", "stop_id", "location_group_id",
+	"location_id", "stop_sequence", "stop_headsign", "start_pickup_drop_off_window", "end_pickup_drop_off_window",
+	"pickup_type", "drop_off_type", "continuous_pickup", "continuous_drop_off", "shape_dist_traveled", "timepoint",
+	"pickup_booking_rule_id", "drop_off_booking_rule_id"}
+
 func LoadStopTimes(csvReader *csv.Reader) ([]*StopTime, []error) {
 	stopPoints := make([]*StopTime, 0)
 	errs := make([]error, 0)
 
-	headers, err := ReadHeaderRow(csvReader)
+	headers, err := ReadHeaderRow(csvReader, validStopTimeHeaders)
 	if err != nil {
 		errs = append(errs, createFileError(StopTimesFileName, fmt.Sprintf("read error: %v", err.Error())))
 		return stopPoints, errs
