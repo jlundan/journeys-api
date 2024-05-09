@@ -176,15 +176,28 @@ func handleColorField(str string, fileName string, fieldName string, index int, 
 }
 
 func handleURLField(str string, fileName string, fieldName string, index int, errs *[]error) *string {
-	//if str == "" {
-	//	*errs = append(*errs, createFieldError(fileName, fieldName, index, errors.New(emptyValueNotAllowed)))
-	//	return nil
-	//}
-
 	_, err := url.Parse(str)
 	if err != nil {
 		*errs = append(*errs, createFieldError(fileName, fieldName, index, err))
 		return nil
 	}
 	return &str
+}
+
+func getRowValue(row []string, headers map[string]uint8, header string, errs []error, rowIndex int, fileName string) string {
+	headerPosition, ok := headers[header]
+
+	if !ok {
+		// Requested header not specified in the CSV file, return empty string
+		errs = append(errs, createFileRowError(fileName, rowIndex, fmt.Sprintf("invalid header: %s", header)))
+		return ""
+	}
+
+	if len(row) <= int(headerPosition) {
+		// Requested header is found but the row does not have enough columns, return empty string
+		errs = append(errs, createFileRowError(fileName, rowIndex, fmt.Sprintf("missing required field: %s", header)))
+		return ""
+	}
+
+	return row[headerPosition]
 }

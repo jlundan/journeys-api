@@ -6,14 +6,14 @@ import (
 )
 
 type Agency struct {
-	Id         *string // agency_id
-	Name       string  // agency_name
-	Url        string  // agency_url
-	Timezone   string  // agency_timezone
-	Lang       *string // agency_lang
-	Phone      *string // agency_phone
-	FareURL    *string // agency_fare_url
-	Email      *string // agency_email
+	Id         string // agency_id
+	Name       string // agency_name
+	Url        string // agency_url
+	Timezone   string // agency_timezone
+	Lang       string // agency_lang
+	Phone      string // agency_phone
+	FareURL    string // agency_fare_url
+	Email      string // agency_email
 	lineNumber int
 }
 
@@ -33,7 +33,6 @@ func LoadAgencies(csvReader *csv.Reader) ([]*Agency, []error) {
 		return agencies, errs
 	}
 
-	usedIds := make([]string, 0)
 	index := 0
 	for {
 		row, err := ReadDataRow(csvReader)
@@ -42,79 +41,52 @@ func LoadAgencies(csvReader *csv.Reader) ([]*Agency, []error) {
 			index++
 			continue
 		}
+
 		if row == nil {
 			break
 		}
 
-		rowErrs := make([]error, 0)
+		if len(row) == 0 {
+			continue
+		}
+
 		agency := Agency{
 			lineNumber: index,
+			Id:         getRowValue(row, headers, "agency_id", errs, index, AgenciesFileName),
+			Name:       getRowValue(row, headers, "agency_name", errs, index, AgenciesFileName),
+			Url:        getRowValue(row, headers, "agency_url", errs, index, AgenciesFileName),
+			Timezone:   getRowValue(row, headers, "agency_timezone", errs, index, AgenciesFileName),
+			Lang:       getRowValue(row, headers, "agency_lang", errs, index, AgenciesFileName),
+			Phone:      getRowValue(row, headers, "agency_phone", errs, index, AgenciesFileName),
+			FareURL:    getRowValue(row, headers, "agency_fare_url", errs, index, AgenciesFileName),
+			Email:      getRowValue(row, headers, "agency_email", errs, index, AgenciesFileName),
 		}
 
-		var agencyName, agencyUrl, agencyTimezone *string
-
-		for name, column := range headers {
-			switch name {
-			case "agency_id":
-				agency.Id = handleIDField(row[column], AgenciesFileName, name, index, &rowErrs)
-			case "agency_name":
-				agencyName = handleTextField(row[column], AgenciesFileName, name, index, &rowErrs)
-			case "agency_url":
-				agencyUrl = handleURLField(row[column], AgenciesFileName, name, index, &rowErrs)
-			case "agency_timezone":
-				agencyTimezone = handleTimeZoneField(row[column], AgenciesFileName, name, index, &rowErrs)
-			case "agency_lang":
-				agency.Lang = handleLanguageCodeField(row[column], AgenciesFileName, name, index, &rowErrs)
-			case "agency_phone":
-				agency.Phone = handlePhoneNumberField(row[column], AgenciesFileName, name, index, &rowErrs)
-			case "agency_fare_url":
-				agency.FareURL = handleURLField(row[column], AgenciesFileName, name, index, &rowErrs)
-			case "agency_email":
-				agency.Email = handleEmailField(row[column], AgenciesFileName, name, index, &rowErrs)
-			}
+		if agency.Url == "" {
+			errs = append(errs, createFileRowError(AgenciesFileName, agency.lineNumber, "agency_url must be specified"))
 		}
 
-		if agency.Id != nil {
-			if StringArrayContainsItem(usedIds, *agency.Id) {
-				errs = append(errs, createFileRowError(AgenciesFileName, index, fmt.Sprintf("%s: agency_id", nonUniqueId)))
-			} else {
-				usedIds = append(usedIds, *agency.Id)
-			}
+		if agency.Timezone == "" {
+			errs = append(errs, createFileRowError(AgenciesFileName, agency.lineNumber, "agency_timezone must be specified"))
 		}
 
-		if agencyName == nil {
-			rowErrs = append(rowErrs, createFileRowError(AgenciesFileName, agency.lineNumber, "agency_name must be specified"))
-		} else {
-			agency.Name = *agencyName
-		}
-
-		if agencyUrl == nil {
-			rowErrs = append(rowErrs, createFileRowError(AgenciesFileName, agency.lineNumber, "agency_url must be specified"))
-		} else if *agencyUrl == "" {
-			rowErrs = append(rowErrs, createFileRowError(AgenciesFileName, agency.lineNumber, "agency_url must not be empty"))
-		} else {
-			agency.Url = *agencyUrl
-		}
-
-		if agencyTimezone == nil {
-			rowErrs = append(rowErrs, createFileRowError(AgenciesFileName, agency.lineNumber, "agency_timezone must be specified"))
-		} else {
-			agency.Timezone = *agencyTimezone
-		}
-
-		if len(rowErrs) > 0 {
-			errs = append(errs, rowErrs...)
-		} else {
-			agencies = append(agencies, &agency)
-		}
-
+		agencies = append(agencies, &agency)
 		index++
 	}
 
 	if len(agencies) > 1 {
+		usedIds := make([]string, 0)
+
 		for _, a := range agencies {
-			if a.Id == nil {
+			if a.Id == "" {
 				errs = append(errs, createFileRowError(AgenciesFileName, a.lineNumber, "agency id must be specified when multiple agencies are declared"))
+				continue
+			}
+
+			if StringArrayContainsItem(usedIds, a.Id) {
+				errs = append(errs, createFileRowError(AgenciesFileName, index, fmt.Sprintf("%s: agency_id", nonUniqueId)))
+			} else {
+				usedIds = append(usedIds, a.Id)
 			}
 		}
 	}

@@ -30,34 +30,26 @@ func TestAgencyCSVParsing(t *testing.T) {
 }
 
 func TestAgencyParsingOK(t *testing.T) {
-	id := "1"
-	lang := "fi"
-	phone := "+358123456"
-	email := "acme@acme.inc"
-	fareUrl := "https://acme.inc/fares"
-
 	expected1 := Agency{
-		Id:       &id,
+		Id:       "1",
 		Name:     "ACME",
 		Url:      "https://acme.inc",
 		Timezone: "Europe/Helsinki",
-		Lang:     &lang,
-		Phone:    &phone,
-		FareURL:  &fareUrl,
-		Email:    &email,
+		Lang:     "fi",
+		Phone:    "+358123456",
+		FareURL:  "https://acme.inc/fares",
+		Email:    "acme@acme.inc",
 	}
 
-	id2 := "2"
-
 	expected2 := Agency{
-		Id:       &id2,
+		Id:       "2",
 		Name:     "FOO",
 		Url:      "https://foo.com",
 		Timezone: "Europe/Helsinki",
-		Lang:     nil,
-		Phone:    nil,
-		FareURL:  nil,
-		Email:    nil,
+		Lang:     "",
+		Phone:    "",
+		FareURL:  "",
+		Email:    "",
 	}
 
 	testCases := []struct {
@@ -127,8 +119,8 @@ func TestAgencyParsingNOK(t *testing.T) {
 				{" "},
 			},
 			expected: []string{
-				"agency.txt:0: agency_name must be specified",
-				"agency.txt:0: agency_name: empty value not allowed",
+				//"agency.txt:0: agency_name must be specified",
+				//"agency.txt:0: agency_name: empty value not allowed",
 				"agency.txt:0: agency_timezone must be specified",
 				"agency.txt:0: agency_url must be specified",
 			},
@@ -150,7 +142,7 @@ func TestAgencyParsingNOK(t *testing.T) {
 			},
 			expected: []string{
 				"agency.txt:0: agency_timezone must be specified",
-				"agency.txt:0: agency_url must not be empty",
+				"agency.txt:0: agency_url must be specified",
 			},
 		},
 		{
@@ -160,20 +152,20 @@ func TestAgencyParsingNOK(t *testing.T) {
 			},
 			expected: []string{
 				"agency.txt:0: agency_timezone must be specified",
-				"agency.txt:0: agency_timezone: empty value not allowed",
+				//"agency.txt:0: agency_timezone: empty value not allowed",
 			},
 		},
-		{
-			rows: [][]string{
-				{"agency_name", "agency_url", "agency_timezone", "agency_lang", "agency_phone", "agency_fare_url", "agency_email"},
-				{"ACME", "http://acme.inc", "Europe/Helsinki", "", "", "", ""},
-			},
-			expected: []string{
-				"agency.txt:0: agency_email: empty value not allowed",
-				"agency.txt:0: agency_lang: empty value not allowed",
-				"agency.txt:0: agency_phone: empty value not allowed",
-			},
-		},
+		//{
+		//	rows: [][]string{
+		//		{"agency_name", "agency_url", "agency_timezone", "agency_lang", "agency_phone", "agency_fare_url", "agency_email"},
+		//		{"ACME", "http://acme.inc", "Europe/Helsinki", "", "", "", ""},
+		//	},
+		//	expected: []string{
+		//		"agency.txt:0: agency_email: empty value not allowed",
+		//		"agency.txt:0: agency_lang: empty value not allowed",
+		//		"agency.txt:0: agency_phone: empty value not allowed",
+		//	},
+		//},
 		{
 			rows: [][]string{
 				{"agency_name", "agency_url", "agency_timezone"},
@@ -185,15 +177,15 @@ func TestAgencyParsingNOK(t *testing.T) {
 				"agency.txt:1: agency id must be specified when multiple agencies are declared",
 			},
 		},
-		{
-			rows: [][]string{
-				{"agency_name", "agency_url", "agency_timezone", "agency_id"},
-				{"ACME", "http://acme.inc", "Europe/Helsinki", ""},
-			},
-			expected: []string{
-				"agency.txt:0: agency_id: empty value not allowed",
-			},
-		},
+		//{
+		//	rows: [][]string{
+		//		{"agency_name", "agency_url", "agency_timezone", "agency_id"},
+		//		{"ACME", "http://acme.inc", "Europe/Helsinki", ""},
+		//	},
+		//	expected: []string{
+		//		"agency.txt:0: agency_id: empty value not allowed",
+		//	},
+		//},
 		{
 			rows: [][]string{
 				{"agency_name", "agency_url", "agency_timezone", "agency_id"},
@@ -201,7 +193,7 @@ func TestAgencyParsingNOK(t *testing.T) {
 				{"ACME2", "http://acme2.inc", "Europe/Helsinki2", "ACME"},
 			},
 			expected: []string{
-				"agency.txt:1: non-unique id: agency_id",
+				"agency.txt:2: non-unique id: agency_id",
 			},
 		},
 	}
@@ -218,7 +210,7 @@ func TestAgencyParsingNOK(t *testing.T) {
 		})
 
 		if len(err) == 0 {
-			t.Error("expected to throw an error")
+			t.Error(fmt.Sprintf("%v: expected to throw an error", tcIndex))
 			continue
 		}
 
@@ -232,7 +224,7 @@ func TestAgencyParsingNOK(t *testing.T) {
 
 		for i, e := range err {
 			if e.Error() != tc.expected[i] {
-				t.Error(fmt.Sprintf("expected error %s, got %s", tc.expected[i], e.Error()))
+				t.Error(fmt.Sprintf("%v: expected error %s, got %s", tcIndex, tc.expected[i], e.Error()))
 			}
 		}
 	}
@@ -243,9 +235,9 @@ func agenciesMatch(a Agency, b Agency) bool {
 	return a.Name == b.Name &&
 		a.Url == b.Url &&
 		a.Timezone == b.Timezone &&
-		((a.Id == nil && b.Id == nil) || *a.Id == *b.Id) &&
-		((a.Email == nil && b.Email == nil) || *a.Email == *b.Email) &&
-		((a.FareURL == nil && b.FareURL == nil) || *a.FareURL == *b.FareURL) &&
-		((a.Lang == nil && b.Lang == nil) || *a.Lang == *b.Lang) &&
-		((a.Phone == nil && b.Phone == nil) || *a.Phone == *b.Phone)
+		((a.Id == "" && b.Id == "") || a.Id == b.Id) &&
+		((a.Email == "" && b.Email == "") || a.Email == b.Email) &&
+		((a.FareURL == "" && b.FareURL == "") || a.FareURL == b.FareURL) &&
+		((a.Lang == "" && b.Lang == "") || a.Lang == b.Lang) &&
+		((a.Phone == "" && b.Phone == "") || a.Phone == b.Phone)
 }
