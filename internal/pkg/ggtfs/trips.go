@@ -67,7 +67,8 @@ func LoadTrips(csvReader *csv.Reader) ([]*Trip, []error) {
 			case "trip_id":
 				tripId = handleIDField(row[column], TripsFileName, name, index, &rowErrs)
 			case "trip_headsign":
-				trip.HeadSign = handleTextField(row[column], TripsFileName, name, index, &rowErrs)
+				//trip.HeadSign = handleTextField(row[column], TripsFileName, name, index, &rowErrs)
+				trip.HeadSign = &row[column]
 			case "trip_short_name":
 				trip.ShortName = handleTextField(row[column], TripsFileName, name, index, &rowErrs)
 			case "direction_id":
