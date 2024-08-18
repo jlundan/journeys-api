@@ -13,6 +13,7 @@ import (
 )
 
 var mc *memcache.Client
+var dryRun bool
 
 func corsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -34,6 +35,8 @@ func init() {
 	if os.Getenv("MEMCACHED_URL") != "" {
 		mc = memcache.New(os.Getenv("MEMCACHED_URL"))
 	}
+
+	mainCommand.Flags().BoolVar(&dryRun, "dry-run", false, "Perform a dry run without starting the server")
 }
 
 func cacheMiddleware(next http.Handler) http.Handler {
@@ -94,6 +97,10 @@ var mainCommand = &cobra.Command{
 				log.Println(err)
 			}
 			os.Exit(1)
+		}
+
+		if dryRun {
+			os.Exit(0)
 		}
 
 		r := mux.NewRouter()
