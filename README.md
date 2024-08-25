@@ -20,6 +20,7 @@ The command reads following environment variables:
 | JOURNEYS_GTFS_PATH   | path to directory where the GTFS files are located           |
 | JOURNEYS_BASE_URL    | the base of the outputted URLs in responses                  |
 | JOURNEYS_VA_BASE_URL | the base of the outputted vehicle activity URLs in responses |
+| JOURNEYS_PORT        | the port where the service will run. defaults to 8080        |
 
 The GTFS files for the Tampere region can be downloaded from [ITS Factory](https://data.itsfactory.fi/journeys/files/gtfs/). We currently use the Tampere GTFS files for development, but you should be able to use other cities' GTFS files as well. 
 
