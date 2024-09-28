@@ -1,6 +1,7 @@
 package ggtfs
 
 import (
+	"encoding/csv"
 	"encoding/hex"
 	"errors"
 	"fmt"
@@ -54,17 +55,17 @@ func handleTimeZoneField(str string, fileName string, fieldName string, index in
 	return handleStringField(str, fileName, fieldName, index, errs)
 }
 
-func handleLanguageCodeField(str string, fileName string, fieldName string, index int, errs *[]error) *string {
-	return handleStringField(str, fileName, fieldName, index, errs)
-}
-
-func handlePhoneNumberField(str string, fileName string, fieldName string, index int, errs *[]error) *string {
-	return handleStringField(str, fileName, fieldName, index, errs)
-}
-
-func handleEmailField(str string, fileName string, fieldName string, index int, errs *[]error) *string {
-	return handleStringField(str, fileName, fieldName, index, errs)
-}
+//func handleLanguageCodeField(str string, fileName string, fieldName string, index int, errs *[]error) *string {
+//	return handleStringField(str, fileName, fieldName, index, errs)
+//}
+//
+//func handlePhoneNumberField(str string, fileName string, fieldName string, index int, errs *[]error) *string {
+//	return handleStringField(str, fileName, fieldName, index, errs)
+//}
+//
+//func handleEmailField(str string, fileName string, fieldName string, index int, errs *[]error) *string {
+//	return handleStringField(str, fileName, fieldName, index, errs)
+//}
 
 func handleIntField(str string, fileName string, fieldName string, index int, errs *[]error) *int {
 	val, err := strconv.ParseInt(str, 10, 64)
@@ -200,4 +201,69 @@ func getRowValue(row []string, headers map[string]uint8, header string, errs []e
 	}
 
 	return row[headerPosition]
+}
+
+type entityCreator func(row []string, headers map[string]uint8, lineNumber int) (interface{}, []error)
+
+// LoadEntities is a generic function for loading entities from a CSV file using a provided entity creation callback.
+// This function reads each row from the given CSV reader, creates entities using the provided callback function, and
+// collects any errors encountered during the loading process.
+//
+// Parameters:
+//   - csvReader (*csv.Reader): The CSV reader from which to read the data.
+//   - validHeaders ([]string): A list of expected column headers to validate against the CSV header row.
+//   - entityCreator (EntityCreator): A callback function that is called for each data row to create an entity.
+//     The function has the following signature:
+//     func(row []string, headers map[string]int, lineNumber int) (interface{}, error)
+//   - row: Represents a single row of data from the CSV.
+//   - headers: A map of header names to their corresponding index positions in the row.
+//   - lineNumber: The current row number being processed.
+//     The callback should return the created entity and an error, if any.
+//   - fileName (string): The name of the file being processed. Used in error reporting.
+//
+// Returns:
+//   - ([]interface{}): A slice of entities created from the CSV file. The entities are returned as generic interfaces,
+//     and should be type-asserted by the caller to their concrete types.
+//   - ([]error): A slice of errors encountered during the loading process, including errors from reading the CSV,
+//     missing or invalid headers, and errors returned from the entity creation callback.
+func loadEntities(csvReader *csv.Reader, validHeaders []string, entityCreator entityCreator, fileName string) ([]interface{}, []error) {
+	entities := make([]interface{}, 0)
+	errs := make([]error, 0)
+
+	headers, err := ReadHeaderRow(csvReader, validHeaders)
+	if err != nil {
+		errs = append(errs, createFileError(fileName, fmt.Sprintf("read error: %v", err.Error())))
+		return entities, errs
+	}
+	if headers == nil {
+		return entities, errs
+	}
+
+	index := 0
+	for {
+		row, err := ReadDataRow(csvReader)
+		if err != nil {
+			errs = append(errs, createFileError(fileName, fmt.Sprintf("%v", err.Error())))
+			index++
+			continue
+		}
+		if row == nil {
+			break
+		}
+		if len(row) == 0 {
+			continue
+		}
+
+		var entityCreateErrors []error
+		entity, entityCreateErrors := entityCreator(row, headers, index)
+		if len(entityCreateErrors) > 0 {
+			errs = append(errs, entityCreateErrors...)
+		} else {
+			entities = append(entities, entity)
+		}
+
+		index++
+	}
+
+	return entities, errs
 }

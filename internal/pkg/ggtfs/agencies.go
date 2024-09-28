@@ -14,82 +14,83 @@ type Agency struct {
 	Phone      string // agency_phone
 	FareURL    string // agency_fare_url
 	Email      string // agency_email
-	lineNumber int
+	LineNumber int
 }
 
 var validAgencyHeaders = []string{"agency_id", "agency_name", "agency_url", "agency_timezone",
 	"agency_lang", "agency_phone", "agency_fare_url", "agency_email"}
 
 func LoadAgencies(csvReader *csv.Reader) ([]*Agency, []error) {
-	agencies := make([]*Agency, 0)
-	errs := make([]error, 0)
+	entities, errs := loadEntities(csvReader, validAgencyHeaders, CreateAgency, AgenciesFileName)
 
-	headers, err := ReadHeaderRow(csvReader, validAgencyHeaders)
-	if err != nil {
-		errs = append(errs, createFileError(AgenciesFileName, fmt.Sprintf("read error: %v", err.Error())))
-		return agencies, errs
-	}
-	if headers == nil {
-		return agencies, errs
-	}
-
-	index := 0
-	for {
-		row, err := ReadDataRow(csvReader)
-		if err != nil {
-			errs = append(errs, createFileError(AgenciesFileName, fmt.Sprintf("%v", err.Error())))
-			index++
-			continue
-		}
-
-		if row == nil {
-			break
-		}
-
-		if len(row) == 0 {
-			continue
-		}
-
-		agency := Agency{
-			lineNumber: index,
-			Id:         getRowValue(row, headers, "agency_id", errs, index, AgenciesFileName),
-			Name:       getRowValue(row, headers, "agency_name", errs, index, AgenciesFileName),
-			Url:        getRowValue(row, headers, "agency_url", errs, index, AgenciesFileName),
-			Timezone:   getRowValue(row, headers, "agency_timezone", errs, index, AgenciesFileName),
-			Lang:       getRowValue(row, headers, "agency_lang", errs, index, AgenciesFileName),
-			Phone:      getRowValue(row, headers, "agency_phone", errs, index, AgenciesFileName),
-			FareURL:    getRowValue(row, headers, "agency_fare_url", errs, index, AgenciesFileName),
-			Email:      getRowValue(row, headers, "agency_email", errs, index, AgenciesFileName),
-		}
-
-		if agency.Url == "" {
-			errs = append(errs, createFileRowError(AgenciesFileName, agency.lineNumber, "agency_url must be specified"))
-		}
-
-		if agency.Timezone == "" {
-			errs = append(errs, createFileRowError(AgenciesFileName, agency.lineNumber, "agency_timezone must be specified"))
-		}
-
-		agencies = append(agencies, &agency)
-		index++
-	}
-
-	if len(agencies) > 1 {
-		usedIds := make([]string, 0)
-
-		for _, a := range agencies {
-			if a.Id == "" {
-				errs = append(errs, createFileRowError(AgenciesFileName, a.lineNumber, "agency id must be specified when multiple agencies are declared"))
-				continue
-			}
-
-			if StringArrayContainsItem(usedIds, a.Id) {
-				errs = append(errs, createFileRowError(AgenciesFileName, index, fmt.Sprintf("%s: agency_id", nonUniqueId)))
-			} else {
-				usedIds = append(usedIds, a.Id)
-			}
+	agencies := make([]*Agency, 0, len(entities))
+	for _, entity := range entities {
+		if agency, ok := entity.(*Agency); ok {
+			agencies = append(agencies, agency)
 		}
 	}
 
 	return agencies, errs
+}
+
+func CreateAgency(row []string, headers map[string]uint8, lineNumber int) (interface{}, []error) {
+	var validationErrors []error
+
+	agency := Agency{
+		LineNumber: lineNumber,
+		Id:         getRowValue(row, headers, "agency_id", validationErrors, lineNumber, AgenciesFileName),
+		Name:       getRowValue(row, headers, "agency_name", validationErrors, lineNumber, AgenciesFileName),
+		Url:        getRowValue(row, headers, "agency_url", validationErrors, lineNumber, AgenciesFileName),
+		Timezone:   getRowValue(row, headers, "agency_timezone", validationErrors, lineNumber, AgenciesFileName),
+		Lang:       getRowValue(row, headers, "agency_lang", validationErrors, lineNumber, AgenciesFileName),
+		Phone:      getRowValue(row, headers, "agency_phone", validationErrors, lineNumber, AgenciesFileName),
+		FareURL:    getRowValue(row, headers, "agency_fare_url", validationErrors, lineNumber, AgenciesFileName),
+		Email:      getRowValue(row, headers, "agency_email", validationErrors, lineNumber, AgenciesFileName),
+	}
+
+	if len(validationErrors) > 0 {
+		return &agency, validationErrors
+	}
+	return &agency, nil
+}
+
+func ValidateAgencies(agencies []*Agency) []error {
+	var validationErrors []error
+
+	for _, agency := range agencies {
+		if agency == nil {
+			continue
+		}
+
+		if agency.Url == "" {
+			validationErrors = append(validationErrors, createFileRowError(AgenciesFileName, agency.LineNumber, "agency_url must be specified"))
+		}
+
+		if agency.Timezone == "" {
+			validationErrors = append(validationErrors, createFileRowError(AgenciesFileName, agency.LineNumber, "agency_timezone must be specified"))
+		}
+	}
+
+	if len(agencies) > 1 {
+		usedIds := make(map[string]bool)
+
+		for _, a := range agencies {
+			if a == nil {
+				continue
+			}
+
+			if a.Id == "" {
+				validationErrors = append(validationErrors, createFileRowError(AgenciesFileName, a.LineNumber, "agency_id must be specified when multiple agencies are declared"))
+				continue
+			}
+
+			if usedIds[a.Id] {
+				validationErrors = append(validationErrors, createFileRowError(AgenciesFileName, a.LineNumber, fmt.Sprintf("agency_id is not unique within the file")))
+			} else {
+				usedIds[a.Id] = true
+			}
+		}
+	}
+
+	return validationErrors
 }

@@ -316,8 +316,8 @@ func TestValidateRoutes(t *testing.T) {
 				{AgencyId: agencyId1, lineNumber: 0},
 			},
 			agencies: []*Agency{
-				{Id: agencyId1, lineNumber: 0},
-				{Id: agencyId2, lineNumber: 1},
+				{Id: agencyId1, LineNumber: 0},
+				{Id: agencyId2, LineNumber: 1},
 			},
 			expectedErrors: []string{},
 		},
@@ -330,8 +330,8 @@ func TestValidateRoutes(t *testing.T) {
 				nil,
 			},
 			agencies: []*Agency{
-				{Id: agencyId2, lineNumber: 0},
-				{Id: agencyId3, lineNumber: 1},
+				{Id: agencyId2, LineNumber: 0},
+				{Id: agencyId3, LineNumber: 1},
 			},
 			expectedErrors: []string{},
 		},
@@ -340,8 +340,8 @@ func TestValidateRoutes(t *testing.T) {
 				{AgencyId: agencyId1, lineNumber: 0},
 			},
 			agencies: []*Agency{
-				{Id: agencyId2, lineNumber: 0},
-				{Id: agencyId3, lineNumber: 1},
+				{Id: agencyId2, LineNumber: 0},
+				{Id: agencyId3, LineNumber: 1},
 			},
 			expectedErrors: []string{
 				"routes.txt:0: referenced agency_id not found in agency.txt",
@@ -367,7 +367,7 @@ func TestValidateRoutes(t *testing.T) {
 }
 
 func routesMatch(r1 Route, r2 Route) bool {
-	// GTFS spec says that Id and type are the only absolutely mandatory field, therefore it is not a pointer (and cannot be nil)
+	// GTFS spec says that the id and type are the only absolutely mandatory field, therefore it is not a pointer (and cannot be nil)
 	return r1.Id == r2.Id &&
 		((r1.AgencyId == "" && r2.AgencyId == "") || r1.AgencyId == r2.AgencyId) &&
 		((r1.ShortName != nil && r2.ShortName != nil) || (r1.LongName != nil && r2.LongName != nil)) && // either short_name or long_name must not be nil
