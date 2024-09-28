@@ -6,14 +6,14 @@ import (
 )
 
 type Agency struct {
-	Id         string // agency_id
-	Name       string // agency_name
-	Url        string // agency_url
-	Timezone   string // agency_timezone
-	Lang       string // agency_lang
-	Phone      string // agency_phone
-	FareURL    string // agency_fare_url
-	Email      string // agency_email
+	Id         string  // agency_id
+	Name       string  // agency_name
+	Url        string  // agency_url
+	Timezone   string  // agency_timezone
+	Lang       *string // agency_lang
+	Phone      *string // agency_phone
+	FareURL    *string // agency_fare_url
+	Email      *string // agency_email
 	LineNumber int
 }
 
@@ -38,14 +38,27 @@ func CreateAgency(row []string, headers map[string]uint8, lineNumber int) (inter
 
 	agency := Agency{
 		LineNumber: lineNumber,
-		Id:         getRowValue(row, headers, "agency_id", validationErrors, lineNumber, AgenciesFileName),
-		Name:       getRowValue(row, headers, "agency_name", validationErrors, lineNumber, AgenciesFileName),
-		Url:        getRowValue(row, headers, "agency_url", validationErrors, lineNumber, AgenciesFileName),
-		Timezone:   getRowValue(row, headers, "agency_timezone", validationErrors, lineNumber, AgenciesFileName),
-		Lang:       getRowValue(row, headers, "agency_lang", validationErrors, lineNumber, AgenciesFileName),
-		Phone:      getRowValue(row, headers, "agency_phone", validationErrors, lineNumber, AgenciesFileName),
-		FareURL:    getRowValue(row, headers, "agency_fare_url", validationErrors, lineNumber, AgenciesFileName),
-		Email:      getRowValue(row, headers, "agency_email", validationErrors, lineNumber, AgenciesFileName),
+	}
+
+	for hName, hPos := range headers {
+		switch hName {
+		case "agency_id":
+			agency.Id = getField(row, hName, hPos, &validationErrors, lineNumber, AgenciesFileName)
+		case "agency_name":
+			agency.Name = getField(row, hName, hPos, &validationErrors, lineNumber, AgenciesFileName)
+		case "agency_url":
+			agency.Url = getField(row, hName, hPos, &validationErrors, lineNumber, AgenciesFileName)
+		case "agency_timezone":
+			agency.Timezone = getField(row, hName, hPos, &validationErrors, lineNumber, AgenciesFileName)
+		case "agency_lang":
+			agency.Lang = getOptionalField(row, hName, hPos, &validationErrors, lineNumber, AgenciesFileName)
+		case "agency_phone":
+			agency.Phone = getOptionalField(row, hName, hPos, &validationErrors, lineNumber, AgenciesFileName)
+		case "agency_fare_url":
+			agency.FareURL = getOptionalField(row, hName, hPos, &validationErrors, lineNumber, AgenciesFileName)
+		case "agency_email":
+			agency.Email = getOptionalField(row, hName, hPos, &validationErrors, lineNumber, AgenciesFileName)
+		}
 	}
 
 	if len(validationErrors) > 0 {
