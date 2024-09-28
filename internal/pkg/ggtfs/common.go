@@ -185,22 +185,22 @@ func handleURLField(str string, fileName string, fieldName string, index int, er
 	return &str
 }
 
-func getRowValue(row []string, headers map[string]uint8, header string, errs []error, rowIndex int, fileName string) string {
-	headerPosition, ok := headers[header]
-
-	if !ok {
-		// Requested header not specified in the CSV file, return empty string
-		errs = append(errs, createFileRowError(fileName, rowIndex, fmt.Sprintf("invalid header: %s", header)))
-		return ""
-	}
-
+func getField(row []string, headerName string, headerPosition uint8, errs *[]error, rowIndex int, fileName string) string {
 	if len(row) <= int(headerPosition) {
 		// Requested header is found but the row does not have enough columns, return empty string
-		errs = append(errs, createFileRowError(fileName, rowIndex, fmt.Sprintf("missing required field: %s", header)))
+		*errs = append(*errs, createFileRowError(fileName, rowIndex, fmt.Sprintf("missing required field: %s", headerName)))
 		return ""
 	}
 
 	return row[headerPosition]
+}
+
+func getOptionalField(row []string, headerName string, headerPosition uint8, errs *[]error, lineNumber int, fileName string) *string {
+	value := getField(row, headerName, headerPosition, errs, lineNumber, fileName)
+	if value != "" {
+		return &value
+	}
+	return nil
 }
 
 type entityCreator func(row []string, headers map[string]uint8, lineNumber int) (interface{}, []error)
