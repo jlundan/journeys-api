@@ -188,3 +188,7 @@ func runGenericGTFSParseTest(t *testing.T, testName string, loadFunc LoadFunctio
 		})
 	}
 }
+
+func stringPtr(s string) *string {
+	return &s
+}

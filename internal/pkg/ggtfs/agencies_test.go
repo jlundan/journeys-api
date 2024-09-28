@@ -128,10 +128,10 @@ func getParsingOKTestcases() map[string]ggtfsTestCase {
 		Name:     "ACME",
 		Url:      "https://acme.inc",
 		Timezone: "Europe/Helsinki",
-		Lang:     "fi",
-		Phone:    "+358123456",
-		FareURL:  "https://acme.inc/fares",
-		Email:    "acme@acme.inc",
+		Lang:     stringPtr("fi"),
+		Phone:    stringPtr("+358123456"),
+		FareURL:  stringPtr("https://acme.inc/fares"),
+		Email:    stringPtr("acme@acme.inc"),
 	}
 
 	expected2 := Agency{
@@ -139,10 +139,10 @@ func getParsingOKTestcases() map[string]ggtfsTestCase {
 		Name:     "FOO",
 		Url:      "https://foo.com",
 		Timezone: "Europe/Helsinki",
-		Lang:     "",
-		Phone:    "",
-		FareURL:  "",
-		Email:    "",
+		Lang:     nil,
+		Phone:    nil,
+		FareURL:  nil,
+		Email:    nil,
 	}
 
 	testCases := make(map[string]ggtfsTestCase)
