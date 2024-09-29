@@ -11,6 +11,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type Journeys struct {
@@ -286,11 +287,22 @@ func buildCalendarMap(g GTFSContext) map[string]calendarFileRow {
 
 func buildCalendarDatesMap(g GTFSContext) map[string][]*model.DayTypeException {
 	result := make(map[string][]*model.DayTypeException)
+
 	for _, calendarDate := range g.CalendarDates {
+		var date string
+
+		parsedTime, err := time.Parse("20060102", calendarDate.Date)
+		if err != nil {
+			fmt.Println("Error parsing date:", err)
+			date = calendarDate.Date
+		} else {
+			date = parsedTime.Format("2006-01-02")
+		}
+
 		result[calendarDate.ServiceId] = append(result[calendarDate.ServiceId], &model.DayTypeException{
-			From: calendarDate.Date.Format("2006-01-02"),
-			To:   calendarDate.Date.Format("2006-01-02"),
-			Runs: calendarDate.ExceptionType == 1,
+			From: date,
+			To:   date,
+			Runs: calendarDate.ExceptionType == "1",
 		})
 	}
 
