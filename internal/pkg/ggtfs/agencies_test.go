@@ -38,11 +38,11 @@ func TestAgencyParsing(t *testing.T) {
 		return ValidateAgencies(agencies)
 	}
 
-	runGenericGTFSParseTest(t, "NOK", loadAgenciesFunc, validateAgenciesFunc, false, getParsingNOKTestcases())
-	runGenericGTFSParseTest(t, "OK", loadAgenciesFunc, validateAgenciesFunc, false, getParsingOKTestcases())
+	runGenericGTFSParseTest(t, "NOK", loadAgenciesFunc, validateAgenciesFunc, false, getAgencyNOKTestcases())
+	runGenericGTFSParseTest(t, "OK", loadAgenciesFunc, validateAgenciesFunc, false, getAgencyOKTestcases())
 }
 
-func getParsingNOKTestcases() map[string]ggtfsTestCase {
+func getAgencyNOKTestcases() map[string]ggtfsTestCase {
 	testCases := make(map[string]ggtfsTestCase)
 	testCases["1"] = ggtfsTestCase{
 		csvRows: [][]string{
@@ -122,7 +122,7 @@ func getParsingNOKTestcases() map[string]ggtfsTestCase {
 	return testCases
 }
 
-func getParsingOKTestcases() map[string]ggtfsTestCase {
+func getAgencyOKTestcases() map[string]ggtfsTestCase {
 	expected1 := Agency{
 		Id:       "1",
 		Name:     "ACME",
