@@ -9,7 +9,6 @@ import (
 	"github.com/jlundan/journeys-api/internal/pkg/ggtfs"
 	"github.com/jlundan/journeys-api/internal/pkg/utils"
 	"sort"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -175,8 +174,8 @@ func buildJourneys(g GTFSContext, lines Lines, routes Routes, stopPoints StopPoi
 		journey := model.Journey{
 			Id:                   trip.Id,
 			HeadSign:             *trip.HeadSign,
-			Direction:            strconv.Itoa(*trip.DirectionId),
-			WheelchairAccessible: *trip.WheelchairAccessible == 1,
+			Direction:            *trip.DirectionId,
+			WheelchairAccessible: *trip.WheelchairAccessible == "1",
 			GtfsInfo: &model.JourneyGtfsInfo{
 				TripId: trip.Id,
 			},
