@@ -150,8 +150,8 @@ func TestValidateCalendarDates(t *testing.T) {
 				{ServiceId: "1000", LineNumber: 0},
 			},
 			calendarItems: []*CalendarItem{
-				{ServiceId: "1000", lineNumber: 0},
-				{ServiceId: "1001", lineNumber: 1},
+				{ServiceId: "1000", LineNumber: 0},
+				{ServiceId: "1001", LineNumber: 1},
 			},
 			expectedErrors: []string{},
 		},
@@ -162,8 +162,8 @@ func TestValidateCalendarDates(t *testing.T) {
 		{
 			calendarDates: []*CalendarDate{nil},
 			calendarItems: []*CalendarItem{
-				{ServiceId: "1002", lineNumber: 0},
-				{ServiceId: "1001", lineNumber: 1},
+				{ServiceId: "1002", LineNumber: 0},
+				{ServiceId: "1001", LineNumber: 1},
 			},
 			expectedErrors: []string{},
 		},
@@ -181,8 +181,8 @@ func TestValidateCalendarDates(t *testing.T) {
 				{ServiceId: "1000", LineNumber: 0},
 			},
 			calendarItems: []*CalendarItem{
-				{ServiceId: "1002", lineNumber: 0},
-				{ServiceId: "1001", lineNumber: 1},
+				{ServiceId: "1002", LineNumber: 0},
+				{ServiceId: "1001", LineNumber: 1},
 			},
 			expectedErrors: []string{
 				"calendar_dates.txt:0: referenced service_id not found in calendar.txt",
