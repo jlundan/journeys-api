@@ -160,7 +160,10 @@ func runGenericGTFSParseTest(t *testing.T, testName string, loadFunc LoadFunctio
 				for _, e := range result.Errors {
 					t.Logf("Actual error: %s", e.Error())
 				}
-				t.Logf("Expected errors: %v", tc.expectedErrors)
+
+				for _, e := range tc.expectedErrors {
+					t.Logf("Expected error: %s", e)
+				}
 				return
 			}
 
