@@ -38,8 +38,8 @@ func TestAgencyParsing(t *testing.T) {
 		return ValidateAgencies(agencies)
 	}
 
-	runGenericGTFSParseTest(t, "NOK", loadAgenciesFunc, validateAgenciesFunc, false, getAgencyNOKTestcases())
-	runGenericGTFSParseTest(t, "OK", loadAgenciesFunc, validateAgenciesFunc, false, getAgencyOKTestcases())
+	runGenericGTFSParseTest(t, "AgencyNOKTestcases", loadAgenciesFunc, validateAgenciesFunc, false, getAgencyNOKTestcases())
+	runGenericGTFSParseTest(t, "AgencyOKTestcases", loadAgenciesFunc, validateAgenciesFunc, false, getAgencyOKTestcases())
 }
 
 func getAgencyNOKTestcases() map[string]ggtfsTestCase {
