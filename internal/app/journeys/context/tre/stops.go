@@ -6,6 +6,7 @@ import (
 	"github.com/jlundan/journeys-api/internal/app/journeys/model"
 	"math"
 	"sort"
+	"strconv"
 )
 
 type StopPoints struct {
@@ -31,14 +32,24 @@ func buildStopPoints(g GTFSContext, municipalities Municipalities) StopPoints {
 
 	for _, stop := range g.Stops {
 
-		lat := math.Round(*stop.Lat*100000) / 100000
-		lon := math.Round(*stop.Lon*100000) / 100000
+		// FIXME: Nil-checks
+		lat, err := strconv.ParseFloat(*stop.Lat, 64)
+		if err != nil {
+			fmt.Println(fmt.Sprintf("Error parsing shape.PtLat: %v, line: %v", *stop.Lat, stop.LineNumber))
+		}
+		lon, err := strconv.ParseFloat(*stop.Lon, 64)
+		if err != nil {
+			fmt.Println(fmt.Sprintf("Error parsing shape.PtLon: %v, line: %v", *stop.Lon, stop.LineNumber))
+		}
+
+		lat2 := math.Round(lat*100000) / 100000
+		lon2 := math.Round(lon*100000) / 100000
 
 		s := model.StopPoint{
 			Name:       *stop.Name,
 			ShortName:  *stop.Code,
-			Latitude:   lat,
-			Longitude:  lon,
+			Latitude:   lat2,
+			Longitude:  lon2,
 			TariffZone: *stop.ZoneId,
 		}
 
