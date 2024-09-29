@@ -4,13 +4,11 @@ package ggtfs
 
 import (
 	"encoding/csv"
-	"strconv"
 	"strings"
 	"testing"
-	"time"
 )
 
-func TestShouldReturnEmptyCalendarDateArrayOnEmptyString(t *testing.T) {
+func TestShouldReturnEmptyCalendarItemArrayOnEmptyString(t *testing.T) {
 	agencies, errors := LoadCalendarItems(csv.NewReader(strings.NewReader("")))
 	if len(errors) > 0 {
 		t.Error(errors)
@@ -40,8 +38,8 @@ func TestCalendarItemParsing(t *testing.T) {
 		return ValidateCalendarItems(calendarItems)
 	}
 
-	runGenericGTFSParseTest(t, "NOK", loadCalendarItemsFunc, validateCalendarItemsFunc, false, getCalendarItemNOKTestcases())
-	runGenericGTFSParseTest(t, "OK", loadCalendarItemsFunc, validateCalendarItemsFunc, false, getCalendarItemOKTestcases())
+	runGenericGTFSParseTest(t, "CalendarItemNOKTestcases", loadCalendarItemsFunc, validateCalendarItemsFunc, false, getCalendarItemNOKTestcases())
+	runGenericGTFSParseTest(t, "CalendarItemOKTestcases", loadCalendarItemsFunc, validateCalendarItemsFunc, false, getCalendarItemOKTestcases())
 }
 
 func getCalendarItemNOKTestcases() map[string]ggtfsTestCase {
@@ -133,24 +131,24 @@ func getCalendarItemOKTestcases() map[string]ggtfsTestCase {
 	return testCases
 }
 
-func parseDate(str string, fillEnd bool) (time.Time, error) {
-	year, err := strconv.ParseInt(str[:4], 10, 64)
-	if err != nil {
-		return time.Time{}, err
-	}
-
-	month, err := strconv.ParseInt(str[4:6], 10, 64)
-	if err != nil {
-		return time.Time{}, err
-	}
-
-	day, err := strconv.ParseInt(str[6:8], 10, 64)
-	if err != nil {
-		return time.Time{}, err
-	}
-
-	if fillEnd {
-		return time.Date(int(year), time.Month(int(month)), int(day), 23, 59, 59, 0, time.FixedZone("UTC+2", 2*60*60)), nil
-	}
-	return time.Date(int(year), time.Month(int(month)), int(day), 0, 0, 0, 0, time.FixedZone("UTC+2", 2*60*60)), nil
-}
+//func parseDate(str string, fillEnd bool) (time.Time, error) {
+//	year, err := strconv.ParseInt(str[:4], 10, 64)
+//	if err != nil {
+//		return time.Time{}, err
+//	}
+//
+//	month, err := strconv.ParseInt(str[4:6], 10, 64)
+//	if err != nil {
+//		return time.Time{}, err
+//	}
+//
+//	day, err := strconv.ParseInt(str[6:8], 10, 64)
+//	if err != nil {
+//		return time.Time{}, err
+//	}
+//
+//	if fillEnd {
+//		return time.Date(int(year), time.Month(int(month)), int(day), 23, 59, 59, 0, time.FixedZone("UTC+2", 2*60*60)), nil
+//	}
+//	return time.Date(int(year), time.Month(int(month)), int(day), 0, 0, 0, 0, time.FixedZone("UTC+2", 2*60*60)), nil
+//}
