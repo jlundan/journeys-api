@@ -42,7 +42,7 @@ func Validate(ctx *GTFSContext) []error {
 		warnings = append(warnings, routeWarnings...)
 	}
 
-	stopTimeWarnings := ggtfs.ValidateStoptimes(ctx.StopTimes, ctx.Stops)
+	stopTimeWarnings := ggtfs.ValidateStopTimes(ctx.StopTimes, ctx.Stops)
 	if len(stopTimeWarnings) > 0 {
 		warnings = append(warnings, stopTimeWarnings...)
 	}
