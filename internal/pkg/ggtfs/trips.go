@@ -2,131 +2,100 @@ package ggtfs
 
 import (
 	"encoding/csv"
-	"errors"
 	"fmt"
-	"strconv"
 )
 
+// Trip struct with fields as strings and optional fields as string pointers.
 type Trip struct {
-	Id                   string
-	RouteId              string
-	ServiceId            string
-	HeadSign             *string
-	ShortName            *string
-	DirectionId          *int
-	BlockId              *string
-	ShapeId              *string
-	WheelchairAccessible *int
-	BikesAllowed         *int
-	lineNumber           int
+	Id                   string  // trip_id
+	RouteId              string  // route_id
+	ServiceId            string  // service_id
+	HeadSign             *string // trip_headsign (optional)
+	ShortName            *string // trip_short_name (optional)
+	DirectionId          *string // direction_id (optional)
+	BlockId              *string // block_id (optional)
+	ShapeId              *string // shape_id (optional)
+	WheelchairAccessible *string // wheelchair_accessible (optional)
+	BikesAllowed         *string // bikes_allowed (optional)
+	LineNumber           int     // Line number in the CSV file for error reporting
 }
 
+// ValidTripHeaders defines the headers expected in the trips CSV file.
 var validTripHeaders = []string{"route_id", "service_id", "trip_id", "trip_headsign", "trip_short_name",
 	"direction_id", "block_id", "shape_id", "wheelchair_accessible", "bikes_allowed"}
 
+// LoadTrips loads trips from a CSV reader and returns them along with any errors.
 func LoadTrips(csvReader *csv.Reader) ([]*Trip, []error) {
-	stops := make([]*Trip, 0)
-	errs := make([]error, 0)
+	entities, errs := loadEntities(csvReader, validTripHeaders, CreateTrip, TripsFileName)
 
-	headers, err := ReadHeaderRow(csvReader, validTripHeaders)
-	if err != nil {
-		errs = append(errs, createFileError(TripsFileName, fmt.Sprintf("read error: %v", err.Error())))
-		return stops, errs
-	}
-	if headers == nil {
-		return stops, errs
+	trips := make([]*Trip, 0, len(entities))
+	for _, entity := range entities {
+		if trip, ok := entity.(*Trip); ok {
+			trips = append(trips, trip)
+		}
 	}
 
-	usedIds := make([]string, 0)
-	index := 0
-	for {
-		row, err := ReadDataRow(csvReader)
-		if err != nil {
-			errs = append(errs, createFileError(TripsFileName, fmt.Sprintf("%v", err.Error())))
-			index++
-			continue
-		}
-		if row == nil {
-			break
-		}
-
-		rowErrs := make([]error, 0)
-		trip := Trip{
-			lineNumber: index,
-		}
-
-		var (
-			tripId    *string
-			routeId   *string
-			serviceId *string
-		)
-
-		for name, column := range headers {
-			switch name {
-			case "route_id":
-				routeId = handleIDField(row[column], TripsFileName, name, index, &rowErrs)
-			case "service_id":
-				serviceId = handleIDField(row[column], TripsFileName, name, index, &rowErrs)
-			case "trip_id":
-				tripId = handleIDField(row[column], TripsFileName, name, index, &rowErrs)
-			case "trip_headsign":
-				//trip.HeadSign = handleTextField(row[column], TripsFileName, name, index, &rowErrs)
-				trip.HeadSign = &row[column]
-			case "trip_short_name":
-				trip.ShortName = handleTextField(row[column], TripsFileName, name, index, &rowErrs)
-			case "direction_id":
-				trip.DirectionId = handleDirectionField(row[column], TripsFileName, name, index, &rowErrs)
-			case "block_id":
-				trip.BlockId = handleIDField(row[column], TripsFileName, name, index, &rowErrs)
-			case "shape_id":
-				trip.ShapeId = handleIDField(row[column], TripsFileName, name, index, &rowErrs)
-			case "wheelchair_accessible":
-				trip.WheelchairAccessible = handleWheelchairAccessibleField(row[column], TripsFileName, name, index, &rowErrs)
-			case "bikes_allowed":
-				trip.BikesAllowed = handleBikesAllowedField(row[column], TripsFileName, name, index, &rowErrs)
-			}
-		}
-
-		if tripId == nil {
-			rowErrs = append(rowErrs, createFileRowError(TripsFileName, trip.lineNumber, "trip_id must be specified"))
-		} else {
-			trip.Id = *tripId
-			if StringArrayContainsItem(usedIds, *tripId) {
-				errs = append(errs, createFileRowError(TripsFileName, index, fmt.Sprintf("%s: trip_id", nonUniqueId)))
-			} else {
-				usedIds = append(usedIds, *tripId)
-			}
-		}
-
-		if serviceId == nil {
-			rowErrs = append(rowErrs, createFileRowError(TripsFileName, trip.lineNumber, "service_id must be specified"))
-		} else {
-			trip.ServiceId = *serviceId
-		}
-
-		if routeId == nil {
-			rowErrs = append(rowErrs, createFileRowError(TripsFileName, trip.lineNumber, "route_id must be specified"))
-		} else {
-			trip.RouteId = *routeId
-		}
-
-		if len(rowErrs) > 0 {
-			errs = append(errs, rowErrs...)
-		} else {
-			stops = append(stops, &trip)
-		}
-
-		index++
-	}
-
-	return stops, errs
+	return trips, errs
 }
 
+// CreateTrip creates and validates a Trip instance from the CSV row data.
+func CreateTrip(row []string, headers map[string]uint8, lineNumber int) (interface{}, []error) {
+	var parseErrors []error
+
+	trip := Trip{
+		LineNumber: lineNumber,
+	}
+
+	for hName, hPos := range headers {
+		switch hName {
+		case "trip_id":
+			trip.Id = getField(row, hName, hPos, &parseErrors, lineNumber, TripsFileName)
+		case "route_id":
+			trip.RouteId = getField(row, hName, hPos, &parseErrors, lineNumber, TripsFileName)
+		case "service_id":
+			trip.ServiceId = getField(row, hName, hPos, &parseErrors, lineNumber, TripsFileName)
+		case "trip_headsign":
+			trip.HeadSign = getOptionalField(row, hName, hPos, &parseErrors, lineNumber, TripsFileName)
+		case "trip_short_name":
+			trip.ShortName = getOptionalField(row, hName, hPos, &parseErrors, lineNumber, TripsFileName)
+		case "direction_id":
+			trip.DirectionId = getOptionalField(row, hName, hPos, &parseErrors, lineNumber, TripsFileName)
+		case "block_id":
+			trip.BlockId = getOptionalField(row, hName, hPos, &parseErrors, lineNumber, TripsFileName)
+		case "shape_id":
+			trip.ShapeId = getOptionalField(row, hName, hPos, &parseErrors, lineNumber, TripsFileName)
+		case "wheelchair_accessible":
+			trip.WheelchairAccessible = getOptionalField(row, hName, hPos, &parseErrors, lineNumber, TripsFileName)
+		case "bikes_allowed":
+			trip.BikesAllowed = getOptionalField(row, hName, hPos, &parseErrors, lineNumber, TripsFileName)
+		}
+	}
+
+	if len(parseErrors) > 0 {
+		return &trip, parseErrors
+	}
+	return &trip, nil
+}
+
+// ValidateTrips performs additional validation for a list of Trip instances.
 func ValidateTrips(trips []*Trip, routes []*Route, calendarItems []*CalendarItem, shapes []*Shape) []error {
 	var validationErrors []error
 
 	if trips == nil {
 		return validationErrors
+	}
+
+	for _, trip := range trips {
+		// Additional required field checks for individual Trip.
+		if trip.Id == "" {
+			validationErrors = append(validationErrors, createFileRowError(TripsFileName, trip.LineNumber, "trip_id must be specified"))
+		}
+		if trip.RouteId == "" {
+			validationErrors = append(validationErrors, createFileRowError(TripsFileName, trip.LineNumber, "route_id must be specified"))
+		}
+		if trip.ServiceId == "" {
+			validationErrors = append(validationErrors, createFileRowError(TripsFileName, trip.LineNumber, "service_id must be specified"))
+		}
 	}
 
 	for _, trip := range trips {
@@ -146,7 +115,7 @@ func ValidateTrips(trips []*Trip, routes []*Route, calendarItems []*CalendarItem
 				}
 			}
 			if !routeFound {
-				validationErrors = append(validationErrors, createFileRowError(TripsFileName, trip.lineNumber, fmt.Sprintf("referenced route_id not found in %s", RoutesFileName)))
+				validationErrors = append(validationErrors, createFileRowError(TripsFileName, trip.LineNumber, fmt.Sprintf("referenced route_id not found in %s", RoutesFileName)))
 			}
 		}
 
@@ -162,7 +131,7 @@ func ValidateTrips(trips []*Trip, routes []*Route, calendarItems []*CalendarItem
 				}
 			}
 			if !serviceFound {
-				validationErrors = append(validationErrors, createFileRowError(TripsFileName, trip.lineNumber, fmt.Sprintf("referenced service_id not found in %s", CalendarFileName)))
+				validationErrors = append(validationErrors, createFileRowError(TripsFileName, trip.LineNumber, fmt.Sprintf("referenced service_id not found in %s", CalendarFileName)))
 			}
 		}
 
@@ -179,56 +148,11 @@ func ValidateTrips(trips []*Trip, routes []*Route, calendarItems []*CalendarItem
 					}
 				}
 				if !shapeFound {
-					validationErrors = append(validationErrors, createFileRowError(TripsFileName, trip.lineNumber, fmt.Sprintf("referenced shape_id not found in %s", ShapesFileName)))
+					validationErrors = append(validationErrors, createFileRowError(TripsFileName, trip.LineNumber, fmt.Sprintf("referenced shape_id not found in %s", ShapesFileName)))
 				}
 			}
 		}
 	}
 
 	return validationErrors
-}
-
-func handleDirectionField(str string, fileName string, fieldName string, index int, errs *[]error) *int {
-	n, err := strconv.ParseInt(str, 10, 64)
-	if err != nil {
-		*errs = append(*errs, createFieldError(fileName, fieldName, index, err))
-		return nil
-	}
-
-	if v := int(n); v <= 1 {
-		return &v
-	} else {
-		*errs = append(*errs, createFieldError(fileName, fieldName, index, errors.New(invalidValue)))
-		return nil
-	}
-}
-
-func handleWheelchairAccessibleField(str string, fileName string, fieldName string, index int, errs *[]error) *int {
-	n, err := strconv.ParseInt(str, 10, 64)
-	if err != nil {
-		*errs = append(*errs, createFieldError(fileName, fieldName, index, err))
-		return nil
-	}
-
-	if v := int(n); v <= 2 {
-		return &v
-	} else {
-		*errs = append(*errs, createFieldError(fileName, fieldName, index, errors.New(invalidValue)))
-		return nil
-	}
-}
-
-func handleBikesAllowedField(str string, fileName string, fieldName string, index int, errs *[]error) *int {
-	n, err := strconv.ParseInt(str, 10, 64)
-	if err != nil {
-		*errs = append(*errs, createFieldError(fileName, fieldName, index, err))
-		return nil
-	}
-
-	if v := int(n); v <= 2 {
-		return &v
-	} else {
-		*errs = append(*errs, createFieldError(fileName, fieldName, index, errors.New(invalidValue)))
-		return nil
-	}
 }
