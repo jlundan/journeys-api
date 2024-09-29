@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/jlundan/journeys-api/internal/app/journeys/model"
 	"sort"
+	"strconv"
 )
 
 type Routes struct {
@@ -31,7 +32,16 @@ func buildRoutes(g GTFSContext) Routes {
 		if _, ok := shapeIdToCoords[shape.Id]; !ok {
 			shapeIdToCoords[shape.Id] = make([][]float64, 0)
 		}
-		shapeIdToCoords[shape.Id] = append(shapeIdToCoords[shape.Id], []float64{shape.PtLat, shape.PtLon})
+		lat, err := strconv.ParseFloat(shape.PtLat, 64)
+		if err != nil {
+			fmt.Println(fmt.Sprintf("Error parsing shape.PtLat: %v, line: %v", shape.PtLat, shape.LineNumber))
+		}
+		lon, err := strconv.ParseFloat(shape.PtLon, 64)
+		if err != nil {
+			fmt.Println(fmt.Sprintf("Error parsing shape.PtLon: %v, line: %v", shape.PtLon, shape.LineNumber))
+		}
+
+		shapeIdToCoords[shape.Id] = append(shapeIdToCoords[shape.Id], []float64{lat, lon})
 	}
 
 	for shapeId, coords := range shapeIdToCoords {
