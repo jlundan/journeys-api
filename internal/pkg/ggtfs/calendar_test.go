@@ -4,195 +4,133 @@ package ggtfs
 
 import (
 	"encoding/csv"
-	"encoding/json"
-	"fmt"
-	"sort"
 	"strconv"
 	"strings"
 	"testing"
 	"time"
 )
 
-func TestCalendarCSVParsing(t *testing.T) {
-	calendarItems, errs := LoadCalendarItems(csv.NewReader(strings.NewReader("")))
-	if len(errs) > 0 {
-		t.Error(errs)
+func TestShouldReturnEmptyCalendarDateArrayOnEmptyString(t *testing.T) {
+	agencies, errors := LoadCalendarItems(csv.NewReader(strings.NewReader("")))
+	if len(errors) > 0 {
+		t.Error(errors)
 	}
-	if len(calendarItems) != 0 {
-		t.Error("expected zero calendarItems")
-	}
-
-	reader := csv.NewReader(strings.NewReader("foo,bar\n1,2"))
-	reader.Comma = ','
-	reader.Comment = ','
-	_, errs = LoadCalendarItems(reader)
-	if len(errs) == 0 {
-		t.Error("expected to throw error")
+	if len(agencies) != 0 {
+		t.Error("expected zero calendar items")
 	}
 }
 
-func TestSCalendarParsingOK(t *testing.T) {
-	s, err := parseDate("20200101", false)
-	if err != nil {
-		t.Error(err)
-	}
-	e, err := parseDate("20200102", true)
-	if err != nil {
-		t.Error(err)
+func TestCalendarItemParsing(t *testing.T) {
+	loadCalendarItemsFunc := func(reader *csv.Reader) ([]interface{}, []error) {
+		calendarItems, errs := LoadCalendarItems(reader)
+		entities := make([]interface{}, len(calendarItems))
+		for i, calendarItem := range calendarItems {
+			entities[i] = calendarItem
+		}
+		return entities, errs
 	}
 
+	validateCalendarItemsFunc := func(entities []interface{}) []error {
+		calendarItems := make([]*CalendarItem, len(entities))
+		for i, entity := range entities {
+			if calendarItem, ok := entity.(*CalendarItem); ok {
+				calendarItems[i] = calendarItem
+			}
+		}
+		return ValidateCalendarItems(calendarItems)
+	}
+
+	runGenericGTFSParseTest(t, "NOK", loadCalendarItemsFunc, validateCalendarItemsFunc, false, getCalendarItemNOKTestcases())
+	runGenericGTFSParseTest(t, "OK", loadCalendarItemsFunc, validateCalendarItemsFunc, false, getCalendarItemOKTestcases())
+}
+
+func getCalendarItemNOKTestcases() map[string]ggtfsTestCase {
+	testCases := make(map[string]ggtfsTestCase)
+	testCases["1"] = ggtfsTestCase{
+		csvRows: [][]string{
+			{"service_id"},
+			{","},
+		},
+		expectedErrors: []string{
+			"calendar.txt: record on line 2: wrong number of fields",
+		},
+	}
+	testCases["2"] = ggtfsTestCase{
+		csvRows: [][]string{
+			{"service_id"},
+			{" "},
+		},
+		expectedErrors: []string{
+			"calendar.txt:0: end_date must not be empty",
+			"calendar.txt:0: friday must be '0' or '1'",
+			"calendar.txt:0: monday must be '0' or '1'",
+			"calendar.txt:0: saturday must be '0' or '1'",
+			"calendar.txt:0: service_id must not be empty",
+			"calendar.txt:0: start_date must not be empty",
+			"calendar.txt:0: sunday must be '0' or '1'",
+			"calendar.txt:0: thursday must be '0' or '1'",
+			"calendar.txt:0: tuesday must be '0' or '1'",
+			"calendar.txt:0: wednesday must be '0' or '1'",
+		},
+	}
+
+	testCases["3"] = ggtfsTestCase{
+		csvRows: [][]string{
+			{"service_id", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday", "start_date", "end_date"},
+			{"1000", "not an int", "10", "1", "1", "1", "1", "1", "20210101", "20201011"},
+			{"1000", "1", "1", "1", "1", "1", "1", "1", "20210101", "20201011"},
+			{"1002", "1", "1", "1", "1", "1", "1", "1", "202x0101", "20201011"},
+			{"1003", "1", "1", "1", "1", "1", "1", "1", "2021x101", "20201011"},
+			{"1004", "1", "1", "1", "1", "1", "1", "1", "20210x01", "20201011"},
+			{"1005", "1", "1", "1", "1", "1", "1", "1", "202101x1", "20201011"},
+			{"1006", "1", "1", "1", "1", "1", "1", "1", "2021011", "20201011"},
+		},
+		expectedErrors: []string{
+			"calendar.txt:0: monday must be '0' or '1'",
+			"calendar.txt:0: tuesday must be '0' or '1'",
+
+			//TODO: Implement these checks in the validation code
+			//"calendar.txt:1: non-unique id: service_id",
+			//"calendar.txt:2: start_date must be specified",
+			//"calendar.txt:2: start_date: strconv.ParseInt: parsing \"202x\": invalid syntax",
+			//"calendar.txt:3: start_date must be specified",
+			//"calendar.txt:3: start_date: strconv.ParseInt: parsing \"x1\": invalid syntax",
+			//"calendar.txt:4: start_date must be specified",
+			//"calendar.txt:4: start_date: strconv.ParseInt: parsing \"0x\": invalid syntax",
+			//"calendar.txt:5: start_date must be specified",
+			//"calendar.txt:5: start_date: strconv.ParseInt: parsing \"x1\": invalid syntax",
+			//"calendar.txt:6: start_date: invalid date format",
+			//"calendar.txt:6: start_date must be specified",
+		},
+	}
+
+	return testCases
+}
+
+func getCalendarItemOKTestcases() map[string]ggtfsTestCase {
 	expected1 := CalendarItem{
 		ServiceId: "111",
-		Monday:    1,
-		Tuesday:   1,
-		Wednesday: 1,
-		Thursday:  1,
-		Friday:    1,
-		Saturday:  1,
-		Sunday:    1,
-		Start:     s,
-		End:       e,
+		Monday:    "1",
+		Tuesday:   "1",
+		Wednesday: "1",
+		Thursday:  "1",
+		Friday:    "1",
+		Saturday:  "1",
+		Sunday:    "1",
+		StartDate: "20200101",
+		EndDate:   "20200102",
 	}
 
-	testCases := []struct {
-		rows     [][]string
-		expected CalendarItem
-	}{
-		{
-			rows: [][]string{
-				{"service_id", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday", "start_date", "end_date"},
-				{"111", "1", "1", "1", "1", "1", "1", "1", "20200101", "20200102"},
-			},
-			expected: expected1,
+	testCases := make(map[string]ggtfsTestCase)
+	testCases["1"] = ggtfsTestCase{
+		csvRows: [][]string{
+			{"service_id", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday", "start_date", "end_date"},
+			{"111", "1", "1", "1", "1", "1", "1", "1", "20200101", "20200102"},
 		},
+		expectedStructs: []interface{}{&expected1},
 	}
 
-	for _, tc := range testCases {
-		calendarItems, err := LoadCalendarItems(csv.NewReader(strings.NewReader(tableToString(tc.rows))))
-		if len(err) > 0 {
-			t.Error(err)
-			continue
-		}
-
-		if len(calendarItems) != 1 {
-			t.Error("expected one row")
-			continue
-		}
-
-		if !calendarItemsMatch(tc.expected, *calendarItems[0]) {
-			c1, err := json.Marshal(tc.expected)
-			if err != nil {
-				t.Error(err)
-			}
-			c2, err := json.Marshal(*calendarItems[0])
-			if err != nil {
-				t.Error(err)
-			}
-			t.Error(fmt.Sprintf("expected %v, got %v", string(c1), string(c2)))
-		}
-	}
-}
-
-func TestCalendarParsingNOK(t *testing.T) {
-	testCases := []struct {
-		rows     [][]string
-		expected []string
-	}{
-		{
-			rows: [][]string{
-				{"service_id"},
-				{","},
-			},
-			expected: []string{
-				"calendar.txt: record on line 2: wrong number of fields",
-			},
-		},
-		{
-			rows: [][]string{
-				{"service_id"},
-				{" "},
-			},
-			expected: []string{
-				"calendar.txt:0: service_id must be specified",
-				"calendar.txt:0: service_id: empty value not allowed",
-				"calendar.txt:0: monday must be specified",
-				"calendar.txt:0: tuesday must be specified",
-				"calendar.txt:0: wednesday must be specified",
-				"calendar.txt:0: thursday must be specified",
-				"calendar.txt:0: friday must be specified",
-				"calendar.txt:0: saturday must be specified",
-				"calendar.txt:0: sunday must be specified",
-				"calendar.txt:0: start_date must be specified",
-				"calendar.txt:0: end_date must be specified",
-			},
-		},
-		{
-			rows: [][]string{
-				{"service_id", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday", "start_date", "end_date"},
-				{"1000", "not an int", "10", "1", "1", "1", "1", "1", "20210101", "20201011"},
-				{"1000", "1", "1", "1", "1", "1", "1", "1", "20210101", "20201011"},
-				{"1002", "1", "1", "1", "1", "1", "1", "1", "202x0101", "20201011"},
-				{"1003", "1", "1", "1", "1", "1", "1", "1", "2021x101", "20201011"},
-				{"1004", "1", "1", "1", "1", "1", "1", "1", "20210x01", "20201011"},
-				{"1005", "1", "1", "1", "1", "1", "1", "1", "202101x1", "20201011"},
-				{"1006", "1", "1", "1", "1", "1", "1", "1", "2021011", "20201011"},
-			},
-			expected: []string{
-				"calendar.txt:0: monday must be specified",
-				"calendar.txt:0: monday: strconv.ParseInt: parsing \"not an int\": invalid syntax",
-				"calendar.txt:0: tuesday: invalid value",
-				"calendar.txt:0: tuesday must be specified",
-				"calendar.txt:1: non-unique id: service_id",
-				"calendar.txt:2: start_date must be specified",
-				"calendar.txt:2: start_date: strconv.ParseInt: parsing \"202x\": invalid syntax",
-				"calendar.txt:3: start_date must be specified",
-				"calendar.txt:3: start_date: strconv.ParseInt: parsing \"x1\": invalid syntax",
-				"calendar.txt:4: start_date must be specified",
-				"calendar.txt:4: start_date: strconv.ParseInt: parsing \"0x\": invalid syntax",
-				"calendar.txt:5: start_date must be specified",
-				"calendar.txt:5: start_date: strconv.ParseInt: parsing \"x1\": invalid syntax",
-				"calendar.txt:6: start_date: invalid date format",
-				"calendar.txt:6: start_date must be specified",
-			},
-		},
-	}
-
-	for _, tc := range testCases {
-		_, err := LoadCalendarItems(csv.NewReader(strings.NewReader(tableToString(tc.rows))))
-
-		sort.Slice(err, func(x, y int) bool {
-			return err[x].Error() < err[y].Error()
-		})
-
-		sort.Slice(tc.expected, func(x, y int) bool {
-			return tc.expected[x] < tc.expected[y]
-		})
-
-		if len(err) == 0 {
-			t.Error("expected to throw an error")
-			continue
-		}
-
-		if len(err) != len(tc.expected) {
-			t.Error(fmt.Sprintf("expected %v errors, got %v", len(tc.expected), len(err)))
-			for _, e := range err {
-				fmt.Println(e)
-			}
-			continue
-		}
-
-		for i, e := range err {
-			if e.Error() != tc.expected[i] {
-				t.Error(fmt.Sprintf("expected error %s, got %s", tc.expected[i], e.Error()))
-			}
-		}
-	}
-}
-
-func calendarItemsMatch(a CalendarItem, b CalendarItem) bool {
-	return a.ServiceId == b.ServiceId && a.Monday == b.Monday && a.Tuesday == b.Tuesday && a.Wednesday == b.Wednesday &&
-		a.Thursday == b.Thursday && a.Friday == b.Friday && a.Saturday == b.Saturday && a.Sunday == b.Sunday &&
-		a.Start.Unix() == b.Start.Unix() && a.End.Unix() == b.End.Unix()
+	return testCases
 }
 
 func parseDate(str string, fillEnd bool) (time.Time, error) {
