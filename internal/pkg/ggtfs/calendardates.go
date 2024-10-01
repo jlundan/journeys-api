@@ -56,8 +56,9 @@ func CreateCalendarDate(row []string, headers map[string]uint8, lineNumber int) 
 }
 
 // ValidateCalendarDates validates the parsed CalendarDate structs for logical consistency.
-func ValidateCalendarDates(calendarDates []*CalendarDate, calendarItems []*CalendarItem) []error {
+func ValidateCalendarDates(calendarDates []*CalendarDate, calendarItems []*CalendarItem) ([]error, []string) {
 	var validationErrors []error
+	var recommendations []string
 
 	// Validate each calendar date
 	for _, date := range calendarDates {
@@ -90,7 +91,7 @@ func ValidateCalendarDates(calendarDates []*CalendarDate, calendarItems []*Calen
 		validateCalendarDateReferences(calendarDates, calendarItems, &validationErrors)
 	}
 
-	return validationErrors
+	return validationErrors, recommendations
 }
 
 // validateCalendarDateReferences checks if the service_id in CalendarDate has a matching entry in CalendarItem.

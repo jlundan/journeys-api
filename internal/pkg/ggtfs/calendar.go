@@ -78,8 +78,9 @@ func CreateCalendarItem(row []string, headers map[string]uint8, lineNumber int) 
 }
 
 // ValidateCalendarItems validates the parsed CalendarItem structs for logical consistency.
-func ValidateCalendarItems(calendarItems []*CalendarItem) []error {
+func ValidateCalendarItems(calendarItems []*CalendarItem) ([]error, []string) {
 	var validationErrors []error
+	var recommendations []string
 
 	for _, item := range calendarItems {
 		if item == nil {
@@ -119,7 +120,7 @@ func ValidateCalendarItems(calendarItems []*CalendarItem) []error {
 		}
 	}
 
-	return validationErrors
+	return validationErrors, recommendations
 }
 
 //package ggtfs

@@ -84,11 +84,12 @@ func CreateRoute(row []string, headers map[string]uint8, lineNumber int) (interf
 }
 
 // ValidateRoutes performs additional validation for a list of Route instances.
-func ValidateRoutes(routes []*Route, agencies []*Agency) []error {
+func ValidateRoutes(routes []*Route, agencies []*Agency) ([]error, []string) {
 	var validationErrors []error
+	var recommendations []string
 
 	if routes == nil {
-		return validationErrors
+		return validationErrors, recommendations
 	}
 
 	for _, route := range routes {
@@ -105,7 +106,7 @@ func ValidateRoutes(routes []*Route, agencies []*Agency) []error {
 	}
 
 	if agencies == nil {
-		return validationErrors
+		return validationErrors, recommendations
 	}
 
 	// Check for valid agency_id references in the routes.
@@ -141,7 +142,7 @@ func ValidateRoutes(routes []*Route, agencies []*Agency) []error {
 		}
 	}
 
-	return validationErrors
+	return validationErrors, recommendations
 }
 
 //package ggtfs

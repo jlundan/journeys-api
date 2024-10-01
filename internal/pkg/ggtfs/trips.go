@@ -78,11 +78,12 @@ func CreateTrip(row []string, headers map[string]uint8, lineNumber int) (interfa
 }
 
 // ValidateTrips performs additional validation for a list of Trip instances.
-func ValidateTrips(trips []*Trip, routes []*Route, calendarItems []*CalendarItem, shapes []*Shape) []error {
+func ValidateTrips(trips []*Trip, routes []*Route, calendarItems []*CalendarItem, shapes []*Shape) ([]error, []string) {
 	var validationErrors []error
+	var recommendations []string
 
 	if trips == nil {
-		return validationErrors
+		return validationErrors, recommendations
 	}
 
 	for _, trip := range trips {
@@ -154,5 +155,5 @@ func ValidateTrips(trips []*Trip, routes []*Route, calendarItems []*CalendarItem
 		}
 	}
 
-	return validationErrors
+	return validationErrors, recommendations
 }
