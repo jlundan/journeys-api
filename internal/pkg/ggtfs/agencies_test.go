@@ -124,21 +124,21 @@ func getAgencyNOKTestcases() map[string]ggtfsTestCase {
 
 func getAgencyOKTestcases() map[string]ggtfsTestCase {
 	expected1 := Agency{
-		Id:       "1",
-		Name:     "ACME",
-		Url:      "https://acme.inc",
-		Timezone: "Europe/Helsinki",
-		Lang:     stringPtr("fi"),
-		Phone:    stringPtr("+358123456"),
-		FareURL:  stringPtr("https://acme.inc/fares"),
-		Email:    stringPtr("acme@acme.inc"),
+		Id:       NewID("1"),
+		Name:     NewText("ACME"),
+		Url:      NewURL("https://acme.inc"),
+		Timezone: NewTimezone("Europe/Helsinki"),
+		Lang:     NewOptionalLanguageCode(stringPtr("fi")),
+		Phone:    NewOptionalPhoneNumber(stringPtr("+358123456")),
+		FareURL:  NewOptionalURL(stringPtr("https://acme.inc/fares")),
+		Email:    NewOptionalEmail(stringPtr("acme@acme.inc")),
 	}
 
 	expected2 := Agency{
-		Id:       "2",
-		Name:     "FOO",
-		Url:      "https://foo.com",
-		Timezone: "Europe/Helsinki",
+		Id:       NewID("2"),
+		Name:     NewText("FOO"),
+		Url:      NewURL("https://foo.com"),
+		Timezone: NewTimezone("Europe/Helsinki"),
 		Lang:     nil,
 		Phone:    nil,
 		FareURL:  nil,

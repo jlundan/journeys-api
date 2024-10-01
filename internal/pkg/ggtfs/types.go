@@ -33,6 +33,10 @@ func (id *ID) IsValid() bool {
 	return id.raw != ""
 }
 
+func NewID(raw string) ID {
+	return ID{base{raw: raw}}
+}
+
 // Color represents a color encoded as a six-digit hexadecimal number.
 type Color struct {
 	base
@@ -55,6 +59,13 @@ func (e *Email) IsValid() bool {
 	return err == nil
 }
 
+func NewOptionalEmail(raw *string) *Email {
+	if raw == nil {
+		return nil
+	}
+	return &Email{base{raw: *raw}}
+}
+
 // URL represents a fully qualified URL.
 type URL struct {
 	base
@@ -64,6 +75,17 @@ type URL struct {
 func (u *URL) IsValid() bool {
 	parsedURL, err := url.ParseRequestURI(u.raw)
 	return err == nil && (parsedURL.Scheme == "http" || parsedURL.Scheme == "https")
+}
+
+func NewURL(raw string) URL {
+	return URL{base{raw: raw}}
+}
+
+func NewOptionalURL(raw *string) *URL {
+	if raw == nil {
+		return nil
+	}
+	return &URL{base{raw: *raw}}
 }
 
 // Time represents a time in HH:MM:SS or H:MM:SS format.
@@ -122,6 +144,13 @@ func (lc *LanguageCode) IsValid() bool {
 	return match
 }
 
+func NewOptionalLanguageCode(raw *string) *LanguageCode {
+	if raw == nil {
+		return nil
+	}
+	return &LanguageCode{base{raw: *raw}}
+}
+
 // Latitude represents a WGS84 latitude in decimal degrees.
 type Latitude struct {
 	base
@@ -156,6 +185,13 @@ func (pn *PhoneNumber) IsValid() bool {
 	return match
 }
 
+func NewOptionalPhoneNumber(raw *string) *PhoneNumber {
+	if raw == nil {
+		return nil
+	}
+	return &PhoneNumber{base{raw: *raw}}
+}
+
 // Text represents a string of UTF-8 characters intended for display.
 type Text struct {
 	base
@@ -164,6 +200,10 @@ type Text struct {
 // IsValid checks if the Text is non-empty.
 func (t *Text) IsValid() bool {
 	return t.raw != ""
+}
+
+func NewText(raw string) Text {
+	return Text{base{raw: raw}}
 }
 
 // Timezone represents a TZ timezone from the IANA timezone database.
@@ -180,4 +220,8 @@ func (tz *Timezone) IsValid() bool {
 		return true
 	}
 	return false
+}
+
+func NewTimezone(raw string) Timezone {
+	return Timezone{base{raw: raw}}
 }
