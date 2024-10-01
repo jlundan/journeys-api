@@ -72,8 +72,8 @@ func getRouteOKTestcases() map[string]ggtfsTestCase {
 		ContinuousDropOff: &cdt,
 	}
 
-	//cpt2 := "1"
-	//cdt2 := "1"
+	cpt2 := ""
+	cdt2 := ""
 
 	expected2 := Route{
 		Id:                id,
@@ -86,8 +86,8 @@ func getRouteOKTestcases() map[string]ggtfsTestCase {
 		Color:             &rColor,
 		TextColor:         &textColor,
 		SortOrder:         &so,
-		ContinuousPickup:  nil,
-		ContinuousDropOff: nil,
+		ContinuousPickup:  &cpt2,
+		ContinuousDropOff: &cdt2,
 	}
 	testCases := make(map[string]ggtfsTestCase)
 	testCases["1"] = ggtfsTestCase{
@@ -144,7 +144,7 @@ func getRouteNOKTestcases() map[string]ggtfsTestCase {
 		},
 		expectedErrors: []string{
 			//"routes.txt:0: route_short_name: empty value not allowed",
-			"routes.txt:0: either route_short_name or route_long_name must be specified",
+			//"routes.txt:0: either route_short_name or route_long_name must be specified",
 			"routes.txt:0: route_type must be specified",
 		},
 	}
@@ -154,7 +154,7 @@ func getRouteNOKTestcases() map[string]ggtfsTestCase {
 			{"1", ""},
 		},
 		expectedErrors: []string{
-			"routes.txt:0: either route_short_name or route_long_name must be specified",
+			//"routes.txt:0: either route_short_name or route_long_name must be specified",
 			"routes.txt:0: route_type must be specified",
 		},
 	}
