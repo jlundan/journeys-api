@@ -55,8 +55,8 @@ func getAgencyNOKTestcases() map[string]ggtfsTestCase {
 	}
 	testCases["2"] = ggtfsTestCase{
 		csvRows: [][]string{
-			{"agency_name"},
-			{" "},
+			{"agency_id", "agency_name"},
+			{"Foo", " "},
 		},
 		expectedErrors: []string{
 			"agency.txt:0: invalid field: agency_name",
@@ -67,37 +67,30 @@ func getAgencyNOKTestcases() map[string]ggtfsTestCase {
 
 	testCases["3"] = ggtfsTestCase{
 		csvRows: [][]string{
-			{"agency_name"},
-			{"1"},
+			{"agency_name", "agency_url", "agency_timezone"},
+			{"", "", ""},
 		},
 		expectedErrors: []string{
-			"agency.txt:0: missing mandatory field: agency_timezone",
-			"agency.txt:0: missing mandatory field: agency_url",
+			"agency.txt:0: invalid field: agency_name",
+			"agency.txt:0: invalid field: agency_url",
+			"agency.txt:0: invalid field: agency_timezone",
 		},
 	}
 
 	testCases["4"] = ggtfsTestCase{
 		csvRows: [][]string{
-			{"agency_name", "agency_url"},
-			{"ACME", ""},
+			{"agency_name", "agency_url", "agency_timezone", "agency_lang", "agency_phone", "agency_fare_url", "agency_email"},
+			{"ACME", "http://acme.inc", "Europe/Helsinki", "", "", "", ""},
 		},
 		expectedErrors: []string{
-			"agency.txt:0: invalid field: agency_url",
-			"agency.txt:0: missing mandatory field: agency_timezone",
+			"agency.txt:0: invalid field: agency_lang",
+			"agency.txt:0: invalid field: agency_phone",
+			"agency.txt:0: invalid field: agency_fare_url",
+			"agency.txt:0: invalid field: agency_email",
 		},
 	}
 
 	testCases["5"] = ggtfsTestCase{
-		csvRows: [][]string{
-			{"agency_name", "agency_url", "agency_timezone"},
-			{"ACME", "http://acme.inc", ""},
-		},
-		expectedErrors: []string{
-			"agency.txt:0: invalid field: agency_timezone",
-		},
-	}
-
-	testCases["6"] = ggtfsTestCase{
 		csvRows: [][]string{
 			{"agency_name", "agency_url", "agency_timezone"},
 			{"ACME", "http://acme.inc", "Europe/Helsinki"},
@@ -109,7 +102,7 @@ func getAgencyNOKTestcases() map[string]ggtfsTestCase {
 		},
 	}
 
-	testCases["7"] = ggtfsTestCase{
+	testCases["6"] = ggtfsTestCase{
 		csvRows: [][]string{
 			{"agency_name", "agency_url", "agency_timezone", "agency_id"},
 			{"ACME", "http://acme.inc", "Europe/Helsinki", "ACME"},
