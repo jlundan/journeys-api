@@ -93,11 +93,12 @@ func CreateStop(row []string, headers map[string]uint8, lineNumber int) (interfa
 }
 
 // ValidateStops performs additional validation for a list of Stop instances.
-func ValidateStops(stops []*Stop) []error {
+func ValidateStops(stops []*Stop) ([]error, []string) {
 	var validationErrors []error
+	var recommendations []string
 
 	if stops == nil {
-		return validationErrors
+		return validationErrors, recommendations
 	}
 
 	for _, stop := range stops {
@@ -132,5 +133,5 @@ func ValidateStops(stops []*Stop) []error {
 		}
 	}
 
-	return validationErrors
+	return validationErrors, recommendations
 }

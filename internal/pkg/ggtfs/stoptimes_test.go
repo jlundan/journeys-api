@@ -28,7 +28,7 @@ func TestStopTimeParsing(t *testing.T) {
 		return entities, errs
 	}
 
-	validateStopTimesFunc := func(entities []interface{}) []error {
+	validateStopTimesFunc := func(entities []interface{}) ([]error, []string) {
 		stopTimes := make([]*StopTime, len(entities))
 		for i, entity := range entities {
 			if stopTime, ok := entity.(*StopTime); ok {

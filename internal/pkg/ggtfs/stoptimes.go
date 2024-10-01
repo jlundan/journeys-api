@@ -85,11 +85,12 @@ func CreateStopTime(row []string, headers map[string]uint8, lineNumber int) (int
 }
 
 // ValidateStopTimes performs additional validation for a list of StopTime instances.
-func ValidateStopTimes(stopTimes []*StopTime, stops []*Stop) []error {
+func ValidateStopTimes(stopTimes []*StopTime, stops []*Stop) ([]error, []string) {
 	var validationErrors []error
+	var recommendations []string
 
 	if stopTimes == nil {
-		return validationErrors
+		return validationErrors, recommendations
 	}
 
 	for _, stopTime := range stopTimes {
@@ -149,5 +150,5 @@ func ValidateStopTimes(stopTimes []*StopTime, stops []*Stop) []error {
 		}
 	}
 
-	return validationErrors
+	return validationErrors, recommendations
 }

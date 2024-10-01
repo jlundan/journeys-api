@@ -62,11 +62,12 @@ func CreateShape(row []string, headers map[string]uint8, lineNumber int) (interf
 }
 
 // ValidateShapes performs additional validation for a list of Shape instances.
-func ValidateShapes(shapes []*Shape) []error {
+func ValidateShapes(shapes []*Shape) ([]error, []string) {
 	var validationErrors []error
+	var recommendations []string
 
 	if shapes == nil {
-		return validationErrors
+		return validationErrors, recommendations
 	}
 
 	for _, shape := range shapes {
@@ -100,7 +101,7 @@ func ValidateShapes(shapes []*Shape) []error {
 		}
 	}
 
-	return validationErrors
+	return validationErrors, recommendations
 }
 
 //package ggtfs

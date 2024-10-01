@@ -19,35 +19,31 @@ type GTFSContext struct {
 	Shapes        []*ggtfs.Shape
 }
 
-func Validate(ctx *GTFSContext) []error {
+func Validate(ctx *GTFSContext) ([]error, []string) {
 	var warnings []error
+	var recommendations []string
 
-	tripWarnings := ggtfs.ValidateTrips(ctx.Trips, ctx.Routes, ctx.CalendarItems, ctx.Shapes)
-	if len(tripWarnings) > 0 {
-		warnings = append(warnings, tripWarnings...)
-	}
+	tripWarnings, tripRecommendations := ggtfs.ValidateTrips(ctx.Trips, ctx.Routes, ctx.CalendarItems, ctx.Shapes)
+	warnings = append(warnings, tripWarnings...)
+	recommendations = append(recommendations, tripRecommendations...)
 
-	shapeWarnings := ggtfs.ValidateShapes(ctx.Shapes)
-	if len(shapeWarnings) > 0 {
-		warnings = append(warnings, shapeWarnings...)
-	}
+	shapeWarnings, shapeRecommendations := ggtfs.ValidateShapes(ctx.Shapes)
+	warnings = append(warnings, shapeWarnings...)
+	recommendations = append(recommendations, shapeRecommendations...)
 
-	calendarDateWarnings := ggtfs.ValidateCalendarDates(ctx.CalendarDates, ctx.CalendarItems)
-	if len(calendarDateWarnings) > 0 {
-		warnings = append(warnings, calendarDateWarnings...)
-	}
+	calendarDateWarnings, calendarDateRecommendations := ggtfs.ValidateCalendarDates(ctx.CalendarDates, ctx.CalendarItems)
+	warnings = append(warnings, calendarDateWarnings...)
+	recommendations = append(recommendations, calendarDateRecommendations...)
 
-	routeWarnings := ggtfs.ValidateRoutes(ctx.Routes, ctx.Agencies)
-	if len(routeWarnings) > 0 {
-		warnings = append(warnings, routeWarnings...)
-	}
+	routeWarnings, routeRecommendations := ggtfs.ValidateRoutes(ctx.Routes, ctx.Agencies)
+	warnings = append(warnings, routeWarnings...)
+	recommendations = append(recommendations, routeRecommendations...)
 
-	stopTimeWarnings := ggtfs.ValidateStopTimes(ctx.StopTimes, ctx.Stops)
-	if len(stopTimeWarnings) > 0 {
-		warnings = append(warnings, stopTimeWarnings...)
-	}
+	stopTimeWarnings, stopTimeRecommendations := ggtfs.ValidateStopTimes(ctx.StopTimes, ctx.Stops)
+	warnings = append(warnings, stopTimeWarnings...)
+	recommendations = append(recommendations, stopTimeRecommendations...)
 
-	return warnings
+	return warnings, recommendations
 }
 
 func NewGTFSContextForDirectory(gtfsPath string) (*GTFSContext, []error) {

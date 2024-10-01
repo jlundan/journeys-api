@@ -28,7 +28,7 @@ func TestAgencyParsing(t *testing.T) {
 		return entities, errs
 	}
 
-	validateAgenciesFunc := func(entities []interface{}) []error {
+	validateAgenciesFunc := func(entities []interface{}) ([]error, []string) {
 		agencies := make([]*Agency, len(entities))
 		for i, entity := range entities {
 			if agency, ok := entity.(*Agency); ok {

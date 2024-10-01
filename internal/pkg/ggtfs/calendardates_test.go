@@ -28,7 +28,7 @@ func TestCalendarDateParsing(t *testing.T) {
 		return entities, errs
 	}
 
-	validateCalendarItemsFunc := func(entities []interface{}) []error {
+	validateCalendarItemsFunc := func(entities []interface{}) ([]error, []string) {
 		calendarDates := make([]*CalendarDate, len(entities))
 		for i, entity := range entities {
 			if calendarDate, ok := entity.(*CalendarDate); ok {

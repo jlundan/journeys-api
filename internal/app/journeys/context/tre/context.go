@@ -16,10 +16,11 @@ type municipalityData struct {
 	municipalityRows    [][]string
 }
 
-func NewContext() (model.Context, []error, []error) {
+func NewContext() (model.Context, []error, []error, []string) {
 	var (
-		errs     []error
-		warnings []error
+		errs            []error
+		warnings        []error
+		recommendations []string
 	)
 
 	if os.Getenv(GtfsEnvKey) == "" {
@@ -27,17 +28,15 @@ func NewContext() (model.Context, []error, []error) {
 	}
 
 	if len(errs) > 0 {
-		return Context{}, errs, warnings
+		return Context{}, errs, warnings, recommendations
 	}
 
 	g, gtfsErrors := NewGTFSContextForDirectory(os.Getenv(GtfsEnvKey))
-	if len(gtfsErrors) > 0 {
-		errs = append(errs, gtfsErrors...)
-	}
-	gtfsWarnings := Validate(g)
-	if len(gtfsWarnings) > 0 {
-		warnings = append(warnings, gtfsWarnings...)
-	}
+	errs = append(errs, gtfsErrors...)
+
+	gtfsWarnings, gtfsRecommendations := Validate(g)
+	warnings = append(warnings, gtfsWarnings...)
+	recommendations = append(recommendations, gtfsRecommendations...)
 
 	m, err := readMunicipalities()
 	if err != nil {
@@ -45,14 +44,14 @@ func NewContext() (model.Context, []error, []error) {
 	}
 
 	if m == nil && g == nil {
-		return Context{}, errs, warnings
+		return Context{}, errs, warnings, recommendations
 	}
 
 	if m == nil {
 		return Context{
 			lines:  buildLines(*g),
 			routes: buildRoutes(*g),
-		}, errs, warnings
+		}, errs, warnings, recommendations
 	}
 
 	municipalities := buildMunicipalities(*m)
@@ -60,7 +59,7 @@ func NewContext() (model.Context, []error, []error) {
 	if g == nil {
 		return Context{
 			municipalities: municipalities,
-		}, errs, warnings
+		}, errs, warnings, recommendations
 	}
 
 	stopPoints := buildStopPoints(*g, municipalities)
@@ -75,7 +74,7 @@ func NewContext() (model.Context, []error, []error) {
 		municipalities:  municipalities,
 		journeys:        journeys,
 		routes:          routes,
-	}, errs, warnings
+	}, errs, warnings, recommendations
 }
 
 type Context struct {

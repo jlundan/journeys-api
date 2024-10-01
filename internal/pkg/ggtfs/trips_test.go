@@ -28,7 +28,7 @@ func TestTripParsing(t *testing.T) {
 		return entities, errs
 	}
 
-	validateTripsFunc := func(entities []interface{}) []error {
+	validateTripsFunc := func(entities []interface{}) ([]error, []string) {
 		trips := make([]*Trip, len(entities))
 		for i, entity := range entities {
 			if trip, ok := entity.(*Trip); ok {

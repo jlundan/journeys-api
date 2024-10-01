@@ -79,7 +79,7 @@ func TestSendResponseFail(t *testing.T) {
 }
 
 func initializeTest(t *testing.T) (*mux.Router, *httptest.ResponseRecorder, model.Context) {
-	ctx, err, _ := tre.NewContext()
+	ctx, err, _, _ := tre.NewContext()
 	if err != nil {
 		t.Error(err)
 	}
