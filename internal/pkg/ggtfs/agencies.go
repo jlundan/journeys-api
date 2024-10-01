@@ -17,6 +17,20 @@ type Agency struct {
 	LineNumber int
 }
 
+func (a Agency) Validate() []error {
+	var validationErrors []error
+
+	if a.Url.IsEmpty() {
+		validationErrors = append(validationErrors, createFileRowError(AgenciesFileName, a.LineNumber, "agency_url must be specified"))
+	}
+
+	if a.Timezone.IsEmpty() {
+		validationErrors = append(validationErrors, createFileRowError(AgenciesFileName, a.LineNumber, "agency_timezone must be specified"))
+	}
+
+	return validationErrors
+}
+
 var validAgencyHeaders = []string{"agency_id", "agency_name", "agency_url", "agency_timezone",
 	"agency_lang", "agency_phone", "agency_fare_url", "agency_email"}
 
@@ -24,6 +38,7 @@ func LoadAgencies(csvReader *csv.Reader) ([]*Agency, []error) {
 	entities, errs := loadEntities(csvReader, validAgencyHeaders, CreateAgency, AgenciesFileName)
 
 	agencies := make([]*Agency, 0, len(entities))
+
 	for _, entity := range entities {
 		if agency, ok := entity.(*Agency); ok {
 			agencies = append(agencies, agency)
@@ -68,21 +83,16 @@ func CreateAgency(row []string, headers map[string]uint8, lineNumber int) (inter
 	return &agency, nil
 }
 
-func ValidateAgencies(agencies []*Agency) []error {
+func ValidateAgencies(agencies []*Agency) ([]error, []string) {
 	var validationErrors []error
+	var recommendations []string
 
 	for _, agency := range agencies {
 		if agency == nil {
 			continue
 		}
 
-		if agency.Url.IsEmpty() {
-			validationErrors = append(validationErrors, createFileRowError(AgenciesFileName, agency.LineNumber, "agency_url must be specified"))
-		}
-
-		if agency.Timezone.IsEmpty() {
-			validationErrors = append(validationErrors, createFileRowError(AgenciesFileName, agency.LineNumber, "agency_timezone must be specified"))
-		}
+		validationErrors = append(validationErrors, agency.Validate()...)
 	}
 
 	if len(agencies) > 1 {
@@ -104,7 +114,9 @@ func ValidateAgencies(agencies []*Agency) []error {
 				usedIds[a.Id.String()] = true
 			}
 		}
+	} else if len(agencies) == 1 && agencies[0].Id.IsEmpty() {
+		recommendations = append(recommendations, createFileRowRecommendation(AgenciesFileName, agencies[0].LineNumber, "it is recommended that agency_id is specified even when there is only one agency"))
 	}
 
-	return validationErrors
+	return validationErrors, recommendations
 }

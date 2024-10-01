@@ -115,18 +115,19 @@ type ggtfsTestCase struct {
 }
 
 type LoadFunction func(reader *csv.Reader) ([]interface{}, []error)
-type ValidateFunction func(entities []interface{}) []error
+type ValidateFunction func(entities []interface{}) ([]error, []string)
 
 type ParseResult struct {
-	Entities []interface{}
-	Errors   []error
+	Entities        []interface{}
+	Errors          []error
+	Recommendations []string
 }
 
 // LoadAndValidateGTFS is a generic function to load and validate GTFS entities while allowing partial success.
 func loadAndValidateGTFS(csvReader *csv.Reader, loadFunc LoadFunction, validateFunc ValidateFunction, strictMode bool) ParseResult {
 	// Load the entities using the provided load function
 	entities, parseErrors := loadFunc(csvReader)
-	validationErrors := validateFunc(entities)
+	validationErrors, validationRecommendations := validateFunc(entities)
 
 	// If strict mode is enabled, combine parse errors and validation errors and return an empty set of entities
 	if strictMode && (len(parseErrors) > 0 || len(validationErrors) > 0) {
@@ -138,8 +139,9 @@ func loadAndValidateGTFS(csvReader *csv.Reader, loadFunc LoadFunction, validateF
 
 	// Otherwise, return the parsed entities and the errors separately
 	return ParseResult{
-		Entities: entities,
-		Errors:   append(parseErrors, validationErrors...),
+		Entities:        entities,
+		Errors:          append(parseErrors, validationErrors...),
+		Recommendations: validationRecommendations,
 	}
 }
 

@@ -28,7 +28,7 @@ func TestRouteParsing(t *testing.T) {
 		return entities, errs
 	}
 
-	validateRoutesFunc := func(entities []interface{}) []error {
+	validateRoutesFunc := func(entities []interface{}) ([]error, []string) {
 		routes := make([]*Route, len(entities))
 		for i, entity := range entities {
 			if route, ok := entity.(*Route); ok {
