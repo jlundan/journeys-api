@@ -2,12 +2,8 @@ package ggtfs
 
 import (
 	"encoding/csv"
-	"encoding/hex"
 	"errors"
 	"fmt"
-	"net/url"
-	"strconv"
-	"time"
 )
 
 const (
@@ -43,152 +39,24 @@ func createFileError(fileName string, err string) error {
 	return errors.New(fmt.Sprintf("%s: %s", fileName, err))
 }
 
-func handleIDField(str string, fileName string, fieldName string, index int, errs *[]error) *string {
-	return handleStringField(str, fileName, fieldName, index, errs)
-}
-
-func handleTextField(str string, fileName string, fieldName string, index int, errs *[]error) *string {
-	return handleStringField(str, fileName, fieldName, index, errs)
-}
-
-func handleTimeZoneField(str string, fileName string, fieldName string, index int, errs *[]error) *string {
-	return handleStringField(str, fileName, fieldName, index, errs)
-}
-
-//func handleLanguageCodeField(str string, fileName string, fieldName string, index int, errs *[]error) *string {
-//	return handleStringField(str, fileName, fieldName, index, errs)
-//}
+// getField and getOptionalField
+// There are four cases for returning values from the row:
+// For a MANDATORY (from the GTFS spec point of view) field:
+//	- if the field is missing (it has a header, but no value on the row), an empty string is returned.
+//  - if the field is present, a string containing the field value is returned, empty or not.
+// For an OPTIONAL field:
+//	- if the field is missing (it has a header, but no value on the row), a nil pointer is returned.
+//  - if the field is present, a pointer to a string containing the field value is returned, the string being empty or not.
 //
-//func handlePhoneNumberField(str string, fileName string, fieldName string, index int, errs *[]error) *string {
-//	return handleStringField(str, fileName, fieldName, index, errs)
-//}
-//
-//func handleEmailField(str string, fileName string, fieldName string, index int, errs *[]error) *string {
-//	return handleStringField(str, fileName, fieldName, index, errs)
-//}
+// In other words, there is a distinct difference between an empty value ("") on the row when its header is present, and
+// a missing value (nil) when the header is present but the value is not. This is why we have two functions to handle them.
+// You cannot make getOptionalField call getField and then check if the returned value was empty, because you cannot
+// distinguish between a missing value and an empty value in getOptionalField by using getField's result (it will return
+// empty string when the field is missing and when the field is empty). Stop trying to do that. =)
 
-func handleIntField(str string, fileName string, fieldName string, index int, errs *[]error) *int {
-	val, err := strconv.ParseInt(str, 10, 64)
-	if err != nil {
-		*errs = append(*errs, createFieldError(fileName, fieldName, index, err))
-		return nil
-	}
-	so := int(val)
-	return &so
-}
-
-func handleContinuousPickupField(str string, fileName string, fieldName string, index int, errs *[]error) *int {
-	if str == "" {
-		c := 1
-		return &c
-	}
-
-	n, err := strconv.ParseInt(str, 10, 64)
-	if err != nil {
-		*errs = append(*errs, createFieldError(fileName, fieldName, index, err))
-		return nil
-	}
-
-	if cpt := int(n); cpt == 0 || (cpt >= 1 && cpt <= 3) {
-		return &cpt
-	} else {
-		*errs = append(*errs, createFieldError(fileName, fieldName, index, errors.New(invalidValue)))
-		return nil
-	}
-}
-
-func handleContinuousDropOffField(str string, fileName string, fieldName string, index int, errs *[]error) *int {
-	return handleContinuousPickupField(str, fileName, fieldName, index, errs)
-}
-
-func handleFloat64Field(str string, fileName string, fieldName string, index int, errs *[]error) *float64 {
-	val, err := strconv.ParseFloat(str, 64)
-	if err != nil {
-		*errs = append(*errs, createFieldError(fileName, fieldName, index, err))
-		return nil
-	}
-	return &val
-}
-
-func handleDateField(str string, fileName string, fieldName string, index int, fillEnd bool, errs *[]error) *time.Time {
-	if str == "" {
-		*errs = append(*errs, createFieldError(fileName, fieldName, index, errors.New(emptyValueNotAllowed)))
-		return nil
-	}
-
-	if len(str) < 8 {
-		*errs = append(*errs, createFieldError(fileName, fieldName, index, errors.New("invalid date format")))
-		return nil
-	}
-
-	year, err := strconv.ParseInt(str[:4], 10, 64)
-	if err != nil {
-		*errs = append(*errs, createFieldError(fileName, fieldName, index, err))
-		return nil
-	}
-
-	month, err := strconv.ParseInt(str[4:6], 10, 64)
-	if err != nil {
-		*errs = append(*errs, createFieldError(fileName, fieldName, index, err))
-		return nil
-	}
-
-	day, err := strconv.ParseInt(str[6:8], 10, 64)
-	if err != nil {
-		*errs = append(*errs, createFieldError(fileName, fieldName, index, err))
-		return nil
-	}
-
-	var d time.Time
-	if fillEnd {
-		d = time.Date(int(year), time.Month(int(month)), int(day), 23, 59, 59, 0, time.FixedZone("UTC+2", 2*60*60))
-	} else {
-		d = time.Date(int(year), time.Month(int(month)), int(day), 0, 0, 0, 0, time.FixedZone("UTC+2", 2*60*60))
-	}
-	return &d
-}
-
-func handleTimeField(str string, fileName string, fieldName string, index int, errs *[]error) *string {
-	return handleStringField(str, fileName, fieldName, index, errs)
-}
-
-func handleStringField(str string, fileName string, fieldName string, index int, errs *[]error) *string {
-	if str == "" {
-		*errs = append(*errs, createFieldError(fileName, fieldName, index, errors.New(emptyValueNotAllowed)))
-		return nil
-	}
-
-	return &str
-}
-
-func handleColorField(str string, fileName string, fieldName string, index int, errs *[]error) *string {
-	if str == "" {
-		*errs = append(*errs, createFieldError(fileName, fieldName, index, errors.New(emptyValueNotAllowed)))
-		return nil
-	}
-
-	_, err := hex.DecodeString(fmt.Sprintf("%sFF", str))
-	if err != nil {
-		*errs = append(*errs, createFieldError(fileName, fieldName, index, err))
-		return nil
-	}
-
-	return &str
-}
-
-func handleURLField(str string, fileName string, fieldName string, index int, errs *[]error) *string {
-	_, err := url.Parse(str)
-	if err != nil {
-		*errs = append(*errs, createFieldError(fileName, fieldName, index, err))
-		return nil
-	}
-	return &str
-}
-
-func getField(row []string, headerName string, headerPosition uint8, errs *[]error, rowIndex int, fileName string) string {
+func getField(row []string, headerName string, headerPosition uint8, errs *[]error, lineNumber int, fileName string) string {
 	if len(row) <= int(headerPosition) {
-		// Requested header is found but the row does not have enough columns, return empty string
-		*errs = append(*errs, createFileRowError(fileName, rowIndex, fmt.Sprintf("missing required field: %s", headerName)))
+		*errs = append(*errs, createFileRowError(fileName, lineNumber, fmt.Sprintf("missing value for field: %s", headerName)))
 		return ""
 	}
 
@@ -196,11 +64,12 @@ func getField(row []string, headerName string, headerPosition uint8, errs *[]err
 }
 
 func getOptionalField(row []string, headerName string, headerPosition uint8, errs *[]error, lineNumber int, fileName string) *string {
-	value := getField(row, headerName, headerPosition, errs, lineNumber, fileName)
-	if value != "" {
-		return &value
+	if len(row) <= int(headerPosition) {
+		*errs = append(*errs, createFileRowError(fileName, lineNumber, fmt.Sprintf("missing value for field: %s", headerName)))
+		return nil
 	}
-	return nil
+
+	return &row[headerPosition]
 }
 
 type entityCreator func(row []string, headers map[string]uint8, lineNumber int) (interface{}, []error)
@@ -239,12 +108,12 @@ func loadEntities(csvReader *csv.Reader, validHeaders []string, entityCreator en
 		return entities, errs
 	}
 
-	index := 0
+	lineNumber := 0
 	for {
 		row, err := ReadDataRow(csvReader)
 		if err != nil {
 			errs = append(errs, createFileError(fileName, fmt.Sprintf("%v", err.Error())))
-			index++
+			lineNumber++
 			continue
 		}
 		if row == nil {
@@ -255,14 +124,13 @@ func loadEntities(csvReader *csv.Reader, validHeaders []string, entityCreator en
 		}
 
 		var entityCreateErrors []error
-		entity, entityCreateErrors := entityCreator(row, headers, index)
+		entity, entityCreateErrors := entityCreator(row, headers, lineNumber)
 		if len(entityCreateErrors) > 0 {
 			errs = append(errs, entityCreateErrors...)
-		} else {
-			entities = append(entities, entity)
 		}
+		entities = append(entities, entity)
 
-		index++
+		lineNumber++
 	}
 
 	return entities, errs

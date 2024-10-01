@@ -118,7 +118,7 @@ func ValidateRoutes(routes []*Route, agencies []*Agency) []error {
 			if agency == nil {
 				continue
 			}
-			if route.AgencyId == agency.Id {
+			if route.AgencyId == agency.Id.String() {
 				agencyFound = true
 				break
 			}

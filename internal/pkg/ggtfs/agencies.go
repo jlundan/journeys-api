@@ -6,14 +6,14 @@ import (
 )
 
 type Agency struct {
-	Id         string  // agency_id
-	Name       string  // agency_name
-	Url        string  // agency_url
-	Timezone   string  // agency_timezone
-	Lang       *string // agency_lang
-	Phone      *string // agency_phone
-	FareURL    *string // agency_fare_url
-	Email      *string // agency_email
+	Id         ID            // agency_id
+	Name       Text          // agency_name
+	Url        URL           // agency_url
+	Timezone   Timezone      // agency_timezone
+	Lang       *LanguageCode // agency_lang
+	Phone      *PhoneNumber  // agency_phone
+	FareURL    *URL          // agency_fare_url
+	Email      *Email        // agency_email
 	LineNumber int
 }
 
@@ -34,7 +34,7 @@ func LoadAgencies(csvReader *csv.Reader) ([]*Agency, []error) {
 }
 
 func CreateAgency(row []string, headers map[string]uint8, lineNumber int) (interface{}, []error) {
-	var validationErrors []error
+	var parseErrors []error
 
 	agency := Agency{
 		LineNumber: lineNumber,
@@ -43,27 +43,28 @@ func CreateAgency(row []string, headers map[string]uint8, lineNumber int) (inter
 	for hName, hPos := range headers {
 		switch hName {
 		case "agency_id":
-			agency.Id = getField(row, hName, hPos, &validationErrors, lineNumber, AgenciesFileName)
+			agency.Id = NewID(getField(row, hName, hPos, &parseErrors, lineNumber, AgenciesFileName))
 		case "agency_name":
-			agency.Name = getField(row, hName, hPos, &validationErrors, lineNumber, AgenciesFileName)
+			agency.Name = NewText(getField(row, hName, hPos, &parseErrors, lineNumber, AgenciesFileName))
 		case "agency_url":
-			agency.Url = getField(row, hName, hPos, &validationErrors, lineNumber, AgenciesFileName)
+			agency.Url = NewURL(getField(row, hName, hPos, &parseErrors, lineNumber, AgenciesFileName))
 		case "agency_timezone":
-			agency.Timezone = getField(row, hName, hPos, &validationErrors, lineNumber, AgenciesFileName)
+			agency.Timezone = NewTimezone(getField(row, hName, hPos, &parseErrors, lineNumber, AgenciesFileName))
 		case "agency_lang":
-			agency.Lang = getOptionalField(row, hName, hPos, &validationErrors, lineNumber, AgenciesFileName)
+			agency.Lang = NewOptionalLanguageCode(getOptionalField(row, hName, hPos, &parseErrors, lineNumber, AgenciesFileName))
 		case "agency_phone":
-			agency.Phone = getOptionalField(row, hName, hPos, &validationErrors, lineNumber, AgenciesFileName)
+			agency.Phone = NewOptionalPhoneNumber(getOptionalField(row, hName, hPos, &parseErrors, lineNumber, AgenciesFileName))
 		case "agency_fare_url":
-			agency.FareURL = getOptionalField(row, hName, hPos, &validationErrors, lineNumber, AgenciesFileName)
+			agency.FareURL = NewOptionalURL(getOptionalField(row, hName, hPos, &parseErrors, lineNumber, AgenciesFileName))
 		case "agency_email":
-			agency.Email = getOptionalField(row, hName, hPos, &validationErrors, lineNumber, AgenciesFileName)
+			agency.Email = NewOptionalEmail(getOptionalField(row, hName, hPos, &parseErrors, lineNumber, AgenciesFileName))
 		}
 	}
 
-	if len(validationErrors) > 0 {
-		return &agency, validationErrors
+	if len(parseErrors) > 0 {
+		return &agency, parseErrors
 	}
+
 	return &agency, nil
 }
 
@@ -75,11 +76,11 @@ func ValidateAgencies(agencies []*Agency) []error {
 			continue
 		}
 
-		if agency.Url == "" {
+		if agency.Url.IsEmpty() {
 			validationErrors = append(validationErrors, createFileRowError(AgenciesFileName, agency.LineNumber, "agency_url must be specified"))
 		}
 
-		if agency.Timezone == "" {
+		if agency.Timezone.IsEmpty() {
 			validationErrors = append(validationErrors, createFileRowError(AgenciesFileName, agency.LineNumber, "agency_timezone must be specified"))
 		}
 	}
@@ -92,15 +93,15 @@ func ValidateAgencies(agencies []*Agency) []error {
 				continue
 			}
 
-			if a.Id == "" {
+			if a.Id.IsEmpty() {
 				validationErrors = append(validationErrors, createFileRowError(AgenciesFileName, a.LineNumber, "agency_id must be specified when multiple agencies are declared"))
 				continue
 			}
 
-			if usedIds[a.Id] {
+			if usedIds[a.Id.String()] {
 				validationErrors = append(validationErrors, createFileRowError(AgenciesFileName, a.LineNumber, fmt.Sprintf("agency_id is not unique within the file")))
 			} else {
-				usedIds[a.Id] = true
+				usedIds[a.Id.String()] = true
 			}
 		}
 	}
