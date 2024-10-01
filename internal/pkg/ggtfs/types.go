@@ -7,8 +7,18 @@ import (
 	"strconv"
 )
 
+// base is a struct that contains the raw value and a flag to indicate if the header for the field is present in the
+// parsed CSV file.
+// The loader method reads only the fields which have a header present in the file. This means that the loader
+// skips all fields which do not have a header. To make the processing more straightforward, the isPresent is
+// kept at its default state (false), which means that when the loader does not process a missing field, the GTFS
+// entity gets the field struct with default values, if it is mandatory field, which marks the field absent (isPresent is false).
+// (The optional fields will get a nil pointer, if the header for that field is missing in the CSV file, which means
+// that these structs are not created at all for them).
+
 type base struct {
-	raw string
+	raw       string
+	isPresent bool
 }
 
 func (base *base) String() string {
@@ -23,6 +33,10 @@ func (base *base) Length() int {
 	return len(base.raw)
 }
 
+func (base *base) IsPresent() bool {
+	return base.isPresent
+}
+
 // ID represents an internal ID, such as `route_id` or `trip_id`.
 type ID struct {
 	base
@@ -33,8 +47,11 @@ func (id *ID) IsValid() bool {
 	return id.raw != ""
 }
 
-func NewID(raw string) ID {
-	return ID{base{raw: raw}}
+func NewID(raw *string) ID {
+	if raw == nil {
+		return ID{base{raw: ""}}
+	}
+	return ID{base{raw: *raw, isPresent: true}}
 }
 
 // Color represents a color encoded as a six-digit hexadecimal number.
@@ -77,8 +94,11 @@ func (u *URL) IsValid() bool {
 	return err == nil && (parsedURL.Scheme == "http" || parsedURL.Scheme == "https")
 }
 
-func NewURL(raw string) URL {
-	return URL{base{raw: raw}}
+func NewURL(raw *string) URL {
+	if raw == nil {
+		return URL{base{raw: ""}}
+	}
+	return URL{base{raw: *raw, isPresent: true}}
 }
 
 func NewOptionalURL(raw *string) *URL {
@@ -202,8 +222,11 @@ func (t *Text) IsValid() bool {
 	return t.raw != ""
 }
 
-func NewText(raw string) Text {
-	return Text{base{raw: raw}}
+func NewText(raw *string) Text {
+	if raw == nil {
+		return Text{base{raw: ""}}
+	}
+	return Text{base{raw: *raw, isPresent: true}}
 }
 
 // Timezone represents a TZ timezone from the IANA timezone database.
@@ -222,6 +245,9 @@ func (tz *Timezone) IsValid() bool {
 	return false
 }
 
-func NewTimezone(raw string) Timezone {
-	return Timezone{base{raw: raw}}
+func NewTimezone(raw *string) Timezone {
+	if raw == nil {
+		return Timezone{base{raw: ""}}
+	}
+	return Timezone{base{raw: *raw, isPresent: true}}
 }

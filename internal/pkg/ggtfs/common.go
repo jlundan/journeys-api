@@ -43,20 +43,13 @@ func createFileError(fileName string, err string) error {
 	return errors.New(fmt.Sprintf("%s: %s", fileName, err))
 }
 
-// getField and getOptionalField
-// There are four cases for returning values from the row:
-// For a MANDATORY (from the GTFS spec point of view) field:
-//	- if the field is missing (it has a header, but no value on the row), an empty string is returned.
-//  - if the field is present, a string containing the field value is returned, empty or not.
-// For an OPTIONAL field:
-//	- if the field is missing (it has a header, but no value on the row), a nil pointer is returned.
-//  - if the field is present, a pointer to a string containing the field value is returned, the string being empty or not.
-//
-// In other words, there is a distinct difference between an empty value ("") on the row when its header is present, and
-// a missing value (nil) when the header is present but the value is not. This is why we have two functions to handle them.
-// You cannot make getOptionalField call getField and then check if the returned value was empty, because you cannot
-// distinguish between a missing value and an empty value in getOptionalField by using getField's result (it will return
-// empty string when the field is missing and when the field is empty). Stop trying to do that. =)
+func createInvalidFieldString(fieldName string) string {
+	return fmt.Sprintf("invalid field: %s", fieldName)
+}
+
+func createMissingMandatoryFieldString(fieldName string) string {
+	return fmt.Sprintf("missing mandatory field: %s", fieldName)
+}
 
 func getField(row []string, headerName string, headerPosition uint8, errs *[]error, lineNumber int, fileName string) string {
 	if len(row) <= int(headerPosition) {
