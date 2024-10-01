@@ -59,8 +59,9 @@ func getAgencyNOKTestcases() map[string]ggtfsTestCase {
 			{" "},
 		},
 		expectedErrors: []string{
-			"agency.txt:0: agency_timezone must be specified",
-			"agency.txt:0: agency_url must be specified",
+			"agency.txt:0: invalid field: agency_name",
+			"agency.txt:0: missing mandatory field: agency_timezone",
+			"agency.txt:0: missing mandatory field: agency_url",
 		},
 	}
 
@@ -70,8 +71,8 @@ func getAgencyNOKTestcases() map[string]ggtfsTestCase {
 			{"1"},
 		},
 		expectedErrors: []string{
-			"agency.txt:0: agency_timezone must be specified",
-			"agency.txt:0: agency_url must be specified",
+			"agency.txt:0: missing mandatory field: agency_timezone",
+			"agency.txt:0: missing mandatory field: agency_url",
 		},
 	}
 
@@ -81,8 +82,8 @@ func getAgencyNOKTestcases() map[string]ggtfsTestCase {
 			{"ACME", ""},
 		},
 		expectedErrors: []string{
-			"agency.txt:0: agency_timezone must be specified",
-			"agency.txt:0: agency_url must be specified",
+			"agency.txt:0: invalid field: agency_url",
+			"agency.txt:0: missing mandatory field: agency_timezone",
 		},
 	}
 
@@ -92,7 +93,7 @@ func getAgencyNOKTestcases() map[string]ggtfsTestCase {
 			{"ACME", "http://acme.inc", ""},
 		},
 		expectedErrors: []string{
-			"agency.txt:0: agency_timezone must be specified",
+			"agency.txt:0: invalid field: agency_timezone",
 		},
 	}
 
@@ -116,6 +117,7 @@ func getAgencyNOKTestcases() map[string]ggtfsTestCase {
 		},
 		expectedErrors: []string{
 			"agency.txt:1: agency_id is not unique within the file",
+			"agency.txt:1: invalid field: agency_timezone",
 		},
 	}
 
@@ -124,10 +126,10 @@ func getAgencyNOKTestcases() map[string]ggtfsTestCase {
 
 func getAgencyOKTestcases() map[string]ggtfsTestCase {
 	expected1 := Agency{
-		Id:       NewID("1"),
-		Name:     NewText("ACME"),
-		Url:      NewURL("https://acme.inc"),
-		Timezone: NewTimezone("Europe/Helsinki"),
+		Id:       NewID(stringPtr("1")),
+		Name:     NewText(stringPtr("ACME")),
+		URL:      NewURL(stringPtr("https://acme.inc")),
+		Timezone: NewTimezone(stringPtr("Europe/Helsinki")),
 		Lang:     NewOptionalLanguageCode(stringPtr("fi")),
 		Phone:    NewOptionalPhoneNumber(stringPtr("+358123456")),
 		FareURL:  NewOptionalURL(stringPtr("https://acme.inc/fares")),
@@ -135,10 +137,10 @@ func getAgencyOKTestcases() map[string]ggtfsTestCase {
 	}
 
 	expected2 := Agency{
-		Id:       NewID("2"),
-		Name:     NewText("FOO"),
-		Url:      NewURL("https://foo.com"),
-		Timezone: NewTimezone("Europe/Helsinki"),
+		Id:       NewID(stringPtr("2")),
+		Name:     NewText(stringPtr("FOO")),
+		URL:      NewURL(stringPtr("https://foo.com")),
+		Timezone: NewTimezone(stringPtr("Europe/Helsinki")),
 		Lang:     nil,
 		Phone:    nil,
 		FareURL:  nil,

@@ -8,7 +8,7 @@ import (
 type Agency struct {
 	Id         ID            // agency_id
 	Name       Text          // agency_name
-	Url        URL           // agency_url
+	URL        URL           // agency_url
 	Timezone   Timezone      // agency_timezone
 	Lang       *LanguageCode // agency_lang
 	Phone      *PhoneNumber  // agency_phone
@@ -20,12 +20,40 @@ type Agency struct {
 func (a Agency) Validate() []error {
 	var validationErrors []error
 
-	if a.Url.IsEmpty() {
-		validationErrors = append(validationErrors, createFileRowError(AgenciesFileName, a.LineNumber, "agency_url must be specified"))
+	// The 'agency_id' field is conditionally required, check it in the ValidateAgencies function.
+
+	if !a.Name.IsPresent() {
+		validationErrors = append(validationErrors, createFileRowError(AgenciesFileName, a.LineNumber, createMissingMandatoryFieldString("agency_name")))
+	} else if !a.Name.IsValid() {
+		validationErrors = append(validationErrors, createFileRowError(AgenciesFileName, a.LineNumber, createInvalidFieldString("agency_name")))
 	}
 
-	if a.Timezone.IsEmpty() {
-		validationErrors = append(validationErrors, createFileRowError(AgenciesFileName, a.LineNumber, "agency_timezone must be specified"))
+	if !a.URL.IsPresent() {
+		validationErrors = append(validationErrors, createFileRowError(AgenciesFileName, a.LineNumber, createMissingMandatoryFieldString("agency_url")))
+	} else if !a.URL.IsValid() {
+		validationErrors = append(validationErrors, createFileRowError(AgenciesFileName, a.LineNumber, createInvalidFieldString("agency_url")))
+	}
+
+	if !a.Timezone.IsPresent() {
+		validationErrors = append(validationErrors, createFileRowError(AgenciesFileName, a.LineNumber, createMissingMandatoryFieldString("agency_timezone")))
+	} else if !a.Timezone.IsValid() {
+		validationErrors = append(validationErrors, createFileRowError(AgenciesFileName, a.LineNumber, createInvalidFieldString("agency_timezone")))
+	}
+
+	if a.Lang != nil && !a.Lang.IsValid() {
+		validationErrors = append(validationErrors, createFileRowError(AgenciesFileName, a.LineNumber, createInvalidFieldString("agency_lang")))
+	}
+
+	if a.Phone != nil && !a.Phone.IsValid() {
+		validationErrors = append(validationErrors, createFileRowError(AgenciesFileName, a.LineNumber, createInvalidFieldString("agency_phone")))
+	}
+
+	if a.FareURL != nil && !a.FareURL.IsValid() {
+		validationErrors = append(validationErrors, createFileRowError(AgenciesFileName, a.LineNumber, createInvalidFieldString("agency_fare_url")))
+	}
+
+	if a.Email != nil && !a.Email.IsValid() {
+		validationErrors = append(validationErrors, createFileRowError(AgenciesFileName, a.LineNumber, createInvalidFieldString("agency_email")))
 	}
 
 	return validationErrors
@@ -58,13 +86,13 @@ func CreateAgency(row []string, headers map[string]uint8, lineNumber int) (inter
 	for hName, hPos := range headers {
 		switch hName {
 		case "agency_id":
-			agency.Id = NewID(getField(row, hName, hPos, &parseErrors, lineNumber, AgenciesFileName))
+			agency.Id = NewID(getOptionalField(row, hName, hPos, &parseErrors, lineNumber, AgenciesFileName))
 		case "agency_name":
-			agency.Name = NewText(getField(row, hName, hPos, &parseErrors, lineNumber, AgenciesFileName))
+			agency.Name = NewText(getOptionalField(row, hName, hPos, &parseErrors, lineNumber, AgenciesFileName))
 		case "agency_url":
-			agency.Url = NewURL(getField(row, hName, hPos, &parseErrors, lineNumber, AgenciesFileName))
+			agency.URL = NewURL(getOptionalField(row, hName, hPos, &parseErrors, lineNumber, AgenciesFileName))
 		case "agency_timezone":
-			agency.Timezone = NewTimezone(getField(row, hName, hPos, &parseErrors, lineNumber, AgenciesFileName))
+			agency.Timezone = NewTimezone(getOptionalField(row, hName, hPos, &parseErrors, lineNumber, AgenciesFileName))
 		case "agency_lang":
 			agency.Lang = NewOptionalLanguageCode(getOptionalField(row, hName, hPos, &parseErrors, lineNumber, AgenciesFileName))
 		case "agency_phone":

@@ -13,7 +13,7 @@ func TestID_IsValid(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		id := ID{base{tt.value}}
+		id := ID{base{raw: tt.value}}
 		if got := id.IsValid(); got != tt.valid {
 			t.Errorf("ID.IsValid() = %v, want %v, case: %s", got, tt.valid, tt.name)
 		}
@@ -33,7 +33,7 @@ func TestColor_IsValid(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		color := Color{base{tt.value}}
+		color := Color{base{raw: tt.value}}
 		if got := color.IsValid(); got != tt.valid {
 			t.Errorf("Color.IsValid() = %v, want %v, case: %s", got, tt.valid, tt.name)
 		}
@@ -53,7 +53,7 @@ func TestEmail_IsValid(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		email := Email{base{tt.value}}
+		email := Email{base{raw: tt.value}}
 		if got := email.IsValid(); got != tt.valid {
 			t.Errorf("Email.IsValid() = %v, want %v, case: %s", got, tt.valid, tt.name)
 		}
@@ -74,7 +74,7 @@ func TestURL_IsValid(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		url := URL{base{tt.value}}
+		url := URL{base{raw: tt.value}}
 		if got := url.IsValid(); got != tt.valid {
 			t.Errorf("URL.IsValid() = %v, want %v, case: %s", got, tt.valid, tt.name)
 		}
@@ -95,7 +95,7 @@ func TestTime_IsValid(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		time := Time{base{tt.value}}
+		time := Time{base{raw: tt.value}}
 		if got := time.IsValid(); got != tt.valid {
 			t.Errorf("Time.IsValid() = %v, want %v, case: %s", got, tt.valid, tt.name)
 		}
@@ -115,7 +115,7 @@ func TestCurrencyCode_IsValid(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		cc := CurrencyCode{base{tt.value}}
+		cc := CurrencyCode{base{raw: tt.value}}
 		if got := cc.IsValid(); got != tt.valid {
 			t.Errorf("CurrencyCode.IsValid() = %v, want %v, case: %s", got, tt.valid, tt.name)
 		}
@@ -135,7 +135,7 @@ func TestCurrencyAmount_IsValid(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		ca := CurrencyAmount{base{tt.value}}
+		ca := CurrencyAmount{base{raw: tt.value}}
 		if got := ca.IsValid(); got != tt.valid {
 			t.Errorf("CurrencyAmount.IsValid() = %v, want %v, case: %s", got, tt.valid, tt.name)
 		}
@@ -155,7 +155,7 @@ func TestDate_IsValid(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		date := Date{base{tt.value}}
+		date := Date{base{raw: tt.value}}
 		if got := date.IsValid(); got != tt.valid {
 			t.Errorf("Date.IsValid() = %v, want %v, case: %s", got, tt.valid, tt.name)
 		}
@@ -176,7 +176,7 @@ func TestLanguageCode_IsValid(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		lc := LanguageCode{base{tt.value}}
+		lc := LanguageCode{base{raw: tt.value}}
 		if got := lc.IsValid(); got != tt.valid {
 			t.Errorf("LanguageCode.IsValid() = %v, want %v, case: %s", got, tt.valid, tt.name)
 		}
@@ -197,7 +197,7 @@ func TestLatitude_IsValid(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		lat := Latitude{base{tt.value}}
+		lat := Latitude{base{raw: tt.value}}
 		if got := lat.IsValid(); got != tt.valid {
 			t.Errorf("Latitude.IsValid() = %v, want %v, case: %s", got, tt.valid, tt.name)
 		}
@@ -218,7 +218,7 @@ func TestLongitude_IsValid(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		lon := Longitude{base{tt.value}}
+		lon := Longitude{base{raw: tt.value}}
 		if got := lon.IsValid(); got != tt.valid {
 			t.Errorf("Longitude.IsValid() = %v, want %v, case: %s", got, tt.valid, tt.name)
 		}
@@ -239,7 +239,7 @@ func TestPhoneNumber_IsValid(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		pn := PhoneNumber{base{tt.value}}
+		pn := PhoneNumber{base{raw: tt.value}}
 		if got := pn.IsValid(); got != tt.valid {
 			t.Errorf("PhoneNumber.IsValid() = %v, want %v, case: %s", got, tt.valid, tt.name)
 		}
@@ -257,7 +257,7 @@ func TestText_IsValid(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		text := Text{base{tt.value}}
+		text := Text{base{raw: tt.value}}
 		if got := text.IsValid(); got != tt.valid {
 			t.Errorf("Text.IsValid() = %v, want %v, case: %s", got, tt.valid, tt.name)
 		}
@@ -278,7 +278,7 @@ func TestTimezone_IsValid(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tz := Timezone{base{tt.value}}
+		tz := Timezone{base{raw: tt.value}}
 		if got := tz.IsValid(); got != tt.valid {
 			t.Errorf("got = %v, want %v, case: %s", got, tt.valid, tt.name)
 		}
