@@ -27,14 +27,26 @@ func (base *base) String() string {
 }
 
 func (base *base) IsEmpty() bool {
+	if base == nil {
+		return true
+	}
+
 	return strings.TrimSpace(base.raw) == ""
 }
 
 func (base *base) Length() int {
+	if base == nil {
+		return 0
+	}
+
 	return len(base.raw)
 }
 
 func (base *base) IsPresent() bool {
+	if base == nil {
+		return false
+	}
+
 	return base.isPresent
 }
 
@@ -45,6 +57,10 @@ type ID struct {
 
 // IsValid checks if the ID is not empty.
 func (id *ID) IsValid() bool {
+	if id == nil {
+		return false
+	}
+
 	return !id.IsEmpty()
 }
 
@@ -62,6 +78,10 @@ type Color struct {
 
 // IsValid checks if the Color is a valid six-digit hexadecimal value.
 func (c *Color) IsValid() bool {
+	if c == nil {
+		return false
+	}
+
 	match, _ := regexp.MatchString(`^[0-9A-Fa-f]{6}$`, c.raw)
 	return match
 }
@@ -73,6 +93,10 @@ type Email struct {
 
 // IsValid checks if the Email is in a valid email format.
 func (e *Email) IsValid() bool {
+	if e == nil {
+		return false
+	}
+
 	_, err := mail.ParseAddress(e.raw)
 	return err == nil
 }
@@ -84,6 +108,52 @@ func NewOptionalEmail(raw *string) *Email {
 	return &Email{base{raw: *raw}}
 }
 
+// Integer represents a number without floating point.
+type Integer struct {
+	base
+}
+
+// IsValid if the value is a valid Integer.
+func (i *Integer) IsValid() bool {
+	if i == nil {
+		return false
+	}
+
+	_, err := strconv.Atoi(i.raw)
+	return err == nil
+}
+
+// Int returns an integer value of the raw string received from the CSV file.
+// Use IsValid to verify that the conversion can be made. This method will return
+// zero for strings that cannot be parsed to int.
+func (i *Integer) Int() int {
+	val, _ := strconv.Atoi(i.raw)
+	return val
+}
+
+// Float represents a number with a floating point.
+type Float struct {
+	base
+}
+
+// IsValid if the value is a valid Float.
+func (f *Float) IsValid() bool {
+	if f == nil {
+		return false
+	}
+
+	_, err := strconv.ParseFloat(f.raw, 64)
+	return err == nil
+}
+
+// Float64 returns a 64-bit float value of the raw string received from the CSV file.
+// Use IsValid to verify that the conversion can be made. This method will return
+// zero for strings that cannot be parsed to float.
+func (f *Float) Float64() float64 {
+	val, _ := strconv.ParseFloat(f.raw, 64)
+	return val
+}
+
 // URL represents a fully qualified URL.
 type URL struct {
 	base
@@ -91,6 +161,10 @@ type URL struct {
 
 // IsValid checks if the URL is well-formed.
 func (u *URL) IsValid() bool {
+	if u == nil {
+		return false
+	}
+
 	parsedURL, err := url.ParseRequestURI(u.raw)
 	return err == nil && (parsedURL.Scheme == "http" || parsedURL.Scheme == "https")
 }
@@ -116,6 +190,10 @@ type Time struct {
 
 // IsValid checks if the Time is in a valid format.
 func (t *Time) IsValid() bool {
+	if t == nil {
+		return false
+	}
+
 	match, _ := regexp.MatchString(`^(0[0-9]|1[0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])$|^([0-9]|1[0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])$`, t.raw)
 	return match
 }
@@ -127,6 +205,10 @@ type CurrencyCode struct {
 
 // IsValid checks if the CurrencyCode is a three-letter code.
 func (cc *CurrencyCode) IsValid() bool {
+	if cc == nil {
+		return false
+	}
+
 	match, _ := regexp.MatchString(`^[A-Z]{3}$`, cc.raw)
 	return match
 }
@@ -138,6 +220,10 @@ type CurrencyAmount struct {
 
 // IsValid checks if the CurrencyAmount is a valid decimal number.
 func (ca *CurrencyAmount) IsValid() bool {
+	if ca == nil {
+		return false
+	}
+
 	_, err := strconv.ParseFloat(ca.raw, 64)
 	return err == nil
 }
@@ -149,8 +235,19 @@ type Date struct {
 
 // IsValid checks if the Date is in the valid YYYYMMDD format.
 func (d *Date) IsValid() bool {
+	if d == nil {
+		return false
+	}
+
 	match, _ := regexp.MatchString(`^\d{8}$`, d.raw)
 	return match
+}
+
+func NewDate(raw *string) Date {
+	if raw == nil {
+		return Date{base{raw: ""}}
+	}
+	return Date{base{raw: *raw, isPresent: true}}
 }
 
 // LanguageCode represents an IETF BCP 47 language code.
@@ -160,6 +257,9 @@ type LanguageCode struct {
 
 // IsValid checks if the LanguageCode is a valid IETF BCP 47 code.
 func (lc *LanguageCode) IsValid() bool {
+	if lc == nil {
+		return false
+	}
 	// Basic validation for language codes: e.g., "en", "en-US"
 	match, _ := regexp.MatchString(`^[a-zA-Z]{2,3}(-[a-zA-Z]{2,3})?$`, lc.raw)
 	return match
@@ -179,6 +279,9 @@ type Latitude struct {
 
 // IsValid checks if the Latitude is a valid decimal value between -90 and 90.
 func (lat *Latitude) IsValid() bool {
+	if lat == nil {
+		return false
+	}
 	value, err := strconv.ParseFloat(lat.raw, 64)
 	return err == nil && value >= -90.0 && value <= 90.0
 }
@@ -190,6 +293,10 @@ type Longitude struct {
 
 // IsValid checks if the Longitude is a valid decimal value between -180 and 180.
 func (lon *Longitude) IsValid() bool {
+	if lon == nil {
+		return false
+	}
+
 	value, err := strconv.ParseFloat(lon.raw, 64)
 	return err == nil && value >= -180.0 && value <= 180.0
 }
@@ -201,6 +308,9 @@ type PhoneNumber struct {
 
 // IsValid checks if the PhoneNumber has a reasonable length and contains only digits and certain symbols.
 func (pn *PhoneNumber) IsValid() bool {
+	if pn == nil {
+		return false
+	}
 	// Check for minimum length, only contains digits, and common phone number symbols
 	match, _ := regexp.MatchString(`^[\d\s\-+()]{5,}$`, pn.raw)
 	return match
@@ -220,6 +330,9 @@ type Text struct {
 
 // IsValid checks if the Text is non-empty.
 func (t *Text) IsValid() bool {
+	if t == nil {
+		return false
+	}
 	return !t.IsEmpty()
 }
 
@@ -237,6 +350,9 @@ type Timezone struct {
 
 // IsValid checks if the Timezone is in a valid format (e.g., "America/New_York").
 func (tz *Timezone) IsValid() bool {
+	if tz == nil {
+		return false
+	}
 	// Basic regex to validate Continent/City or Continent/City_Name format.
 	// It checks if we have at least a structure like Continent/City.
 	match, _ := regexp.MatchString(`^[A-Za-z]+/[A-Za-z_]+$|^[A-Za-z]+/[A-Za-z]+$`, tz.raw)
