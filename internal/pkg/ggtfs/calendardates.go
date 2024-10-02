@@ -98,11 +98,11 @@ func ValidateCalendarDates(calendarDates []*CalendarDate, calendarItems []*Calen
 func validateCalendarDateReferences(calendarDates []*CalendarDate, calendarItems []*CalendarItem, validationErrors *[]error) {
 	// Create a map of CalendarItem service_ids for quick lookup
 	serviceIDMap := make(map[string]struct{})
-	for _, item := range calendarItems {
-		if item != nil && item.ServiceId != "" {
-			serviceIDMap[item.ServiceId] = struct{}{}
-		}
-	}
+	//for _, item := range calendarItems {
+	//	if item != nil && item.ServiceId != "" {
+	//		serviceIDMap[item.ServiceId] = struct{}{}
+	//	}
+	//}
 
 	// Check if each CalendarDate service_id is present in CalendarItems
 	for _, calendarDate := range calendarDates {
