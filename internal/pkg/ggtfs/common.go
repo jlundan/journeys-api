@@ -130,3 +130,20 @@ func loadEntities(csvReader *csv.Reader, validHeaders []string, entityCreator en
 
 	return entities, errs
 }
+
+func validateFieldIsPresentAndValid(field ValidAndPresentField, fieldName string, lineNumber int, fileName string) []error {
+	var validationErrors []error
+
+	if !field.IsPresent() {
+		validationErrors = append(validationErrors, createFileRowError(fileName, lineNumber, createMissingMandatoryFieldString(fieldName)))
+	} else if !field.IsValid() {
+		validationErrors = append(validationErrors, createFileRowError(fileName, lineNumber, createInvalidFieldString(fieldName)))
+	}
+
+	return validationErrors
+}
+
+type ValidAndPresentField interface {
+	IsValid() bool
+	IsPresent() bool
+}

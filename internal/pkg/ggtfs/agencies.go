@@ -22,23 +22,21 @@ func (a Agency) Validate() []error {
 
 	// The 'agency_id' field is conditionally required, check it in the ValidateAgencies function.
 
-	if !a.Name.IsPresent() {
-		validationErrors = append(validationErrors, createFileRowError(AgenciesFileName, a.LineNumber, createMissingMandatoryFieldString("agency_name")))
-	} else if !a.Name.IsValid() {
-		validationErrors = append(validationErrors, createFileRowError(AgenciesFileName, a.LineNumber, createInvalidFieldString("agency_name")))
+	fields := []struct {
+		fieldName string
+		field     ValidAndPresentField
+	}{
+		{"agency_name", &a.Name},
+		{"agency_url", &a.URL},
+		{"agency_timezone", &a.Timezone},
 	}
 
-	if !a.URL.IsPresent() {
-		validationErrors = append(validationErrors, createFileRowError(AgenciesFileName, a.LineNumber, createMissingMandatoryFieldString("agency_url")))
-	} else if !a.URL.IsValid() {
-		validationErrors = append(validationErrors, createFileRowError(AgenciesFileName, a.LineNumber, createInvalidFieldString("agency_url")))
+	for _, f := range fields {
+		validationErrors = append(validationErrors, validateFieldIsPresentAndValid(f.field, f.fieldName, a.LineNumber, AgenciesFileName)...)
 	}
 
-	if !a.Timezone.IsPresent() {
-		validationErrors = append(validationErrors, createFileRowError(AgenciesFileName, a.LineNumber, createMissingMandatoryFieldString("agency_timezone")))
-	} else if !a.Timezone.IsValid() {
-		validationErrors = append(validationErrors, createFileRowError(AgenciesFileName, a.LineNumber, createInvalidFieldString("agency_timezone")))
-	}
+	// These should not be implemented with the above method, since checking nil values with Golang interfaces, would
+	// require using reflection, which is way too slow.
 
 	if a.Lang != nil && !a.Lang.IsValid() {
 		validationErrors = append(validationErrors, createFileRowError(AgenciesFileName, a.LineNumber, createInvalidFieldString("agency_lang")))
