@@ -32,7 +32,7 @@ func LoadCalendarDates(csvReader *csv.Reader) ([]*CalendarDate, []error) {
 }
 
 // CreateCalendarDate creates a CalendarDate from a CSV row using the provided headers.
-func CreateCalendarDate(row []string, headers map[string]int, lineNumber int) (interface{}, []error) {
+func CreateCalendarDate(row []string, headers map[string]int, lineNumber int) interface{} {
 	var validationErrors []error
 
 	// Create the CalendarDate struct and populate fields dynamically
@@ -52,7 +52,7 @@ func CreateCalendarDate(row []string, headers map[string]int, lineNumber int) (i
 		}
 	}
 
-	return calendarDate, validationErrors
+	return calendarDate
 }
 
 // ValidateCalendarDates validates the parsed CalendarDate structs for logical consistency.

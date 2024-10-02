@@ -44,7 +44,7 @@ func LoadStops(csvReader *csv.Reader) ([]*Stop, []error) {
 }
 
 // CreateStop creates and validates a Stop instance from the CSV row data.
-func CreateStop(row []string, headers map[string]int, lineNumber int) (interface{}, []error) {
+func CreateStop(row []string, headers map[string]int, lineNumber int) interface{} {
 	var parseErrors []error
 
 	stop := Stop{
@@ -87,9 +87,9 @@ func CreateStop(row []string, headers map[string]int, lineNumber int) (interface
 	}
 
 	if len(parseErrors) > 0 {
-		return &stop, parseErrors
+		return &stop
 	}
-	return &stop, nil
+	return &stop
 }
 
 // ValidateStops performs additional validation for a list of Stop instances.
