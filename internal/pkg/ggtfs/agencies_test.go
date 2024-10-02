@@ -114,7 +114,7 @@ func getAgencyNOKTestcases() map[string]ggtfsTestCase {
 		},
 	}
 
-	testCases["6"] = ggtfsTestCase{
+	testCases["7"] = ggtfsTestCase{
 		csvRows: [][]string{
 			{"agency_url", "agency_timezone", "agency_id"},
 			{"http://acme.inc", "Europe/Helsinki", "ACME"},
