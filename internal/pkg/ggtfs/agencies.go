@@ -125,8 +125,8 @@ func ValidateAgencies(agencies []*Agency) ([]error, []string) {
 
 			validationErrors = append(validationErrors, a.Validate()...)
 
-			if a.Id.IsEmpty() {
-				validationErrors = append(validationErrors, createFileRowError(AgenciesFileName, a.LineNumber, "agency_id must be specified when multiple agencies are declared"))
+			if !a.Id.IsValid() {
+				validationErrors = append(validationErrors, createFileRowError(AgenciesFileName, a.LineNumber, "a valid agency_id must be specified when multiple agencies are declared"))
 				continue
 			}
 
