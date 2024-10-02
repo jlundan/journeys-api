@@ -97,8 +97,8 @@ func getAgencyNOKTestcases() map[string]ggtfsTestCase {
 			{"ACME", "http://acme.inc", "Europe/Helsinki"},
 		},
 		expectedErrors: []string{
-			"agency.txt:0: agency_id must be specified when multiple agencies are declared",
-			"agency.txt:1: agency_id must be specified when multiple agencies are declared",
+			"agency.txt:0: a valid agency_id must be specified when multiple agencies are declared",
+			"agency.txt:1: a valid agency_id must be specified when multiple agencies are declared",
 		},
 	}
 
