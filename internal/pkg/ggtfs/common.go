@@ -4,6 +4,7 @@ import (
 	"encoding/csv"
 	"errors"
 	"fmt"
+	"io"
 )
 
 const (
@@ -51,7 +52,7 @@ func createMissingMandatoryFieldString(fieldName string) string {
 	return fmt.Sprintf("missing mandatory field: %s", fieldName)
 }
 
-func getField(row []string, headerName string, headerPosition uint8, errs *[]error, lineNumber int, fileName string) string {
+func getField(row []string, headerName string, headerPosition int, errs *[]error, lineNumber int, fileName string) string {
 	if len(row) <= int(headerPosition) {
 		*errs = append(*errs, createFileRowError(fileName, lineNumber, fmt.Sprintf("missing value for field: %s", headerName)))
 		return ""
@@ -60,7 +61,7 @@ func getField(row []string, headerName string, headerPosition uint8, errs *[]err
 	return row[headerPosition]
 }
 
-func getOptionalField(row []string, headerName string, headerPosition uint8, errs *[]error, lineNumber int, fileName string) *string {
+func getOptionalField(row []string, headerName string, headerPosition int, errs *[]error, lineNumber int, fileName string) *string {
 	if len(row) <= int(headerPosition) {
 		*errs = append(*errs, createFileRowError(fileName, lineNumber, fmt.Sprintf("missing value for field: %s", headerName)))
 		return nil
@@ -69,7 +70,7 @@ func getOptionalField(row []string, headerName string, headerPosition uint8, err
 	return &row[headerPosition]
 }
 
-type entityCreator func(row []string, headers map[string]uint8, lineNumber int) (interface{}, []error)
+type entityCreator func(row []string, headers map[string]int, lineNumber int) (interface{}, []error)
 
 // LoadEntities is a generic function for loading entities from a CSV file using a provided entity creation callback.
 // This function reads each row from the given CSV reader, creates entities using the provided callback function, and
@@ -97,6 +98,10 @@ func loadEntities(csvReader *csv.Reader, validHeaders []string, entityCreator en
 	errs := make([]error, 0)
 
 	headers, err := ReadHeaderRow(csvReader, validHeaders)
+	if err == io.EOF {
+		return entities, errs
+	}
+
 	if err != nil {
 		errs = append(errs, createFileError(fileName, fmt.Sprintf("read error: %v", err.Error())))
 		return entities, errs
@@ -107,16 +112,14 @@ func loadEntities(csvReader *csv.Reader, validHeaders []string, entityCreator en
 
 	lineNumber := 0
 	for {
-		row, err := ReadDataRow(csvReader)
+		row, err := csvReader.Read()
+		if err == io.EOF {
+			break
+		}
+
 		if err != nil {
 			errs = append(errs, createFileError(fileName, fmt.Sprintf("%v", err.Error())))
 			lineNumber++
-			continue
-		}
-		if row == nil {
-			break
-		}
-		if len(row) == 0 {
 			continue
 		}
 

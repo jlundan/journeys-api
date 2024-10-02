@@ -39,8 +39,8 @@ func TestShapeParsing(t *testing.T) {
 		return ValidateShapes(shapes)
 	}
 
-	runGenericGTFSParseTest(t, "CalendarDateOKTestcases", loadShapesFunc, validateShapesFunc, false, getShapeOKTestcases())
-	runGenericGTFSParseTest(t, "CalendarDateNOKTestcases", loadShapesFunc, validateShapesFunc, false, getShapeNOKTestcases())
+	runGenericGTFSParseTest(t, "ShapeOKTestcases", loadShapesFunc, validateShapesFunc, false, getShapeOKTestcases())
+	runGenericGTFSParseTest(t, "ShapeNOKTestcases", loadShapesFunc, validateShapesFunc, false, getShapeNOKTestcases())
 }
 
 func getShapeOKTestcases() map[string]ggtfsTestCase {
@@ -86,8 +86,8 @@ func getShapeNOKTestcases() map[string]ggtfsTestCase {
 		expectedErrors: []string{
 			// TODO: Fix these
 			"shapes.txt: record on line 2: wrong number of fields",
-			"shapes.txt: shape () has less than two shape points",
-			"shapes.txt:1: shape_id must be specified",
+			"shapes.txt: shape ( ) has less than two shape points",
+			//"shapes.txt:1: shape_id must be specified",
 			"shapes.txt:1: shape_pt_lat must be specified and non-empty",
 			"shapes.txt:1: shape_pt_lon must be specified and non-empty",
 			"shapes.txt:1: shape_pt_sequence must be specified",

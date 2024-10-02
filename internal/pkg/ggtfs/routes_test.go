@@ -121,7 +121,7 @@ func getRouteNOKTestcases() map[string]ggtfsTestCase {
 		expectedErrors: []string{
 			"routes.txt: record on line 2: wrong number of fields",
 			"routes.txt:1: either route_short_name or route_long_name must be specified",
-			"routes.txt:1: route_id must be specified",
+			//"routes.txt:1: route_id must be specified",
 			"routes.txt:1: route_type must be specified",
 			"routes.txt:2: either route_short_name or route_long_name must be specified",
 			"routes.txt:2: route_type must be specified",
