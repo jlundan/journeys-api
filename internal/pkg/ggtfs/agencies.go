@@ -113,10 +113,6 @@ func ValidateAgencies(agencies []*Agency) ([]error, []string) {
 		usedIds := make(map[string]bool)
 
 		for _, a := range agencies {
-			if a == nil {
-				continue
-			}
-
 			validationErrors = append(validationErrors, a.Validate()...)
 
 			if !a.Id.IsValid() {
