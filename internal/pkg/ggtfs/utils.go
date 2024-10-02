@@ -2,46 +2,39 @@ package ggtfs
 
 import (
 	"encoding/csv"
-	"io"
+	"fmt"
 	"strings"
 )
 
-func ReadHeaderRow(r *csv.Reader, validHeaders []string) (map[string]uint8, error) {
+func ReadHeaderRow(r *csv.Reader, validHeaders []string) (map[string]int, error) {
 	row, err := r.Read()
-	if err == io.EOF {
-		return nil, nil
-	}
 	if err != nil {
 		return nil, err
 	}
 
-	var headers = map[string]uint8{}
-	for index, item := range row {
-		h := strings.TrimSpace(item)
+	validHeaderSet := make(map[string]struct{}, len(validHeaders))
+	for _, header := range validHeaders {
+		validHeaderSet[header] = struct{}{}
+	}
 
-		if !StringArrayContainsItem(validHeaders, h) {
+	headers := make(map[string]int)
+	encounteredHeaders := make(map[string]bool)
+
+	for index, headerName := range row {
+		headerName = strings.TrimSpace(headerName)
+
+		if _, isValid := validHeaderSet[headerName]; !isValid {
 			continue
 		}
 
-		headers[h] = uint8(index)
+		if encounteredHeaders[headerName] {
+			return nil, fmt.Errorf("duplicate header found: %s", headerName)
+		}
+
+		encounteredHeaders[headerName] = true
+		headers[headerName] = index
 	}
 	return headers, nil
-}
-
-func ReadDataRow(r *csv.Reader) ([]string, error) {
-	row, err := r.Read()
-	if err == io.EOF {
-		return nil, nil
-	}
-	if err != nil {
-		return nil, err
-	}
-
-	var trimmedRow []string
-	for _, item := range row {
-		trimmedRow = append(trimmedRow, strings.TrimSpace(item))
-	}
-	return trimmedRow, nil
 }
 
 func StringArrayContainsItem(arr []string, item string) bool {

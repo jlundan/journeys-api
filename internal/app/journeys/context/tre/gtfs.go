@@ -1,11 +1,15 @@
 package tre
 
 import (
+	"bufio"
+	"bytes"
 	"encoding/csv"
 	"github.com/dimchansky/utfbom"
 	"github.com/jlundan/journeys-api/internal/pkg/ggtfs"
+	"io"
 	"os"
 	"path"
+	"strings"
 )
 
 type GTFSContext struct {
@@ -95,5 +99,26 @@ func CreateCSVReaderForFile(path string) (*csv.Reader, error) {
 
 	sr, _ := utfbom.Skip(csvFile)
 
-	return csv.NewReader(sr), nil
+	filteredReader := NewSkippingReader(sr)
+
+	return csv.NewReader(filteredReader), nil
+}
+
+func NewSkippingReader(r io.Reader) io.Reader {
+	var buf bytes.Buffer
+
+	// Use a bufio.Scanner to read through the input line by line.
+	scanner := bufio.NewScanner(r)
+	for scanner.Scan() {
+		line := scanner.Text()
+		// Skip empty lines and lines that contain only whitespace.
+		if strings.TrimSpace(line) == "" {
+			continue
+		}
+		// Write non-empty lines to the buffer.
+		buf.WriteString(line + "\n")
+	}
+
+	// Return a new reader that reads from the buffer.
+	return &buf
 }

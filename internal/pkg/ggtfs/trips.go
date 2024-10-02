@@ -39,7 +39,7 @@ func LoadTrips(csvReader *csv.Reader) ([]*Trip, []error) {
 }
 
 // CreateTrip creates and validates a Trip instance from the CSV row data.
-func CreateTrip(row []string, headers map[string]uint8, lineNumber int) (interface{}, []error) {
+func CreateTrip(row []string, headers map[string]int, lineNumber int) (interface{}, []error) {
 	var parseErrors []error
 
 	trip := Trip{
