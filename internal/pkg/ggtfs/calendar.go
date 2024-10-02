@@ -40,7 +40,7 @@ func LoadCalendarItems(csvReader *csv.Reader) ([]*CalendarItem, []error) {
 }
 
 // CreateCalendarItem creates a CalendarItem from a CSV row, using the provided headers.
-func CreateCalendarItem(row []string, headers map[string]uint8, lineNumber int) (interface{}, []error) {
+func CreateCalendarItem(row []string, headers map[string]int, lineNumber int) (interface{}, []error) {
 	var validationErrors []error
 
 	// Create the CalendarItem struct and populate fields dynamically

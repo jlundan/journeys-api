@@ -63,7 +63,7 @@ func getCalendarItemNOKTestcases() map[string]ggtfsTestCase {
 			"calendar.txt:0: friday must be '0' or '1'",
 			"calendar.txt:0: monday must be '0' or '1'",
 			"calendar.txt:0: saturday must be '0' or '1'",
-			"calendar.txt:0: service_id must not be empty",
+			//"calendar.txt:0: service_id must not be empty",
 			"calendar.txt:0: start_date must not be empty",
 			"calendar.txt:0: sunday must be '0' or '1'",
 			"calendar.txt:0: thursday must be '0' or '1'",

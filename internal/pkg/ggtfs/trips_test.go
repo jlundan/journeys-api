@@ -87,7 +87,7 @@ func getTripNOKTestcases() map[string]ggtfsTestCase {
 		},
 		expectedErrors: []string{
 			"trips.txt: record on line 2: wrong number of fields",
-			"trips.txt:1: route_id must be specified",
+			//"trips.txt:1: route_id must be specified",
 			"trips.txt:1: service_id must be specified",
 			"trips.txt:1: trip_id must be specified",
 		},

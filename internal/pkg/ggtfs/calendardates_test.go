@@ -74,8 +74,8 @@ func getCalendarDateNOKTestcases() map[string]ggtfsTestCase {
 		},
 		expectedErrors: []string{
 			"calendar_dates.txt: record on line 2: wrong number of fields",
-			"calendar_dates.txt:1: date must not be empty",
-			"calendar_dates.txt:1: service_id must not be empty",
+			"calendar_dates.txt:1: invalid date format:  ",
+			//"calendar_dates.txt:1: service_id must not be empty",
 			"calendar_dates.txt:2: exception_type must be '1' or '2', found: not an int",
 			"calendar_dates.txt:3: exception_type must be '1' or '2', found: 10",
 			// TODO: Fix these

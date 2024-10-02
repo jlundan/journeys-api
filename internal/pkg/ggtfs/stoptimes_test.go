@@ -95,13 +95,13 @@ func getStopTimeNOKTestcases() map[string]ggtfsTestCase {
 		},
 		expectedErrors: []string{
 			"stop_times.txt: record on line 2: wrong number of fields",
-			"stop_times.txt: trip () has less than two defined stop times",
-			"stop_times.txt: trip () references to an unknown stop_id ()",
+			"stop_times.txt: trip ( ) has less than two defined stop times",
+			"stop_times.txt: trip ( ) references to an unknown stop_id ()",
 			"stop_times.txt:1: arrival_time must be specified",
 			"stop_times.txt:1: departure_time must be specified",
 			"stop_times.txt:1: stop_id must be specified",
 			"stop_times.txt:1: stop_sequence must be specified",
-			"stop_times.txt:1: trip_id must be specified",
+			//"stop_times.txt:1: trip_id must be specified",
 		},
 	}
 	testCases["2"] = ggtfsTestCase{

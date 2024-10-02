@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"regexp"
 	"strconv"
+	"strings"
 )
 
 // base is a struct that contains the raw value and a flag to indicate if the header for the field is present in the
@@ -26,7 +27,7 @@ func (base *base) String() string {
 }
 
 func (base *base) IsEmpty() bool {
-	return base.raw == ""
+	return strings.TrimSpace(base.raw) == ""
 }
 
 func (base *base) Length() int {
@@ -44,7 +45,7 @@ type ID struct {
 
 // IsValid checks if the ID is not empty.
 func (id *ID) IsValid() bool {
-	return id.raw != ""
+	return !id.IsEmpty()
 }
 
 func NewID(raw *string) ID {
@@ -219,7 +220,7 @@ type Text struct {
 
 // IsValid checks if the Text is non-empty.
 func (t *Text) IsValid() bool {
-	return t.raw != ""
+	return !t.IsEmpty()
 }
 
 func NewText(raw *string) Text {

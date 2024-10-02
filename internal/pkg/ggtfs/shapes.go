@@ -33,7 +33,7 @@ func LoadShapes(csvReader *csv.Reader) ([]*Shape, []error) {
 }
 
 // CreateShape creates and validates a Shape instance from the CSV row data.
-func CreateShape(row []string, headers map[string]uint8, lineNumber int) (interface{}, []error) {
+func CreateShape(row []string, headers map[string]int, lineNumber int) (interface{}, []error) {
 	var validationErrors []error
 
 	shape := Shape{

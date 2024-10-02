@@ -76,7 +76,7 @@ func LoadAgencies(csvReader *csv.Reader) ([]*Agency, []error) {
 	return agencies, errs
 }
 
-func CreateAgency(row []string, headers map[string]uint8, lineNumber int) (interface{}, []error) {
+func CreateAgency(row []string, headers map[string]int, lineNumber int) (interface{}, []error) {
 	var parseErrors []error
 
 	agency := Agency{
@@ -115,14 +115,6 @@ func ValidateAgencies(agencies []*Agency) ([]error, []string) {
 	var validationErrors []error
 	var recommendations []string
 
-	for _, agency := range agencies {
-		if agency == nil {
-			continue
-		}
-
-		validationErrors = append(validationErrors, agency.Validate()...)
-	}
-
 	if len(agencies) > 1 {
 		usedIds := make(map[string]bool)
 
@@ -130,6 +122,8 @@ func ValidateAgencies(agencies []*Agency) ([]error, []string) {
 			if a == nil {
 				continue
 			}
+
+			validationErrors = append(validationErrors, a.Validate()...)
 
 			if a.Id.IsEmpty() {
 				validationErrors = append(validationErrors, createFileRowError(AgenciesFileName, a.LineNumber, "agency_id must be specified when multiple agencies are declared"))
@@ -144,6 +138,9 @@ func ValidateAgencies(agencies []*Agency) ([]error, []string) {
 		}
 	} else if len(agencies) == 1 && agencies[0].Id.IsEmpty() {
 		recommendations = append(recommendations, createFileRowRecommendation(AgenciesFileName, agencies[0].LineNumber, "it is recommended that agency_id is specified even when there is only one agency"))
+		validationErrors = append(validationErrors, agencies[0].Validate()...)
+	} else if len(agencies) == 1 {
+		validationErrors = append(validationErrors, agencies[0].Validate()...)
 	}
 
 	return validationErrors, recommendations

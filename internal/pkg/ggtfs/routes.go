@@ -41,7 +41,7 @@ func LoadRoutes(csvReader *csv.Reader) ([]*Route, []error) {
 }
 
 // CreateRoute creates and validates a Route instance from the CSV row data.
-func CreateRoute(row []string, headers map[string]uint8, lineNumber int) (interface{}, []error) {
+func CreateRoute(row []string, headers map[string]int, lineNumber int) (interface{}, []error) {
 	var parseErrors []error
 
 	route := Route{
