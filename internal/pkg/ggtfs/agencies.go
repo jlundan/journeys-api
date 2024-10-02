@@ -76,9 +76,7 @@ func LoadAgencies(csvReader *csv.Reader) ([]*Agency, []error) {
 	return agencies, errs
 }
 
-func CreateAgency(row []string, headers map[string]int, lineNumber int) (interface{}, []error) {
-	var parseErrors []error
-
+func CreateAgency(row []string, headers map[string]int, lineNumber int) interface{} {
 	agency := Agency{
 		LineNumber: lineNumber,
 	}
@@ -86,29 +84,25 @@ func CreateAgency(row []string, headers map[string]int, lineNumber int) (interfa
 	for hName, hPos := range headers {
 		switch hName {
 		case "agency_id":
-			agency.Id = NewID(getOptionalField(row, hName, hPos, &parseErrors, lineNumber, AgenciesFileName))
+			agency.Id = NewID(&row[hPos])
 		case "agency_name":
-			agency.Name = NewText(getOptionalField(row, hName, hPos, &parseErrors, lineNumber, AgenciesFileName))
+			agency.Name = NewText(&row[hPos])
 		case "agency_url":
-			agency.URL = NewURL(getOptionalField(row, hName, hPos, &parseErrors, lineNumber, AgenciesFileName))
+			agency.URL = NewURL(&row[hPos])
 		case "agency_timezone":
-			agency.Timezone = NewTimezone(getOptionalField(row, hName, hPos, &parseErrors, lineNumber, AgenciesFileName))
+			agency.Timezone = NewTimezone(&row[hPos])
 		case "agency_lang":
-			agency.Lang = NewOptionalLanguageCode(getOptionalField(row, hName, hPos, &parseErrors, lineNumber, AgenciesFileName))
+			agency.Lang = NewOptionalLanguageCode(&row[hPos])
 		case "agency_phone":
-			agency.Phone = NewOptionalPhoneNumber(getOptionalField(row, hName, hPos, &parseErrors, lineNumber, AgenciesFileName))
+			agency.Phone = NewOptionalPhoneNumber(&row[hPos])
 		case "agency_fare_url":
-			agency.FareURL = NewOptionalURL(getOptionalField(row, hName, hPos, &parseErrors, lineNumber, AgenciesFileName))
+			agency.FareURL = NewOptionalURL(&row[hPos])
 		case "agency_email":
-			agency.Email = NewOptionalEmail(getOptionalField(row, hName, hPos, &parseErrors, lineNumber, AgenciesFileName))
+			agency.Email = NewOptionalEmail(&row[hPos])
 		}
 	}
 
-	if len(parseErrors) > 0 {
-		return &agency, parseErrors
-	}
-
-	return &agency, nil
+	return &agency
 }
 
 func ValidateAgencies(agencies []*Agency) ([]error, []string) {
