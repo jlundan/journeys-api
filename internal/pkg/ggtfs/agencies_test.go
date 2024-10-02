@@ -114,6 +114,16 @@ func getAgencyNOKTestcases() map[string]ggtfsTestCase {
 		},
 	}
 
+	testCases["6"] = ggtfsTestCase{
+		csvRows: [][]string{
+			{"agency_url", "agency_timezone", "agency_id"},
+			{"http://acme.inc", "Europe/Helsinki", "ACME"},
+		},
+		expectedErrors: []string{
+			"agency.txt:0: missing mandatory field: agency_name",
+		},
+	}
+
 	return testCases
 }
 

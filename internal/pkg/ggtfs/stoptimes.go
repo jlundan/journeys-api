@@ -42,7 +42,7 @@ func LoadStopTimes(csvReader *csv.Reader) ([]*StopTime, []error) {
 }
 
 // CreateStopTime creates and validates a StopTime instance from the CSV row data.
-func CreateStopTime(row []string, headers map[string]int, lineNumber int) (interface{}, []error) {
+func CreateStopTime(row []string, headers map[string]int, lineNumber int) interface{} {
 	var parseErrors []error
 
 	stopTime := StopTime{
@@ -79,9 +79,9 @@ func CreateStopTime(row []string, headers map[string]int, lineNumber int) (inter
 	}
 
 	if len(parseErrors) > 0 {
-		return &stopTime, parseErrors
+		return &stopTime
 	}
-	return &stopTime, nil
+	return &stopTime
 }
 
 // ValidateStopTimes performs additional validation for a list of StopTime instances.

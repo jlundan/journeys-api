@@ -70,7 +70,7 @@ func getOptionalField(row []string, headerName string, headerPosition int, errs 
 	return &row[headerPosition]
 }
 
-type entityCreator func(row []string, headers map[string]int, lineNumber int) (interface{}, []error)
+type entityCreator func(row []string, headers map[string]int, lineNumber int) interface{}
 
 // LoadEntities is a generic function for loading entities from a CSV file using a provided entity creation callback.
 // This function reads each row from the given CSV reader, creates entities using the provided callback function, and
@@ -123,12 +123,7 @@ func loadEntities(csvReader *csv.Reader, validHeaders []string, entityCreator en
 			continue
 		}
 
-		var entityCreateErrors []error
-		entity, entityCreateErrors := entityCreator(row, headers, lineNumber)
-		if len(entityCreateErrors) > 0 {
-			errs = append(errs, entityCreateErrors...)
-		}
-		entities = append(entities, entity)
+		entities = append(entities, entityCreator(row, headers, lineNumber))
 
 		lineNumber++
 	}
