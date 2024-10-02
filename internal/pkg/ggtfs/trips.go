@@ -126,7 +126,7 @@ func ValidateTrips(trips []*Trip, routes []*Route, calendarItems []*CalendarItem
 				if calendarItem == nil {
 					continue
 				}
-				if trip.ServiceId == calendarItem.ServiceId {
+				if trip.ServiceId == calendarItem.ServiceId.String() {
 					serviceFound = true
 					break
 				}

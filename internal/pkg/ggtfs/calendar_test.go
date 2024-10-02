@@ -59,16 +59,16 @@ func getCalendarItemNOKTestcases() map[string]ggtfsTestCase {
 			{" "},
 		},
 		expectedErrors: []string{
-			"calendar.txt:0: end_date must not be empty",
-			"calendar.txt:0: friday must be '0' or '1'",
-			"calendar.txt:0: monday must be '0' or '1'",
-			"calendar.txt:0: saturday must be '0' or '1'",
-			//"calendar.txt:0: service_id must not be empty",
-			"calendar.txt:0: start_date must not be empty",
-			"calendar.txt:0: sunday must be '0' or '1'",
-			"calendar.txt:0: thursday must be '0' or '1'",
-			"calendar.txt:0: tuesday must be '0' or '1'",
-			"calendar.txt:0: wednesday must be '0' or '1'",
+			"calendar.txt:0: invalid field: service_id",
+			"calendar.txt:0: missing mandatory field: end_date",
+			"calendar.txt:0: missing mandatory field: friday",
+			"calendar.txt:0: missing mandatory field: monday",
+			"calendar.txt:0: missing mandatory field: saturday",
+			"calendar.txt:0: missing mandatory field: start_date",
+			"calendar.txt:0: missing mandatory field: sunday",
+			"calendar.txt:0: missing mandatory field: thursday",
+			"calendar.txt:0: missing mandatory field: tuesday",
+			"calendar.txt:0: missing mandatory field: wednesday",
 		},
 	}
 
@@ -84,8 +84,13 @@ func getCalendarItemNOKTestcases() map[string]ggtfsTestCase {
 			{"1006", "1", "1", "1", "1", "1", "1", "1", "2021011", "20201011"},
 		},
 		expectedErrors: []string{
-			"calendar.txt:0: monday must be '0' or '1'",
-			"calendar.txt:0: tuesday must be '0' or '1'",
+			"calendar.txt:0: invalid field: monday",
+			"calendar.txt:0: invalid field: tuesday",
+			"calendar.txt:2: invalid field: start_date",
+			"calendar.txt:3: invalid field: start_date",
+			"calendar.txt:4: invalid field: start_date",
+			"calendar.txt:5: invalid field: start_date",
+			"calendar.txt:6: invalid field: start_date",
 
 			//TODO: Implement these checks in the validation code
 			//"calendar.txt:1: non-unique id: service_id",
@@ -107,16 +112,16 @@ func getCalendarItemNOKTestcases() map[string]ggtfsTestCase {
 
 func getCalendarItemOKTestcases() map[string]ggtfsTestCase {
 	expected1 := CalendarItem{
-		ServiceId: "111",
-		Monday:    "1",
-		Tuesday:   "1",
-		Wednesday: "1",
-		Thursday:  "1",
-		Friday:    "1",
-		Saturday:  "1",
-		Sunday:    "1",
-		StartDate: "20200101",
-		EndDate:   "20200102",
+		ServiceId: NewID(stringPtr("111")),
+		Monday:    NewWeekdayEnum(stringPtr("1")),
+		Tuesday:   NewWeekdayEnum(stringPtr("1")),
+		Wednesday: NewWeekdayEnum(stringPtr("1")),
+		Thursday:  NewWeekdayEnum(stringPtr("1")),
+		Friday:    NewWeekdayEnum(stringPtr("1")),
+		Saturday:  NewWeekdayEnum(stringPtr("1")),
+		Sunday:    NewWeekdayEnum(stringPtr("1")),
+		StartDate: NewDate(stringPtr("20200101")),
+		EndDate:   NewDate(stringPtr("20200102")),
 	}
 
 	testCases := make(map[string]ggtfsTestCase)
