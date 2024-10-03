@@ -45,9 +45,9 @@ func TestCalendarDateParsing(t *testing.T) {
 
 func getCalendarDateOKTestcases() map[string]ggtfsTestCase {
 	expected1 := CalendarDate{
-		ServiceId:     "1",
-		Date:          "20200101",
-		ExceptionType: "1",
+		ServiceId:     NewID(stringPtr("1")),
+		Date:          NewDate(stringPtr("20200101")),
+		ExceptionType: NewExceptionTypeEnum(stringPtr("1")),
 	}
 
 	testCases := make(map[string]ggtfsTestCase)
@@ -74,20 +74,10 @@ func getCalendarDateNOKTestcases() map[string]ggtfsTestCase {
 		},
 		expectedErrors: []string{
 			"calendar_dates.txt: record on line 2: wrong number of fields",
-			"calendar_dates.txt:1: invalid date format:  ",
-			//"calendar_dates.txt:1: service_id must not be empty",
-			"calendar_dates.txt:2: exception_type must be '1' or '2', found: not an int",
-			"calendar_dates.txt:3: exception_type must be '1' or '2', found: 10",
-			// TODO: Fix these
-			//"calendar_dates.txt: record on line 2: wrong number of fields",
-			//"calendar_dates.txt:1: service_id must be specified",
-			//"calendar_dates.txt:1: service_id: empty value not allowed",
-			//"calendar_dates.txt:1: date must be specified",
-			//"calendar_dates.txt:1: date: empty value not allowed",
-			//"calendar_dates.txt:2: exception_type must be specified",
-			//"calendar_dates.txt:2: exception_type: strconv.ParseInt: parsing \"not an int\": invalid syntax",
-			//"calendar_dates.txt:3: exception_type: invalid value",
-			//"calendar_dates.txt:3: exception_type must be specified",
+			"calendar_dates.txt:1: invalid field: date",
+			"calendar_dates.txt:1: invalid field: service_id",
+			"calendar_dates.txt:2: invalid field: exception_type",
+			"calendar_dates.txt:3: invalid field: exception_type",
 		},
 	}
 
