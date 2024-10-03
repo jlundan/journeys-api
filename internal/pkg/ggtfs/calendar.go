@@ -73,25 +73,25 @@ func CreateCalendarItem(row []string, headers map[string]int, lineNumber int) in
 	for hName, hPos := range headers {
 		switch hName {
 		case "service_id":
-			calendarItem.ServiceId = NewID(&row[hPos])
+			calendarItem.ServiceId = NewID(getRowValue(row, hPos))
 		case "monday":
-			calendarItem.Monday = NewWeekdayEnum(&row[hPos])
+			calendarItem.Monday = NewWeekdayEnum(getRowValue(row, hPos))
 		case "tuesday":
-			calendarItem.Tuesday = NewWeekdayEnum(&row[hPos])
+			calendarItem.Tuesday = NewWeekdayEnum(getRowValue(row, hPos))
 		case "wednesday":
-			calendarItem.Wednesday = NewWeekdayEnum(&row[hPos])
+			calendarItem.Wednesday = NewWeekdayEnum(getRowValue(row, hPos))
 		case "thursday":
-			calendarItem.Thursday = NewWeekdayEnum(&row[hPos])
+			calendarItem.Thursday = NewWeekdayEnum(getRowValue(row, hPos))
 		case "friday":
-			calendarItem.Friday = NewWeekdayEnum(&row[hPos])
+			calendarItem.Friday = NewWeekdayEnum(getRowValue(row, hPos))
 		case "saturday":
-			calendarItem.Saturday = NewWeekdayEnum(&row[hPos])
+			calendarItem.Saturday = NewWeekdayEnum(getRowValue(row, hPos))
 		case "sunday":
-			calendarItem.Sunday = NewWeekdayEnum(&row[hPos])
+			calendarItem.Sunday = NewWeekdayEnum(getRowValue(row, hPos))
 		case "start_date":
-			calendarItem.StartDate = NewDate(&row[hPos])
+			calendarItem.StartDate = NewDate(getRowValue(row, hPos))
 		case "end_date":
-			calendarItem.EndDate = NewDate(&row[hPos])
+			calendarItem.EndDate = NewDate(getRowValue(row, hPos))
 		}
 	}
 

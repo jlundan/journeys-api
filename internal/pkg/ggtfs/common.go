@@ -147,3 +147,11 @@ type ValidAndPresentField interface {
 	IsValid() bool
 	IsPresent() bool
 }
+
+func getRowValue(row []string, position int) *string {
+	if position < 0 || position >= len(row) {
+		return nil
+	}
+
+	return &row[position]
+}

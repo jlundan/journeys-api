@@ -18,6 +18,14 @@ func TestShouldReturnEmptyCalendarItemArrayOnEmptyString(t *testing.T) {
 	}
 }
 
+func TestNewWeekdayEnumReturnsEmptyOnNil(t *testing.T) {
+	we := NewWeekdayEnum(nil)
+
+	if we.raw != "" {
+		t.Error("expected empty WeekdayEnum")
+	}
+}
+
 func TestCalendarItemParsing(t *testing.T) {
 	loadCalendarItemsFunc := func(reader *csv.Reader) ([]interface{}, []error) {
 		calendarItems, errs := LoadCalendarItems(reader)
@@ -91,19 +99,6 @@ func getCalendarItemNOKTestcases() map[string]ggtfsTestCase {
 			"calendar.txt:4: invalid field: start_date",
 			"calendar.txt:5: invalid field: start_date",
 			"calendar.txt:6: invalid field: start_date",
-
-			//TODO: Implement these checks in the validation code
-			//"calendar.txt:1: non-unique id: service_id",
-			//"calendar.txt:2: start_date must be specified",
-			//"calendar.txt:2: start_date: strconv.ParseInt: parsing \"202x\": invalid syntax",
-			//"calendar.txt:3: start_date must be specified",
-			//"calendar.txt:3: start_date: strconv.ParseInt: parsing \"x1\": invalid syntax",
-			//"calendar.txt:4: start_date must be specified",
-			//"calendar.txt:4: start_date: strconv.ParseInt: parsing \"0x\": invalid syntax",
-			//"calendar.txt:5: start_date must be specified",
-			//"calendar.txt:5: start_date: strconv.ParseInt: parsing \"x1\": invalid syntax",
-			//"calendar.txt:6: start_date: invalid date format",
-			//"calendar.txt:6: start_date must be specified",
 		},
 	}
 
@@ -135,25 +130,3 @@ func getCalendarItemOKTestcases() map[string]ggtfsTestCase {
 
 	return testCases
 }
-
-//func parseDate(str string, fillEnd bool) (time.Time, error) {
-//	year, err := strconv.ParseInt(str[:4], 10, 64)
-//	if err != nil {
-//		return time.Time{}, err
-//	}
-//
-//	month, err := strconv.ParseInt(str[4:6], 10, 64)
-//	if err != nil {
-//		return time.Time{}, err
-//	}
-//
-//	day, err := strconv.ParseInt(str[6:8], 10, 64)
-//	if err != nil {
-//		return time.Time{}, err
-//	}
-//
-//	if fillEnd {
-//		return time.Date(int(year), time.Month(int(month)), int(day), 23, 59, 59, 0, time.FixedZone("UTC+2", 2*60*60)), nil
-//	}
-//	return time.Date(int(year), time.Month(int(month)), int(day), 0, 0, 0, 0, time.FixedZone("UTC+2", 2*60*60)), nil
-//}
