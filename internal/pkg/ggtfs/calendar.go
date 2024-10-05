@@ -7,17 +7,17 @@ import (
 
 // CalendarItem represents the GTFS calendar file structure.
 type CalendarItem struct {
-	ServiceId  ID          // service_id
-	Monday     WeekdayEnum // monday
-	Tuesday    WeekdayEnum // tuesday
-	Wednesday  WeekdayEnum // wednesday
-	Thursday   WeekdayEnum // thursday
-	Friday     WeekdayEnum // friday
-	Saturday   WeekdayEnum // saturday
-	Sunday     WeekdayEnum // sunday
-	StartDate  Date        // start_date
-	EndDate    Date        // end_date
-	LineNumber int         // CSV row number
+	ServiceId  ID                      // service_id
+	Monday     AvailableForWeekdayInfo // monday
+	Tuesday    AvailableForWeekdayInfo // tuesday
+	Wednesday  AvailableForWeekdayInfo // wednesday
+	Thursday   AvailableForWeekdayInfo // thursday
+	Friday     AvailableForWeekdayInfo // friday
+	Saturday   AvailableForWeekdayInfo // saturday
+	Sunday     AvailableForWeekdayInfo // sunday
+	StartDate  Date                    // start_date
+	EndDate    Date                    // end_date
+	LineNumber int                     // CSV row number
 }
 
 func (c CalendarItem) Validate() []error {
@@ -75,19 +75,19 @@ func CreateCalendarItem(row []string, headers map[string]int, lineNumber int) in
 		case "service_id":
 			calendarItem.ServiceId = NewID(getRowValue(row, hPos))
 		case "monday":
-			calendarItem.Monday = NewWeekdayEnum(getRowValue(row, hPos))
+			calendarItem.Monday = NewAvailableForWeekdayInfo(getRowValue(row, hPos))
 		case "tuesday":
-			calendarItem.Tuesday = NewWeekdayEnum(getRowValue(row, hPos))
+			calendarItem.Tuesday = NewAvailableForWeekdayInfo(getRowValue(row, hPos))
 		case "wednesday":
-			calendarItem.Wednesday = NewWeekdayEnum(getRowValue(row, hPos))
+			calendarItem.Wednesday = NewAvailableForWeekdayInfo(getRowValue(row, hPos))
 		case "thursday":
-			calendarItem.Thursday = NewWeekdayEnum(getRowValue(row, hPos))
+			calendarItem.Thursday = NewAvailableForWeekdayInfo(getRowValue(row, hPos))
 		case "friday":
-			calendarItem.Friday = NewWeekdayEnum(getRowValue(row, hPos))
+			calendarItem.Friday = NewAvailableForWeekdayInfo(getRowValue(row, hPos))
 		case "saturday":
-			calendarItem.Saturday = NewWeekdayEnum(getRowValue(row, hPos))
+			calendarItem.Saturday = NewAvailableForWeekdayInfo(getRowValue(row, hPos))
 		case "sunday":
-			calendarItem.Sunday = NewWeekdayEnum(getRowValue(row, hPos))
+			calendarItem.Sunday = NewAvailableForWeekdayInfo(getRowValue(row, hPos))
 		case "start_date":
 			calendarItem.StartDate = NewDate(getRowValue(row, hPos))
 		case "end_date":
@@ -108,12 +108,18 @@ func ValidateCalendarItems(calendarItems []*CalendarItem) ([]error, []string) {
 	return validationErrors, nil
 }
 
-type WeekdayEnum struct {
+const (
+	CalendarAvailableForWeekday    string = "1"
+	CalendarNotAvailableForWeekday string = "0"
+)
+
+type AvailableForWeekdayInfo struct {
 	Integer
 }
 
-func (w WeekdayEnum) IsValid() bool {
+func (w AvailableForWeekdayInfo) IsValid() bool {
 	val, err := strconv.Atoi(w.Integer.base.raw)
+
 	if err != nil {
 		return false
 	}
@@ -121,10 +127,10 @@ func (w WeekdayEnum) IsValid() bool {
 	return val == 0 || val == 1
 }
 
-func NewWeekdayEnum(raw *string) WeekdayEnum {
+func NewAvailableForWeekdayInfo(raw *string) AvailableForWeekdayInfo {
 	if raw == nil {
-		return WeekdayEnum{
+		return AvailableForWeekdayInfo{
 			Integer{base: base{raw: ""}}}
 	}
-	return WeekdayEnum{Integer{base: base{raw: *raw, isPresent: true}}}
+	return AvailableForWeekdayInfo{Integer{base: base{raw: *raw, isPresent: true}}}
 }
