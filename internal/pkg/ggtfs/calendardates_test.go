@@ -4,6 +4,8 @@ package ggtfs
 
 import (
 	"encoding/csv"
+	"fmt"
+	"strconv"
 	"strings"
 	"testing"
 )
@@ -46,6 +48,8 @@ func TestCalendarDateParsing(t *testing.T) {
 		for i, fixture := range fixtures["calendarItems"] {
 			if calendarItem, ok := fixture.(*CalendarItem); ok {
 				calendarItems[i] = calendarItem
+			} else {
+				t.Error(fmt.Sprintf("test setup error: cannot convert %v to CalendarItem pointer. maybe you used value instead of pointer when setting fixtures", fixture))
 			}
 		}
 
@@ -94,67 +98,55 @@ func getCalendarDateNOKTestcases() map[string]ggtfsTestCase {
 		},
 	}
 
+	testCases["2"] = ggtfsTestCase{
+		csvRows: [][]string{
+			{"service_id", "date", "exception_type"},
+			{"1000", "20201011", strconv.Itoa(ServiceAddedForCalendarDate)},
+			{"1001", "20201011", strconv.Itoa(ServiceRemovedForCalendarDate)},
+		},
+		expectedErrors: []string{
+			"calendar_dates.txt:1: referenced service_id '1001' not found in calendar.txt",
+		},
+		fixtures: map[string][]interface{}{
+			"calendarItems": {
+				&CalendarItem{
+					ServiceId:  NewID(stringPtr("1000")),
+					Monday:     NewAvailableForWeekdayInfo(stringPtr(CalendarAvailableForWeekday)),
+					Tuesday:    NewAvailableForWeekdayInfo(stringPtr(CalendarAvailableForWeekday)),
+					Wednesday:  NewAvailableForWeekdayInfo(stringPtr(CalendarAvailableForWeekday)),
+					Thursday:   NewAvailableForWeekdayInfo(stringPtr(CalendarAvailableForWeekday)),
+					Friday:     NewAvailableForWeekdayInfo(stringPtr(CalendarAvailableForWeekday)),
+					Saturday:   NewAvailableForWeekdayInfo(stringPtr(CalendarNotAvailableForWeekday)),
+					Sunday:     NewAvailableForWeekdayInfo(stringPtr(CalendarNotAvailableForWeekday)),
+					StartDate:  NewDate(stringPtr("20201011")),
+					EndDate:    NewDate(stringPtr("20201011")),
+					LineNumber: 0,
+				},
+			},
+		},
+	}
+
 	return testCases
 }
 
-// TODO: Integrate these to the test cases run by runGenericGTFSParseTest
-//func TestValidateCalendarDates(t *testing.T) {
-//	testCases := []struct {
-//		calendarDates  []*CalendarDate
-//		calendarItems  []*CalendarItem
-//		expectedErrors []string
-//	}{
-//		{
-//			calendarDates: []*CalendarDate{
-//				{ServiceId: "1000", LineNumber: 0},
-//			},
-//			calendarItems: []*CalendarItem{
-//				{ServiceId: "1000", LineNumber: 0},
-//				{ServiceId: "1001", LineNumber: 1},
-//			},
-//			expectedErrors: []string{},
-//		},
-//		{
-//			calendarDates:  nil,
-//			expectedErrors: []string{},
-//		},
-//		{
-//			calendarDates: []*CalendarDate{nil},
-//			calendarItems: []*CalendarItem{
-//				{ServiceId: "1002", LineNumber: 0},
-//				{ServiceId: "1001", LineNumber: 1},
-//			},
-//			expectedErrors: []string{},
-//		},
-//		{
-//			calendarDates: []*CalendarDate{
-//				{ServiceId: "1000", LineNumber: 0},
-//			},
-//			calendarItems: []*CalendarItem{nil},
-//			expectedErrors: []string{
-//				"calendar_dates.txt:0: referenced service_id not found in calendar.txt",
-//			},
-//		},
-//		{
-//			calendarDates: []*CalendarDate{
-//				{ServiceId: "1000", LineNumber: 0},
-//			},
-//			calendarItems: []*CalendarItem{
-//				{ServiceId: "1002", LineNumber: 0},
-//				{ServiceId: "1001", LineNumber: 1},
-//			},
-//			expectedErrors: []string{
-//				"calendar_dates.txt:0: referenced service_id not found in calendar.txt",
-//			},
-//		},
-//	}
-//
-//	for _, tc := range testCases {
-//		err := ValidateCalendarDates(tc.calendarDates, tc.calendarItems)
-//		checkErrors(tc.expectedErrors, err, t)
-//	}
-//}
-//
-//func calendarDatesMatch(a CalendarDate, b CalendarDate) bool {
-//	return a.ServiceId == b.ServiceId && a.Date == b.Date && a.ExceptionType == b.ExceptionType
-//}
+func TestValidateCalendarDateReferencesReturnsNoErrorsOnNilValues(t *testing.T) {
+	calendarDates := []*CalendarDate{
+		nil,
+	}
+	calendarItems := []*CalendarItem{
+		nil,
+	}
+	var validationErrors *[]error
+
+	validateCalendarDateReferences(calendarDates, calendarItems, validationErrors)
+	if validationErrors != nil {
+		t.Error("Expected no errors")
+	}
+}
+
+func TestNewExceptionTypeEnumReturnsEmptyOnNilArgument(t *testing.T) {
+	nete := NewExceptionTypeEnum(nil)
+	if !nete.IsEmpty() {
+		t.Error("Expected empty ExceptionTypeEnum")
+	}
+}
