@@ -28,7 +28,7 @@ func TestCalendarDateParsing(t *testing.T) {
 		return entities, errs
 	}
 
-	validateCalendarItemsFunc := func(entities []interface{}) ([]error, []string) {
+	validateCalendarItemsFunc := func(entities []interface{}, fixtures map[string][]interface{}) ([]error, []string) {
 		calendarDates := make([]*CalendarDate, len(entities))
 		for i, entity := range entities {
 			if calendarDate, ok := entity.(*CalendarDate); ok {
@@ -36,7 +36,20 @@ func TestCalendarDateParsing(t *testing.T) {
 			}
 		}
 
-		return ValidateCalendarDates(calendarDates, nil)
+		ciCount := len(fixtures["calendarItems"])
+
+		if ciCount == 0 {
+			return ValidateCalendarDates(calendarDates, nil)
+		}
+
+		calendarItems := make([]*CalendarItem, ciCount)
+		for i, fixture := range fixtures["calendarItems"] {
+			if calendarItem, ok := fixture.(*CalendarItem); ok {
+				calendarItems[i] = calendarItem
+			}
+		}
+
+		return ValidateCalendarDates(calendarDates, calendarItems)
 	}
 
 	runGenericGTFSParseTest(t, "CalendarDateNOKTestcases", loadCalendarDatesFunc, validateCalendarItemsFunc, false, getCalendarDateNOKTestcases())

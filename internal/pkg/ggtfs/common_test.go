@@ -71,11 +71,12 @@ func formatDifferences(differences []string) string {
 type ggtfsTestCase struct {
 	csvRows         [][]string
 	expectedStructs []interface{}
+	fixtures        map[string][]interface{}
 	expectedErrors  []string
 }
 
 type LoadFunction func(reader *csv.Reader) ([]interface{}, []error)
-type ValidateFunction func(entities []interface{}) ([]error, []string)
+type ValidateFunction func(entities []interface{}, fixtures map[string][]interface{}) ([]error, []string)
 
 type ParseResult struct {
 	Entities        []interface{}
@@ -84,10 +85,10 @@ type ParseResult struct {
 }
 
 // LoadAndValidateGTFS is a generic function to load and validate GTFS entities while allowing partial success.
-func loadAndValidateGTFS(csvReader *csv.Reader, loadFunc LoadFunction, validateFunc ValidateFunction, strictMode bool) ParseResult {
+func loadAndValidateGTFS(csvReader *csv.Reader, loadFunc LoadFunction, validateFunc ValidateFunction, fixtures map[string][]interface{}, strictMode bool) ParseResult {
 	// Load the entities using the provided load function
 	entities, parseErrors := loadFunc(csvReader)
-	validationErrors, validationRecommendations := validateFunc(entities)
+	validationErrors, validationRecommendations := validateFunc(entities, fixtures)
 
 	// If strict mode is enabled, combine parse errors and validation errors and return an empty set of entities
 	if strictMode && (len(parseErrors) > 0 || len(validationErrors) > 0) {
@@ -108,7 +109,7 @@ func loadAndValidateGTFS(csvReader *csv.Reader, loadFunc LoadFunction, validateF
 func runGenericGTFSParseTest(t *testing.T, testName string, loadFunc LoadFunction, validateFunc ValidateFunction, strictMode bool, testCases map[string]ggtfsTestCase) {
 	for tcName, tc := range testCases {
 		t.Run(fmt.Sprintf("%s/%s", testName, tcName), func(t *testing.T) {
-			result := loadAndValidateGTFS(csv.NewReader(strings.NewReader(tableToString(tc.csvRows))), loadFunc, validateFunc, strictMode)
+			result := loadAndValidateGTFS(csv.NewReader(strings.NewReader(tableToString(tc.csvRows))), loadFunc, validateFunc, tc.fixtures, strictMode)
 
 			// Sort errors for consistent comparison
 			sort.Slice(result.Errors, func(x, y int) bool {

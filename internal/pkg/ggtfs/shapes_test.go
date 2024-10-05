@@ -28,7 +28,7 @@ func TestShapeParsing(t *testing.T) {
 		return entities, errs
 	}
 
-	validateShapesFunc := func(entities []interface{}) ([]error, []string) {
+	validateShapesFunc := func(entities []interface{}, _ map[string][]interface{}) ([]error, []string) {
 		shapes := make([]*Shape, len(entities))
 		for i, entity := range entities {
 			if shape, ok := entity.(*Shape); ok {
