@@ -88,14 +88,14 @@ func validateCalendarDateReferences(calendarDates []*CalendarDate, calendarItems
 	// Create a map of CalendarItem service_ids for quick lookup
 	serviceIDMap := make(map[string]struct{})
 	for _, item := range calendarItems {
-		if item != nil && item.ServiceId.String() != "" {
+		if item != nil && !item.ServiceId.IsEmpty() {
 			serviceIDMap[item.ServiceId.String()] = struct{}{}
 		}
 	}
 
 	// Check if each CalendarDate service_id is present in CalendarItems
 	for _, calendarDate := range calendarDates {
-		if calendarDate == nil || calendarDate.ServiceId.String() == "" {
+		if calendarDate == nil || calendarDate.ServiceId.IsEmpty() {
 			continue
 		}
 		if _, found := serviceIDMap[calendarDate.ServiceId.String()]; !found {
@@ -105,6 +105,11 @@ func validateCalendarDateReferences(calendarDates []*CalendarDate, calendarItems
 		}
 	}
 }
+
+const (
+	ServiceAddedForCalendarDate   int = 1
+	ServiceRemovedForCalendarDate int = 2
+)
 
 type ExceptionTypeEnum struct {
 	Integer
@@ -116,7 +121,7 @@ func (ete ExceptionTypeEnum) IsValid() bool {
 		return false
 	}
 
-	return val == 0 || val == 1
+	return val == ServiceAddedForCalendarDate || val == ServiceRemovedForCalendarDate
 }
 
 func NewExceptionTypeEnum(raw *string) ExceptionTypeEnum {
