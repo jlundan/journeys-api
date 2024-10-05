@@ -19,10 +19,10 @@ func TestShouldReturnEmptyCalendarItemArrayOnEmptyString(t *testing.T) {
 }
 
 func TestNewWeekdayEnumReturnsEmptyOnNil(t *testing.T) {
-	we := NewWeekdayEnum(nil)
+	we := NewAvailableForWeekdayInfo(nil)
 
 	if we.raw != "" {
-		t.Error("expected empty WeekdayEnum")
+		t.Error("expected empty AvailableForWeekdayInfo")
 	}
 }
 
@@ -108,13 +108,13 @@ func getCalendarItemNOKTestcases() map[string]ggtfsTestCase {
 func getCalendarItemOKTestcases() map[string]ggtfsTestCase {
 	expected1 := CalendarItem{
 		ServiceId: NewID(stringPtr("111")),
-		Monday:    NewWeekdayEnum(stringPtr("1")),
-		Tuesday:   NewWeekdayEnum(stringPtr("1")),
-		Wednesday: NewWeekdayEnum(stringPtr("1")),
-		Thursday:  NewWeekdayEnum(stringPtr("1")),
-		Friday:    NewWeekdayEnum(stringPtr("1")),
-		Saturday:  NewWeekdayEnum(stringPtr("1")),
-		Sunday:    NewWeekdayEnum(stringPtr("1")),
+		Monday:    NewAvailableForWeekdayInfo(stringPtr("1")),
+		Tuesday:   NewAvailableForWeekdayInfo(stringPtr("1")),
+		Wednesday: NewAvailableForWeekdayInfo(stringPtr("1")),
+		Thursday:  NewAvailableForWeekdayInfo(stringPtr("1")),
+		Friday:    NewAvailableForWeekdayInfo(stringPtr("1")),
+		Saturday:  NewAvailableForWeekdayInfo(stringPtr("1")),
+		Sunday:    NewAvailableForWeekdayInfo(stringPtr("1")),
 		StartDate: NewDate(stringPtr("20200101")),
 		EndDate:   NewDate(stringPtr("20200102")),
 	}
