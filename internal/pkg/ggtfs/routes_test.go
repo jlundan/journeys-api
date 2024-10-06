@@ -64,7 +64,7 @@ func getRouteOKTestcases() map[string]ggtfsTestCase {
 		LongName:          NewOptionalText(stringPtr(longName)),
 		Description:       NewOptionalText(stringPtr(desc)),
 		Type:              NewRouteType(stringPtr(routeType)),
-		Url:               NewOptionalURL(stringPtr(u)),
+		URL:               NewOptionalURL(stringPtr(u)),
 		Color:             NewOptionalColor(stringPtr(rColor)),
 		TextColor:         NewOptionalColor(stringPtr(textColor)),
 		SortOrder:         NewOptionalInteger(stringPtr(so)),
@@ -82,7 +82,7 @@ func getRouteOKTestcases() map[string]ggtfsTestCase {
 		LongName:          NewOptionalText(stringPtr(longName)),
 		Description:       NewOptionalText(stringPtr(desc)),
 		Type:              NewRouteType(stringPtr(routeType)),
-		Url:               NewOptionalURL(stringPtr(u)),
+		URL:               NewOptionalURL(stringPtr(u)),
 		Color:             NewOptionalColor(stringPtr(rColor)),
 		TextColor:         NewOptionalColor(stringPtr(textColor)),
 		SortOrder:         NewOptionalInteger(stringPtr(so)),
@@ -121,10 +121,10 @@ func getRouteNOKTestcases() map[string]ggtfsTestCase {
 		expectedErrors: []string{
 			"routes.txt: record on line 2: wrong number of fields",
 			"routes.txt:1: either route_short_name or route_long_name must be specified",
-			//"routes.txt:1: route_id must be specified",
-			"routes.txt:1: route_type must be specified",
+			"routes.txt:1: invalid field: route_id",
+			"routes.txt:1: missing mandatory field: route_type",
 			"routes.txt:2: either route_short_name or route_long_name must be specified",
-			"routes.txt:2: route_type must be specified",
+			"routes.txt:2: missing mandatory field: route_type",
 		},
 	}
 	testCases["2"] = ggtfsTestCase{
@@ -134,7 +134,7 @@ func getRouteNOKTestcases() map[string]ggtfsTestCase {
 		},
 		expectedErrors: []string{
 			"routes.txt:0: either route_short_name or route_long_name must be specified",
-			"routes.txt:0: route_type must be specified",
+			"routes.txt:0: missing mandatory field: route_type",
 		},
 	}
 	testCases["3"] = ggtfsTestCase{
@@ -143,9 +143,7 @@ func getRouteNOKTestcases() map[string]ggtfsTestCase {
 			{"1", ""},
 		},
 		expectedErrors: []string{
-			//"routes.txt:0: route_short_name: empty value not allowed",
-			//"routes.txt:0: either route_short_name or route_long_name must be specified",
-			"routes.txt:0: route_type must be specified",
+			"routes.txt:0: missing mandatory field: route_type",
 		},
 	}
 	testCases["4"] = ggtfsTestCase{
@@ -154,8 +152,7 @@ func getRouteNOKTestcases() map[string]ggtfsTestCase {
 			{"1", ""},
 		},
 		expectedErrors: []string{
-			//"routes.txt:0: either route_short_name or route_long_name must be specified",
-			"routes.txt:0: route_type must be specified",
+			"routes.txt:0: missing mandatory field: route_type",
 		},
 	}
 	testCases["5"] = ggtfsTestCase{
@@ -164,9 +161,9 @@ func getRouteNOKTestcases() map[string]ggtfsTestCase {
 			{"1", ""},
 		},
 		expectedErrors: []string{
-			//"routes.txt:0: route_desc: empty value not allowed",
 			"routes.txt:0: either route_short_name or route_long_name must be specified",
-			"routes.txt:0: route_type must be specified",
+			"routes.txt:0: invalid field: route_desc",
+			"routes.txt:0: missing mandatory field: route_type",
 		},
 	}
 	testCases["6"] = ggtfsTestCase{
@@ -175,9 +172,8 @@ func getRouteNOKTestcases() map[string]ggtfsTestCase {
 			{"1", "100"},
 		},
 		expectedErrors: []string{
-			//"routes.txt:0: route_type: invalid value",
 			"routes.txt:0: either route_short_name or route_long_name must be specified",
-			//"routes.txt:0: route_type must be specified",
+			"routes.txt:0: invalid field: route_type",
 		},
 	}
 	testCases["7"] = ggtfsTestCase{
@@ -186,8 +182,8 @@ func getRouteNOKTestcases() map[string]ggtfsTestCase {
 			{"1", "malformed"},
 		},
 		expectedErrors: []string{
-			//"routes.txt:0: route_type: strconv.ParseInt: parsing \"malformed\": invalid syntax",
 			"routes.txt:0: either route_short_name or route_long_name must be specified",
+			"routes.txt:0: invalid field: route_type",
 		},
 	}
 	testCases["8"] = ggtfsTestCase{
@@ -196,7 +192,7 @@ func getRouteNOKTestcases() map[string]ggtfsTestCase {
 			{"1", "1", "1", "\000malformed"},
 		},
 		expectedErrors: []string{
-			//"routes.txt:0: route_url: parse \"\\x00malformed\": net/url: invalid control character in URL",
+			"routes.txt:0: invalid field: route_url",
 		},
 	}
 	testCases["9"] = ggtfsTestCase{
@@ -206,8 +202,8 @@ func getRouteNOKTestcases() map[string]ggtfsTestCase {
 			{"2", "1", "1", ""},
 		},
 		expectedErrors: []string{
-			//"routes.txt:0: route_color: encoding/hex: invalid byte: U+006D 'm'",
-			//"routes.txt:1: route_color: empty value not allowed",
+			"routes.txt:0: invalid field: route_color",
+			"routes.txt:1: invalid field: route_color",
 		},
 	}
 	testCases["10"] = ggtfsTestCase{
@@ -216,7 +212,7 @@ func getRouteNOKTestcases() map[string]ggtfsTestCase {
 			{"1", "1", "1", "malformed"},
 		},
 		expectedErrors: []string{
-			//"routes.txt:0: route_text_color: encoding/hex: invalid byte: U+006D 'm'",
+			"routes.txt:0: invalid field: route_text_color",
 		},
 	}
 	testCases["11"] = ggtfsTestCase{
@@ -225,7 +221,7 @@ func getRouteNOKTestcases() map[string]ggtfsTestCase {
 			{"1", "1", "1", "malformed"},
 		},
 		expectedErrors: []string{
-			//"routes.txt:0: route_sort_order: strconv.ParseInt: parsing \"malformed\": invalid syntax",
+			"routes.txt:0: invalid field: route_sort_order",
 		},
 	}
 	testCases["12"] = ggtfsTestCase{
