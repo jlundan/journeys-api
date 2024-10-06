@@ -13,7 +13,7 @@ type Route struct {
 	LongName          *Text                  // route_long_name
 	Description       *Text                  // route_desc
 	Type              RouteType              // route_type
-	Url               *URL                   // route_url
+	URL               *URL                   // route_url
 	Color             *Color                 // route_color
 	TextColor         *Color                 // route_text_color
 	SortOrder         *Integer               // route_sort_order
@@ -21,6 +21,50 @@ type Route struct {
 	ContinuousDropOff *ContinuousDropOffType // continuous_drop_off
 	NetworkId         *ID                    // network_id
 	LineNumber        int
+}
+
+func (r Route) Validate() []error {
+	var validationErrors []error
+
+	// agency_id is handled in the ValidateRoute function
+	// route_short_name is handled in the ValidateRoute function
+	// route_long_name is handled in the ValidateRoute function
+	// continuous_pickup is handled in the ValidateRoute function
+	// continuous_drop_off is handled in the ValidateRoute function
+	// network_id is handled in the ValidateRoute function
+
+	fields := []struct {
+		fieldName string
+		field     ValidAndPresentField
+	}{
+		{"route_id", &r.Id},
+		{"route_type", &r.Type},
+	}
+	for _, f := range fields {
+		validationErrors = append(validationErrors, validateFieldIsPresentAndValid(f.field, f.fieldName, r.LineNumber, RoutesFileName)...)
+	}
+
+	if r.Description != nil && !r.Description.IsValid() {
+		validationErrors = append(validationErrors, createFileRowError(RoutesFileName, r.LineNumber, createInvalidFieldString("route_desc")))
+	}
+	if r.URL != nil && !r.URL.IsValid() {
+		validationErrors = append(validationErrors, createFileRowError(RoutesFileName, r.LineNumber, createInvalidFieldString("route_url")))
+	}
+	if r.Color != nil && !r.Color.IsValid() {
+		validationErrors = append(validationErrors, createFileRowError(RoutesFileName, r.LineNumber, createInvalidFieldString("route_color")))
+	}
+	if r.TextColor != nil && !r.TextColor.IsValid() {
+		validationErrors = append(validationErrors, createFileRowError(RoutesFileName, r.LineNumber, createInvalidFieldString("route_text_color")))
+	}
+	if r.SortOrder != nil && !r.SortOrder.IsValid() {
+		validationErrors = append(validationErrors, createFileRowError(RoutesFileName, r.LineNumber, createInvalidFieldString("route_sort_order")))
+	}
+
+	if r.ShortName == nil && r.LongName == nil {
+		validationErrors = append(validationErrors, createFileRowError(RoutesFileName, r.LineNumber, "either route_short_name or route_long_name must be specified"))
+	}
+
+	return validationErrors
 }
 
 var validRouteHeaders = []string{"route_id", "agency_id", "route_short_name", "route_long_name", "route_desc",
@@ -60,7 +104,7 @@ func CreateRoute(row []string, headers map[string]int, lineNumber int) interface
 		case "route_type":
 			route.Type = NewRouteType(getRowValue(row, hPos))
 		case "route_url":
-			route.Url = NewOptionalURL(getRowValue(row, hPos))
+			route.URL = NewOptionalURL(getRowValue(row, hPos))
 		case "route_color":
 			route.Color = NewOptionalColor(getRowValue(row, hPos))
 		case "route_text_color":
@@ -82,56 +126,45 @@ func CreateRoute(row []string, headers map[string]int, lineNumber int) interface
 
 func ValidateRoutes(routes []*Route, agencies []*Agency) ([]error, []string) {
 	var validationErrors []error
-	var recommendations []string
 
 	if routes == nil {
-		return validationErrors, recommendations
+		return validationErrors, nil
 	}
 
 	for _, route := range routes {
-		// Additional required field checks for individual Route.
-		if route.Id.String() == "" {
-			validationErrors = append(validationErrors, createFileRowError(RoutesFileName, route.LineNumber, "route_id must be specified"))
-		}
-		if route.Type.String() == "" {
-			validationErrors = append(validationErrors, createFileRowError(RoutesFileName, route.LineNumber, "route_type must be specified"))
-		}
-		if route.ShortName == nil && route.LongName == nil {
-			validationErrors = append(validationErrors, createFileRowError(RoutesFileName, route.LineNumber, "either route_short_name or route_long_name must be specified"))
-		}
+		validationErrors = append(validationErrors, route.Validate()...)
 	}
 
 	if agencies == nil {
-		return validationErrors, recommendations
+		return validationErrors, nil
 	}
 
-	// Check for valid agency_id references in the routes.
+	usedIds := make(map[string]bool)
 	for _, route := range routes {
-		if route == nil {
+		if route == nil || route.AgencyId == nil {
 			continue
 		}
-		agencyFound := false
+
+		matchingAgencyFound := false
 		for _, agency := range agencies {
 			if agency == nil {
 				continue
 			}
 
-			if route.AgencyId != nil && route.AgencyId.String() == agency.Id.String() {
-				agencyFound = true
+			errs := agency.Validate()
+			if len(errs) > 0 {
+				continue
+			}
+
+			if route.AgencyId.String() == agency.Id.String() {
+				matchingAgencyFound = true
 				break
 			}
 		}
-		if !agencyFound {
-			validationErrors = append(validationErrors, createFileRowError(RoutesFileName, route.LineNumber, fmt.Sprintf("referenced agency_id '%s' not found in %s", route.AgencyId, AgenciesFileName)))
+		if !matchingAgencyFound {
+			validationErrors = append(validationErrors, createFileRowError(RoutesFileName, route.LineNumber, fmt.Sprintf("referenced agency_id '%s' not found in %s", route.AgencyId.String(), AgenciesFileName)))
 		}
-	}
 
-	// Check for duplicate route_id entries.
-	usedIds := make(map[string]bool)
-	for _, route := range routes {
-		if route == nil {
-			continue
-		}
 		if usedIds[route.Id.String()] {
 			validationErrors = append(validationErrors, createFileRowError(RoutesFileName, route.LineNumber, fmt.Sprintf("route_id '%s' is not unique within the file", route.Id.String())))
 		} else {
@@ -139,7 +172,7 @@ func ValidateRoutes(routes []*Route, agencies []*Agency) ([]error, []string) {
 		}
 	}
 
-	return validationErrors, recommendations
+	return validationErrors, nil
 }
 
 const (
