@@ -3,22 +3,23 @@ package ggtfs
 import (
 	"encoding/csv"
 	"fmt"
+	"strconv"
 )
 
-// Route struct with optional fields as string pointers and required fields as strings.
 type Route struct {
-	Id                string
-	AgencyId          string
-	ShortName         *string
-	LongName          *string
-	Desc              *string
-	Type              string
-	Url               *string
-	Color             *string
-	TextColor         *string
-	SortOrder         *string
-	ContinuousPickup  *string
-	ContinuousDropOff *string
+	Id                ID                     // route_id
+	AgencyId          *ID                    // agency_id
+	ShortName         *Text                  // route_short_name
+	LongName          *Text                  // route_long_name
+	Description       *Text                  // route_desc
+	Type              RouteType              // route_type
+	Url               *URL                   // route_url
+	Color             *Color                 // route_color
+	TextColor         *Color                 // route_text_color
+	SortOrder         *Integer               // route_sort_order
+	ContinuousPickup  *ContinuousPickupType  // continuous_pickup
+	ContinuousDropOff *ContinuousDropOffType // continuous_drop_off
+	NetworkId         *ID                    // network_id
 	LineNumber        int
 }
 
@@ -26,7 +27,6 @@ var validRouteHeaders = []string{"route_id", "agency_id", "route_short_name", "r
 	"route_type", "route_url", "route_color", "route_text_color", "route_sort_order", "continuous_pickup",
 	"continuous_drop_off", "network_id"}
 
-// LoadRoutes loads routes from a CSV reader and returns them along with any errors.
 func LoadRoutes(csvReader *csv.Reader) ([]*Route, []error) {
 	entities, errs := loadEntities(csvReader, validRouteHeaders, CreateRoute, RoutesFileName)
 
@@ -40,10 +40,7 @@ func LoadRoutes(csvReader *csv.Reader) ([]*Route, []error) {
 	return routes, errs
 }
 
-// CreateRoute creates and validates a Route instance from the CSV row data.
 func CreateRoute(row []string, headers map[string]int, lineNumber int) interface{} {
-	var parseErrors []error
-
 	route := Route{
 		LineNumber: lineNumber,
 	}
@@ -51,39 +48,38 @@ func CreateRoute(row []string, headers map[string]int, lineNumber int) interface
 	for hName, hPos := range headers {
 		switch hName {
 		case "route_id":
-			route.Id = getField(row, hName, hPos, &parseErrors, lineNumber, RoutesFileName)
+			route.Id = NewID(getRowValue(row, hPos))
 		case "agency_id":
-			route.AgencyId = getField(row, hName, hPos, &parseErrors, lineNumber, RoutesFileName)
+			route.AgencyId = NewOptionalID(getRowValue(row, hPos))
 		case "route_short_name":
-			route.ShortName = getOptionalField(row, hName, hPos, &parseErrors, lineNumber, RoutesFileName)
+			route.ShortName = NewOptionalText(getRowValue(row, hPos))
 		case "route_long_name":
-			route.LongName = getOptionalField(row, hName, hPos, &parseErrors, lineNumber, RoutesFileName)
+			route.LongName = NewOptionalText(getRowValue(row, hPos))
 		case "route_desc":
-			route.Desc = getOptionalField(row, hName, hPos, &parseErrors, lineNumber, RoutesFileName)
-		case "route_url":
-			route.Url = getOptionalField(row, hName, hPos, &parseErrors, lineNumber, RoutesFileName)
-		case "route_color":
-			route.Color = getOptionalField(row, hName, hPos, &parseErrors, lineNumber, RoutesFileName)
-		case "route_text_color":
-			route.TextColor = getOptionalField(row, hName, hPos, &parseErrors, lineNumber, RoutesFileName)
-		case "route_sort_order":
-			route.SortOrder = getOptionalField(row, hName, hPos, &parseErrors, lineNumber, RoutesFileName)
-		case "continuous_pickup":
-			route.ContinuousPickup = getOptionalField(row, hName, hPos, &parseErrors, lineNumber, RoutesFileName)
-		case "continuous_drop_off":
-			route.ContinuousDropOff = getOptionalField(row, hName, hPos, &parseErrors, lineNumber, RoutesFileName)
+			route.Description = NewOptionalText(getRowValue(row, hPos))
 		case "route_type":
-			route.Type = getField(row, hName, hPos, &parseErrors, lineNumber, RoutesFileName)
+			route.Type = NewRouteType(getRowValue(row, hPos))
+		case "route_url":
+			route.Url = NewOptionalURL(getRowValue(row, hPos))
+		case "route_color":
+			route.Color = NewOptionalColor(getRowValue(row, hPos))
+		case "route_text_color":
+			route.TextColor = NewOptionalColor(getRowValue(row, hPos))
+		case "route_sort_order":
+			route.SortOrder = NewOptionalInteger(getRowValue(row, hPos))
+		case "continuous_pickup":
+			route.ContinuousPickup = NewOptionalContinuousPickupType(getRowValue(row, hPos))
+		case "continuous_drop_off":
+			route.ContinuousDropOff = NewOptionalContinuousDropOffType(getRowValue(row, hPos))
+
+		case "network_id":
+			route.NetworkId = NewOptionalID(getRowValue(row, hPos))
 		}
 	}
 
-	if len(parseErrors) > 0 {
-		return &route
-	}
 	return &route
 }
 
-// ValidateRoutes performs additional validation for a list of Route instances.
 func ValidateRoutes(routes []*Route, agencies []*Agency) ([]error, []string) {
 	var validationErrors []error
 	var recommendations []string
@@ -94,10 +90,10 @@ func ValidateRoutes(routes []*Route, agencies []*Agency) ([]error, []string) {
 
 	for _, route := range routes {
 		// Additional required field checks for individual Route.
-		if route.Id == "" {
+		if route.Id.String() == "" {
 			validationErrors = append(validationErrors, createFileRowError(RoutesFileName, route.LineNumber, "route_id must be specified"))
 		}
-		if route.Type == "" {
+		if route.Type.String() == "" {
 			validationErrors = append(validationErrors, createFileRowError(RoutesFileName, route.LineNumber, "route_type must be specified"))
 		}
 		if route.ShortName == nil && route.LongName == nil {
@@ -119,7 +115,8 @@ func ValidateRoutes(routes []*Route, agencies []*Agency) ([]error, []string) {
 			if agency == nil {
 				continue
 			}
-			if route.AgencyId == agency.Id.String() {
+
+			if route.AgencyId != nil && route.AgencyId.String() == agency.Id.String() {
 				agencyFound = true
 				break
 			}
@@ -135,209 +132,118 @@ func ValidateRoutes(routes []*Route, agencies []*Agency) ([]error, []string) {
 		if route == nil {
 			continue
 		}
-		if usedIds[route.Id] {
-			validationErrors = append(validationErrors, createFileRowError(RoutesFileName, route.LineNumber, fmt.Sprintf("route_id '%s' is not unique within the file", route.Id)))
+		if usedIds[route.Id.String()] {
+			validationErrors = append(validationErrors, createFileRowError(RoutesFileName, route.LineNumber, fmt.Sprintf("route_id '%s' is not unique within the file", route.Id.String())))
 		} else {
-			usedIds[route.Id] = true
+			usedIds[route.Id.String()] = true
 		}
 	}
 
 	return validationErrors, recommendations
 }
 
-//package ggtfs
-//
-//import (
-//	"encoding/csv"
-//	"errors"
-//	"fmt"
-//	"strconv"
-//)
-//
-//type Route struct {
-//	Id                string
-//	AgencyId          string
-//	ShortName         *string
-//	LongName          *string
-//	Desc              *string
-//	Type              int
-//	Url               *string
-//	Color             *string
-//	TextColor         *string
-//	SortOrder         *int
-//	ContinuousPickup  *int
-//	ContinuousDropOff *int
-//	lineNumber        int
-//}
-//
-//var validRouteHeaders = []string{"route_id", "agency_id", "route_short_name", "route_long_name", "route_desc",
-//	"route_type", "route_url", "route_color", "route_text_color", "route_sort_order", "continuous_pickup",
-//	"continuous_drop_off", "network_id"}
-//
-//func LoadRoutes(csvReader *csv.Reader) ([]*Route, []error) {
-//	routes := make([]*Route, 0)
-//	errs := make([]error, 0)
-//
-//	headers, err := ReadHeaderRow(csvReader, validRouteHeaders)
-//	if err != nil {
-//		errs = append(errs, createFileError(RoutesFileName, fmt.Sprintf("read error: %v", err.Error())))
-//		return routes, errs
-//	}
-//	if headers == nil {
-//		return routes, errs
-//	}
-//
-//	usedIds := make([]string, 0)
-//	index := 0
-//	for {
-//		row, err := ReadDataRow(csvReader)
-//		if err != nil {
-//			errs = append(errs, createFileError(RoutesFileName, fmt.Sprintf("%v", err.Error())))
-//			index++
-//			continue
-//		}
-//		if row == nil {
-//			break
-//		}
-//
-//		rowErrs := make([]error, 0)
-//		route := Route{
-//			lineNumber: index,
-//		}
-//
-//		var (
-//			routeId   *string
-//			routeType *int
-//		)
-//		for name, column := range headers {
-//			switch name {
-//			case "route_id":
-//				routeId = handleStringField(row[column], RoutesFileName, name, index, &rowErrs)
-//			case "agency_id":
-//				route.AgencyId = row[column] //handleStringField(row[column], RoutesFileName, name, index, &rowErrs)
-//			case "route_short_name":
-//				route.ShortName = handleStringField(row[column], RoutesFileName, name, index, &rowErrs)
-//			case "route_long_name":
-//				//route.LongName = handleStringField(row[column], RoutesFileName, name, index, &rowErrs)
-//				route.LongName = &row[column]
-//			case "route_desc":
-//				route.Desc = handleStringField(row[column], RoutesFileName, name, index, &rowErrs)
-//			case "route_url":
-//				route.Url = handleURLField(row[column], RoutesFileName, name, index, &rowErrs)
-//			case "route_color":
-//				route.Color = handleColorField(row[column], RoutesFileName, name, index, &rowErrs)
-//			case "route_text_color":
-//				route.TextColor = handleColorField(row[column], RoutesFileName, name, index, &rowErrs)
-//			case "route_sort_order":
-//				route.SortOrder = handleIntField(row[column], RoutesFileName, name, index, &rowErrs)
-//			case "continuous_pickup":
-//				route.ContinuousPickup = handleContinuousPickupField(row[column], RoutesFileName, name, index, &rowErrs)
-//			case "continuous_drop_off":
-//				route.ContinuousDropOff = handleContinuousDropOffField(row[column], RoutesFileName, name, index, &rowErrs)
-//			case "route_type":
-//				routeType = handleRouteTypeField(row[column], RoutesFileName, name, index, &rowErrs)
-//			}
-//		}
-//
-//		if routeId == nil {
-//			rowErrs = append(rowErrs, createFileRowError(RoutesFileName, index, "route_id must be specified"))
-//		} else {
-//			route.Id = *routeId
-//			if StringArrayContainsItem(usedIds, *routeId) {
-//				errs = append(errs, createFileRowError(RoutesFileName, index, fmt.Sprintf("%s: route_id", nonUniqueId)))
-//			} else {
-//				usedIds = append(usedIds, *routeId)
-//			}
-//		}
-//
-//		if routeType == nil {
-//			rowErrs = append(rowErrs, createFileRowError(RoutesFileName, index, "route_type must be specified"))
-//		} else {
-//			route.Type = *routeType
-//		}
-//
-//		if route.ShortName == nil && route.LongName == nil {
-//			rowErrs = append(rowErrs, createFileRowError(RoutesFileName, index, "either route_short_name or route_long_name must be specified"))
-//		}
-//
-//		if len(rowErrs) > 0 {
-//			errs = append(errs, rowErrs...)
-//		} else {
-//			routes = append(routes, &route)
-//		}
-//
-//		index++
-//	}
-//
-//	return routes, errs
-//}
-//
-//func ValidateRoutes(routes []*Route, agencies []*Agency) []error {
-//	var validationErrors []error
-//
-//	if routes == nil || agencies == nil {
-//		return validationErrors
-//	}
-//
-//	for _, route := range routes {
-//		if route == nil {
-//			continue
-//		}
-//		notFound := true
-//		for _, agency := range agencies {
-//			if agency == nil {
-//				continue
-//			}
-//			if route.AgencyId == agency.Id {
-//				notFound = false
-//				break
-//			}
-//		}
-//		if notFound {
-//			validationErrors = append(validationErrors, createFileRowError(RoutesFileName, route.lineNumber, fmt.Sprintf("referenced agency_id not found in %s", AgenciesFileName)))
-//		}
-//	}
-//
-//	return validationErrors
-//}
-//
-//func handleRouteTypeField(str string, fileName string, fieldName string, index int, errs *[]error) *int {
-//	n, err := strconv.ParseInt(str, 10, 64)
-//	if err != nil {
-//		*errs = append(*errs, createFieldError(fileName, fieldName, index, err))
-//	}
-//
-//	if rt := int(n); rt <= 7 || (rt >= 11 && rt <= 12) {
-//		return &rt
-//	} else {
-//		*errs = append(*errs, createFieldError(fileName, fieldName, index, errors.New(invalidValue)))
-//		return nil
-//	}
-//}
-//
-////const (
-////	TramStreetcarLightRail RouteType = iota
-////	SubwayMetro
-////	Rail
-////	Bus
-////	Ferry
-////	CableTram
-////	AerialLiftSuspendedCableCar
-////	Funicular
-////	TrolleyBus
-////	Monorail
-////)
-////
-////const (
-////	ContinuousPickup ContinuousPickupType = iota
-////	NoContinuousPickup
-////	PhoneAgencyPickup
-////	CoordinateWithDriverPickup
-////)
-////
-////const (
-////	ContinuousDropOff ContinuousDropOffType = iota
-////	NoContinuousDropOff
-////	PhoneAgencyDropOff
-////	CoordinateWithDriverDropOff
-////)
+const (
+	TramStreetCarLightRailRouteType   = 0
+	SubwayMetroRouteType              = 1
+	RailRouteType                     = 2
+	BusRouteType                      = 3
+	FerryRouteType                    = 4
+	CableTramRouteType                = 5
+	AerialLiftSuspendedCableRouteType = 6
+	FunicularRouteType                = 7
+	TrolleyBusRouteType               = 11
+	MonorailRouteType                 = 12
+)
+
+type RouteType struct {
+	Integer
+}
+
+func (ete RouteType) IsValid() bool {
+	val, err := strconv.Atoi(ete.Integer.base.raw)
+	if err != nil {
+		return false
+	}
+
+	return val == TramStreetCarLightRailRouteType || val == SubwayMetroRouteType || val == RailRouteType || val == BusRouteType ||
+		val == FerryRouteType || val == CableTramRouteType || val == AerialLiftSuspendedCableRouteType || val == FunicularRouteType ||
+		val == TrolleyBusRouteType || val == MonorailRouteType
+}
+
+func NewRouteType(raw *string) RouteType {
+	if raw == nil {
+		return RouteType{
+			Integer{base: base{raw: ""}}}
+	}
+	return RouteType{Integer{base: base{raw: *raw, isPresent: true}}}
+}
+
+const (
+	ContinuousStoppingPickupType       = 0
+	NoContinuousStoppingPickupType     = 1
+	MustPhoneAgencyPickupType          = 2
+	MustCoordinateWithDriverPickupType = 3
+)
+
+type ContinuousPickupType struct {
+	Integer
+}
+
+func (cpt ContinuousPickupType) IsValid() bool {
+	// Spec says "1 or empty - No continuous stopping drop off."
+	// Empty = valid
+	if cpt.Integer.base.IsEmpty() {
+		return true
+	}
+
+	val, err := strconv.Atoi(cpt.Integer.base.raw)
+	if err != nil {
+		return false
+	}
+
+	return val == ContinuousStoppingPickupType || val == NoContinuousStoppingPickupType ||
+		val == MustPhoneAgencyPickupType || val == MustCoordinateWithDriverPickupType
+}
+
+func NewOptionalContinuousPickupType(raw *string) *ContinuousPickupType {
+	if raw == nil {
+		return &ContinuousPickupType{
+			Integer{base: base{raw: ""}}}
+	}
+	return &ContinuousPickupType{Integer{base: base{raw: *raw}}}
+}
+
+const (
+	ContinuousStoppingDropOffType       = 0
+	NoContinuousStoppingDropOffType     = 1
+	MustPhoneAgencyDropOffType          = 2
+	MustCoordinateWithDriverDropOffType = 3
+)
+
+type ContinuousDropOffType struct {
+	Integer
+}
+
+func (cpt ContinuousDropOffType) IsValid() bool {
+	// Spec says "1 or empty - No continuous stopping drop off."
+	// Empty = valid
+	if cpt.Integer.base.IsEmpty() {
+		return true
+	}
+
+	val, err := strconv.Atoi(cpt.Integer.base.raw)
+	if err != nil {
+		return false
+	}
+
+	return val == ContinuousStoppingDropOffType || val == NoContinuousStoppingDropOffType ||
+		val == MustPhoneAgencyDropOffType || val == MustCoordinateWithDriverDropOffType
+}
+
+func NewOptionalContinuousDropOffType(raw *string) *ContinuousDropOffType {
+	if raw == nil {
+		return &ContinuousDropOffType{
+			Integer{base: base{raw: ""}}}
+	}
+	return &ContinuousDropOffType{Integer{base: base{raw: *raw}}}
+}
