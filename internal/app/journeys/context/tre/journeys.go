@@ -9,8 +9,8 @@ import (
 	"github.com/jlundan/journeys-api/internal/pkg/ggtfs"
 	"github.com/jlundan/journeys-api/internal/pkg/utils"
 	"sort"
-	"strconv"
 	"strings"
+	"time"
 )
 
 type Journeys struct {
@@ -174,8 +174,8 @@ func buildJourneys(g GTFSContext, lines Lines, routes Routes, stopPoints StopPoi
 		journey := model.Journey{
 			Id:                   trip.Id,
 			HeadSign:             *trip.HeadSign,
-			Direction:            strconv.Itoa(*trip.DirectionId),
-			WheelchairAccessible: *trip.WheelchairAccessible == 1,
+			Direction:            *trip.DirectionId,
+			WheelchairAccessible: *trip.WheelchairAccessible == "1",
 			GtfsInfo: &model.JourneyGtfsInfo{
 				TripId: trip.Id,
 			},
@@ -250,33 +250,33 @@ func buildCalendarMap(g GTFSContext) map[string]calendarFileRow {
 	result := make(map[string]calendarFileRow)
 	for _, calendarItem := range g.CalendarItems {
 		days := make([]string, 0)
-		if calendarItem.Monday == 1 {
+		if calendarItem.Monday.String() == "1" {
 			days = append(days, "monday")
 		}
-		if calendarItem.Tuesday == 1 {
+		if calendarItem.Tuesday.String() == "1" {
 			days = append(days, "tuesday")
 		}
-		if calendarItem.Wednesday == 1 {
+		if calendarItem.Wednesday.String() == "1" {
 			days = append(days, "wednesday")
 		}
-		if calendarItem.Thursday == 1 {
+		if calendarItem.Thursday.String() == "1" {
 			days = append(days, "thursday")
 		}
-		if calendarItem.Friday == 1 {
+		if calendarItem.Friday.String() == "1" {
 			days = append(days, "friday")
 		}
-		if calendarItem.Saturday == 1 {
+		if calendarItem.Saturday.String() == "1" {
 			days = append(days, "saturday")
 		}
-		if calendarItem.Sunday == 1 {
+		if calendarItem.Sunday.String() == "1" {
 			days = append(days, "sunday")
 		}
 
 		serviceId := calendarItem.ServiceId
-		result[serviceId] = calendarFileRow{
-			serviceId: serviceId,
-			startDate: calendarItem.Start.Format("2006-01-02"),
-			endDate:   calendarItem.End.Format("2006-01-02"),
+		result[serviceId.String()] = calendarFileRow{
+			serviceId: serviceId.String(),
+			startDate: calendarItem.StartDate.String(),
+			endDate:   calendarItem.EndDate.String(),
 			dayTypes:  days,
 		}
 	}
@@ -286,11 +286,22 @@ func buildCalendarMap(g GTFSContext) map[string]calendarFileRow {
 
 func buildCalendarDatesMap(g GTFSContext) map[string][]*model.DayTypeException {
 	result := make(map[string][]*model.DayTypeException)
+
 	for _, calendarDate := range g.CalendarDates {
-		result[calendarDate.ServiceId] = append(result[calendarDate.ServiceId], &model.DayTypeException{
-			From: calendarDate.Date.Format("2006-01-02"),
-			To:   calendarDate.Date.Format("2006-01-02"),
-			Runs: calendarDate.ExceptionType == 1,
+		var date string
+
+		parsedTime, err := time.Parse("20060102", calendarDate.Date.String())
+		if err != nil {
+			fmt.Println("Error parsing date:", err)
+			date = calendarDate.Date.String()
+		} else {
+			date = parsedTime.Format("2006-01-02")
+		}
+
+		result[calendarDate.ServiceId.String()] = append(result[calendarDate.ServiceId.String()], &model.DayTypeException{
+			From: date,
+			To:   date,
+			Runs: calendarDate.ExceptionType.String() == "1",
 		})
 	}
 

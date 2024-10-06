@@ -91,15 +91,21 @@ var mainCommand = &cobra.Command{
 			os.Exit(1)
 		}
 
-		ctx, errs, _ := tre.NewContext()
-		if len(errs) > 0 {
-			for _, err := range errs {
-				log.Println(err)
-			}
-			os.Exit(1)
+		ctx, errs, warnings, recommendations := tre.NewContext()
+
+		for _, err := range errs {
+			log.Println(err.Error())
 		}
 
-		if dryRun {
+		for _, warning := range warnings {
+			log.Println(warning.Error())
+		}
+
+		for _, recommendation := range recommendations {
+			log.Println(recommendation)
+		}
+
+		if dryRun && len(errs) > 0 {
 			os.Exit(0)
 		}
 

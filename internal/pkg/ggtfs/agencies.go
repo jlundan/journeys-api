@@ -6,115 +6,130 @@ import (
 )
 
 type Agency struct {
-	Id         *string // agency_id
-	Name       string  // agency_name
-	Url        string  // agency_url
-	Timezone   string  // agency_timezone
-	Lang       *string // agency_lang
-	Phone      *string // agency_phone
-	FareURL    *string // agency_fare_url
-	Email      *string // agency_email
-	lineNumber int
+	Id         ID            // agency_id
+	Name       Text          // agency_name
+	URL        URL           // agency_url
+	Timezone   Timezone      // agency_timezone
+	Lang       *LanguageCode // agency_lang
+	Phone      *PhoneNumber  // agency_phone
+	FareURL    *URL          // agency_fare_url
+	Email      *Email        // agency_email
+	LineNumber int
 }
 
+func (a Agency) Validate() []error {
+	var validationErrors []error
+
+	// The 'agency_id' field is conditionally required, check it in the ValidateAgencies function.
+
+	fields := []struct {
+		fieldName string
+		field     ValidAndPresentField
+	}{
+		{"agency_name", &a.Name},
+		{"agency_url", &a.URL},
+		{"agency_timezone", &a.Timezone},
+	}
+
+	for _, f := range fields {
+		validationErrors = append(validationErrors, validateFieldIsPresentAndValid(f.field, f.fieldName, a.LineNumber, AgenciesFileName)...)
+	}
+
+	// These should not be implemented with the above method, since checking nil values with Golang interfaces, would
+	// require using reflection, which is way too slow.
+
+	if a.Lang != nil && !a.Lang.IsValid() {
+		validationErrors = append(validationErrors, createFileRowError(AgenciesFileName, a.LineNumber, createInvalidFieldString("agency_lang")))
+	}
+
+	if a.Phone != nil && !a.Phone.IsValid() {
+		validationErrors = append(validationErrors, createFileRowError(AgenciesFileName, a.LineNumber, createInvalidFieldString("agency_phone")))
+	}
+
+	if a.FareURL != nil && !a.FareURL.IsValid() {
+		validationErrors = append(validationErrors, createFileRowError(AgenciesFileName, a.LineNumber, createInvalidFieldString("agency_fare_url")))
+	}
+
+	if a.Email != nil && !a.Email.IsValid() {
+		validationErrors = append(validationErrors, createFileRowError(AgenciesFileName, a.LineNumber, createInvalidFieldString("agency_email")))
+	}
+
+	return validationErrors
+}
+
+var validAgencyHeaders = []string{"agency_id", "agency_name", "agency_url", "agency_timezone",
+	"agency_lang", "agency_phone", "agency_fare_url", "agency_email"}
+
 func LoadAgencies(csvReader *csv.Reader) ([]*Agency, []error) {
-	agencies := make([]*Agency, 0)
-	errs := make([]error, 0)
+	entities, errs := loadEntities(csvReader, validAgencyHeaders, CreateAgency, AgenciesFileName)
 
-	headers, err := ReadHeaderRow(csvReader)
-	if err != nil {
-		errs = append(errs, createFileError(AgenciesFileName, fmt.Sprintf("read error: %v", err.Error())))
-		return agencies, errs
-	}
-	if headers == nil {
-		return agencies, errs
-	}
+	agencies := make([]*Agency, 0, len(entities))
 
-	usedIds := make([]string, 0)
-	index := 0
-	for {
-		row, err := ReadDataRow(csvReader)
-		if err != nil {
-			errs = append(errs, createFileError(AgenciesFileName, fmt.Sprintf("%v", err.Error())))
-			index++
-			continue
-		}
-		if row == nil {
-			break
-		}
-
-		rowErrs := make([]error, 0)
-		agency := Agency{
-			lineNumber: index,
-		}
-
-		var agencyName, agencyUrl, agencyTimezone *string
-
-		for name, column := range headers {
-			switch name {
-			case "agency_id":
-				agency.Id = handleIDField(row[column], AgenciesFileName, name, index, &rowErrs)
-			case "agency_name":
-				agencyName = handleTextField(row[column], AgenciesFileName, name, index, &rowErrs)
-			case "agency_url":
-				agencyUrl = handleURLField(row[column], AgenciesFileName, name, index, &rowErrs)
-			case "agency_timezone":
-				agencyTimezone = handleTimeZoneField(row[column], AgenciesFileName, name, index, &rowErrs)
-			case "agency_lang":
-				agency.Lang = handleLanguageCodeField(row[column], AgenciesFileName, name, index, &rowErrs)
-			case "agency_phone":
-				agency.Phone = handlePhoneNumberField(row[column], AgenciesFileName, name, index, &rowErrs)
-			case "agency_fare_url":
-				agency.FareURL = handleURLField(row[column], AgenciesFileName, name, index, &rowErrs)
-			case "agency_email":
-				agency.Email = handleEmailField(row[column], AgenciesFileName, name, index, &rowErrs)
-			}
-		}
-
-		if agency.Id != nil {
-			if StringArrayContainsItem(usedIds, *agency.Id) {
-				errs = append(errs, createFileRowError(AgenciesFileName, index, fmt.Sprintf("%s: agency_id", nonUniqueId)))
-			} else {
-				usedIds = append(usedIds, *agency.Id)
-			}
-		}
-
-		if agencyName == nil {
-			rowErrs = append(rowErrs, createFileRowError(AgenciesFileName, agency.lineNumber, "agency_name must be specified"))
-		} else {
-			agency.Name = *agencyName
-		}
-
-		if agencyUrl == nil {
-			rowErrs = append(rowErrs, createFileRowError(AgenciesFileName, agency.lineNumber, "agency_url must be specified"))
-		} else if *agencyUrl == "" {
-			rowErrs = append(rowErrs, createFileRowError(AgenciesFileName, agency.lineNumber, "agency_url must not be empty"))
-		} else {
-			agency.Url = *agencyUrl
-		}
-
-		if agencyTimezone == nil {
-			rowErrs = append(rowErrs, createFileRowError(AgenciesFileName, agency.lineNumber, "agency_timezone must be specified"))
-		} else {
-			agency.Timezone = *agencyTimezone
-		}
-
-		if len(rowErrs) > 0 {
-			errs = append(errs, rowErrs...)
-		} else {
-			agencies = append(agencies, &agency)
-		}
-
-		index++
-	}
-
-	if len(agencies) > 1 {
-		for _, a := range agencies {
-			if a.Id == nil {
-				errs = append(errs, createFileRowError(AgenciesFileName, a.lineNumber, "agency id must be specified when multiple agencies are declared"))
-			}
+	for _, entity := range entities {
+		if agency, ok := entity.(*Agency); ok {
+			agencies = append(agencies, agency)
 		}
 	}
 
 	return agencies, errs
+}
+
+func CreateAgency(row []string, headers map[string]int, lineNumber int) interface{} {
+	agency := Agency{
+		LineNumber: lineNumber,
+	}
+
+	for hName, hPos := range headers {
+		switch hName {
+		case "agency_id":
+			agency.Id = NewID(&row[hPos])
+		case "agency_name":
+			agency.Name = NewText(&row[hPos])
+		case "agency_url":
+			agency.URL = NewURL(&row[hPos])
+		case "agency_timezone":
+			agency.Timezone = NewTimezone(&row[hPos])
+		case "agency_lang":
+			agency.Lang = NewOptionalLanguageCode(&row[hPos])
+		case "agency_phone":
+			agency.Phone = NewOptionalPhoneNumber(&row[hPos])
+		case "agency_fare_url":
+			agency.FareURL = NewOptionalURL(&row[hPos])
+		case "agency_email":
+			agency.Email = NewOptionalEmail(&row[hPos])
+		}
+	}
+
+	return &agency
+}
+
+func ValidateAgencies(agencies []*Agency) ([]error, []string) {
+	var validationErrors []error
+	var recommendations []string
+
+	if len(agencies) > 1 {
+		usedIds := make(map[string]bool)
+
+		for _, a := range agencies {
+			validationErrors = append(validationErrors, a.Validate()...)
+
+			if !a.Id.IsValid() {
+				validationErrors = append(validationErrors, createFileRowError(AgenciesFileName, a.LineNumber, "a valid agency_id must be specified when multiple agencies are declared"))
+				continue
+			}
+
+			if usedIds[a.Id.String()] {
+				validationErrors = append(validationErrors, createFileRowError(AgenciesFileName, a.LineNumber, fmt.Sprintf("agency_id is not unique within the file")))
+			} else {
+				usedIds[a.Id.String()] = true
+			}
+		}
+	} else if len(agencies) == 1 && agencies[0].Id.IsEmpty() {
+		recommendations = append(recommendations, createFileRowRecommendation(AgenciesFileName, agencies[0].LineNumber, "it is recommended that agency_id is specified even when there is only one agency"))
+		validationErrors = append(validationErrors, agencies[0].Validate()...)
+	} else if len(agencies) == 1 {
+		validationErrors = append(validationErrors, agencies[0].Validate()...)
+	}
+
+	return validationErrors, recommendations
 }

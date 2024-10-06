@@ -1,12 +1,10 @@
 package ggtfs
 
 import (
-	"encoding/hex"
+	"encoding/csv"
 	"errors"
 	"fmt"
-	"net/url"
-	"strconv"
-	"time"
+	"io"
 )
 
 const (
@@ -38,153 +36,122 @@ func createFileRowError(fileName string, row int, err string) error {
 	return errors.New(fmt.Sprintf("%s:%v: %s", fileName, row, err))
 }
 
+func createFileRowRecommendation(fileName string, row int, err string) string {
+	return fmt.Sprintf("%s:%v: %s", fileName, row, err)
+}
+
 func createFileError(fileName string, err string) error {
 	return errors.New(fmt.Sprintf("%s: %s", fileName, err))
 }
 
-func handleIDField(str string, fileName string, fieldName string, index int, errs *[]error) *string {
-	return handleStringField(str, fileName, fieldName, index, errs)
+func createInvalidFieldString(fieldName string) string {
+	return fmt.Sprintf("invalid field: %s", fieldName)
 }
 
-func handleTextField(str string, fileName string, fieldName string, index int, errs *[]error) *string {
-	return handleStringField(str, fileName, fieldName, index, errs)
+func createMissingMandatoryFieldString(fieldName string) string {
+	return fmt.Sprintf("missing mandatory field: %s", fieldName)
 }
 
-func handleTimeZoneField(str string, fileName string, fieldName string, index int, errs *[]error) *string {
-	return handleStringField(str, fileName, fieldName, index, errs)
+func getField(row []string, headerName string, headerPosition int, errs *[]error, lineNumber int, fileName string) string {
+	if len(row) <= int(headerPosition) {
+		*errs = append(*errs, createFileRowError(fileName, lineNumber, fmt.Sprintf("missing value for field: %s", headerName)))
+		return ""
+	}
+
+	return row[headerPosition]
 }
 
-func handleLanguageCodeField(str string, fileName string, fieldName string, index int, errs *[]error) *string {
-	return handleStringField(str, fileName, fieldName, index, errs)
+func getOptionalField(row []string, headerName string, headerPosition int, errs *[]error, lineNumber int, fileName string) *string {
+	if len(row) <= int(headerPosition) {
+		*errs = append(*errs, createFileRowError(fileName, lineNumber, fmt.Sprintf("missing value for field: %s", headerName)))
+		return nil
+	}
+
+	return &row[headerPosition]
 }
 
-func handlePhoneNumberField(str string, fileName string, fieldName string, index int, errs *[]error) *string {
-	return handleStringField(str, fileName, fieldName, index, errs)
-}
+type entityCreator func(row []string, headers map[string]int, lineNumber int) interface{}
 
-func handleEmailField(str string, fileName string, fieldName string, index int, errs *[]error) *string {
-	return handleStringField(str, fileName, fieldName, index, errs)
-}
+// LoadEntities is a generic function for loading entities from a CSV file using a provided entity creation callback.
+// This function reads each row from the given CSV reader, creates entities using the provided callback function, and
+// collects any errors encountered during the loading process.
+//
+// Parameters:
+//   - csvReader (*csv.Reader): The CSV reader from which to read the data.
+//   - validHeaders ([]string): A list of expected column headers to validate against the CSV header row.
+//   - entityCreator (EntityCreator): A callback function that is called for each data row to create an entity.
+//     The function has the following signature:
+//     func(row []string, headers map[string]int, lineNumber int) (interface{}, error)
+//   - row: Represents a single row of data from the CSV.
+//   - headers: A map of header names to their corresponding index positions in the row.
+//   - lineNumber: The current row number being processed.
+//     The callback should return the created entity and an error, if any.
+//   - fileName (string): The name of the file being processed. Used in error reporting.
+//
+// Returns:
+//   - ([]interface{}): A slice of entities created from the CSV file. The entities are returned as generic interfaces,
+//     and should be type-asserted by the caller to their concrete types.
+//   - ([]error): A slice of errors encountered during the loading process, including errors from reading the CSV,
+//     missing or invalid headers, and errors returned from the entity creation callback.
+func loadEntities(csvReader *csv.Reader, validHeaders []string, entityCreator entityCreator, fileName string) ([]interface{}, []error) {
+	entities := make([]interface{}, 0)
+	errs := make([]error, 0)
 
-func handleIntField(str string, fileName string, fieldName string, index int, errs *[]error) *int {
-	val, err := strconv.ParseInt(str, 10, 64)
+	headers, err := ReadHeaderRow(csvReader, validHeaders)
+	if err == io.EOF {
+		return entities, errs
+	}
+
 	if err != nil {
-		*errs = append(*errs, createFieldError(fileName, fieldName, index, err))
-		return nil
+		errs = append(errs, createFileError(fileName, fmt.Sprintf("read error: %v", err.Error())))
+		return entities, errs
 	}
-	so := int(val)
-	return &so
+	if headers == nil {
+		return entities, errs
+	}
+
+	lineNumber := 0
+	for {
+		row, err := csvReader.Read()
+		if err == io.EOF {
+			break
+		}
+
+		if err != nil {
+			errs = append(errs, createFileError(fileName, fmt.Sprintf("%v", err.Error())))
+			lineNumber++
+			continue
+		}
+
+		entities = append(entities, entityCreator(row, headers, lineNumber))
+
+		lineNumber++
+	}
+
+	return entities, errs
 }
 
-func handleContinuousPickupField(str string, fileName string, fieldName string, index int, errs *[]error) *int {
-	if str == "" {
-		c := 1
-		return &c
+func validateFieldIsPresentAndValid(field ValidAndPresentField, fieldName string, lineNumber int, fileName string) []error {
+	var validationErrors []error
+
+	if !field.IsPresent() {
+		validationErrors = append(validationErrors, createFileRowError(fileName, lineNumber, createMissingMandatoryFieldString(fieldName)))
+	} else if !field.IsValid() {
+		validationErrors = append(validationErrors, createFileRowError(fileName, lineNumber, createInvalidFieldString(fieldName)))
 	}
 
-	n, err := strconv.ParseInt(str, 10, 64)
-	if err != nil {
-		*errs = append(*errs, createFieldError(fileName, fieldName, index, err))
-		return nil
-	}
-
-	if cpt := int(n); cpt == 0 || (cpt >= 1 && cpt <= 3) {
-		return &cpt
-	} else {
-		*errs = append(*errs, createFieldError(fileName, fieldName, index, errors.New(invalidValue)))
-		return nil
-	}
+	return validationErrors
 }
 
-func handleContinuousDropOffField(str string, fileName string, fieldName string, index int, errs *[]error) *int {
-	return handleContinuousPickupField(str, fileName, fieldName, index, errs)
+type ValidAndPresentField interface {
+	IsValid() bool
+	IsPresent() bool
 }
 
-func handleFloat64Field(str string, fileName string, fieldName string, index int, errs *[]error) *float64 {
-	val, err := strconv.ParseFloat(str, 64)
-	if err != nil {
-		*errs = append(*errs, createFieldError(fileName, fieldName, index, err))
-		return nil
-	}
-	return &val
-}
-
-func handleDateField(str string, fileName string, fieldName string, index int, fillEnd bool, errs *[]error) *time.Time {
-	if str == "" {
-		*errs = append(*errs, createFieldError(fileName, fieldName, index, errors.New(emptyValueNotAllowed)))
+func getRowValue(row []string, position int) *string {
+	if position < 0 || position >= len(row) {
 		return nil
 	}
 
-	if len(str) < 8 {
-		*errs = append(*errs, createFieldError(fileName, fieldName, index, errors.New("invalid date format")))
-		return nil
-	}
-
-	year, err := strconv.ParseInt(str[:4], 10, 64)
-	if err != nil {
-		*errs = append(*errs, createFieldError(fileName, fieldName, index, err))
-		return nil
-	}
-
-	month, err := strconv.ParseInt(str[4:6], 10, 64)
-	if err != nil {
-		*errs = append(*errs, createFieldError(fileName, fieldName, index, err))
-		return nil
-	}
-
-	day, err := strconv.ParseInt(str[6:8], 10, 64)
-	if err != nil {
-		*errs = append(*errs, createFieldError(fileName, fieldName, index, err))
-		return nil
-	}
-
-	var d time.Time
-	if fillEnd {
-		d = time.Date(int(year), time.Month(int(month)), int(day), 23, 59, 59, 0, time.FixedZone("UTC+2", 2*60*60))
-	} else {
-		d = time.Date(int(year), time.Month(int(month)), int(day), 0, 0, 0, 0, time.FixedZone("UTC+2", 2*60*60))
-	}
-	return &d
-}
-
-func handleTimeField(str string, fileName string, fieldName string, index int, errs *[]error) *string {
-	return handleStringField(str, fileName, fieldName, index, errs)
-}
-
-func handleStringField(str string, fileName string, fieldName string, index int, errs *[]error) *string {
-	if str == "" {
-		*errs = append(*errs, createFieldError(fileName, fieldName, index, errors.New(emptyValueNotAllowed)))
-		return nil
-	}
-
-	return &str
-}
-
-func handleColorField(str string, fileName string, fieldName string, index int, errs *[]error) *string {
-	if str == "" {
-		*errs = append(*errs, createFieldError(fileName, fieldName, index, errors.New(emptyValueNotAllowed)))
-		return nil
-	}
-
-	_, err := hex.DecodeString(fmt.Sprintf("%sFF", str))
-	if err != nil {
-		*errs = append(*errs, createFieldError(fileName, fieldName, index, err))
-		return nil
-	}
-
-	return &str
-}
-
-func handleURLField(str string, fileName string, fieldName string, index int, errs *[]error) *string {
-	//if str == "" {
-	//	*errs = append(*errs, createFieldError(fileName, fieldName, index, errors.New(emptyValueNotAllowed)))
-	//	return nil
-	//}
-
-	_, err := url.Parse(str)
-	if err != nil {
-		*errs = append(*errs, createFieldError(fileName, fieldName, index, err))
-		return nil
-	}
-	return &str
+	return &row[position]
 }

@@ -2,176 +2,135 @@ package ggtfs
 
 import (
 	"encoding/csv"
-	"errors"
-	"fmt"
 	"strconv"
-	"time"
 )
 
+// CalendarItem represents the GTFS calendar file structure.
 type CalendarItem struct {
-	ServiceId  string
-	Monday     int
-	Tuesday    int
-	Wednesday  int
-	Thursday   int
-	Friday     int
-	Saturday   int
-	Sunday     int
-	Start      time.Time
-	End        time.Time
-	lineNumber int
+	ServiceId  ID                      // service_id
+	Monday     AvailableForWeekdayInfo // monday
+	Tuesday    AvailableForWeekdayInfo // tuesday
+	Wednesday  AvailableForWeekdayInfo // wednesday
+	Thursday   AvailableForWeekdayInfo // thursday
+	Friday     AvailableForWeekdayInfo // friday
+	Saturday   AvailableForWeekdayInfo // saturday
+	Sunday     AvailableForWeekdayInfo // sunday
+	StartDate  Date                    // start_date
+	EndDate    Date                    // end_date
+	LineNumber int                     // CSV row number
 }
 
+func (c CalendarItem) Validate() []error {
+	var validationErrors []error
+
+	fields := []struct {
+		fieldName string
+		field     ValidAndPresentField
+	}{
+		{"service_id", &c.ServiceId},
+		{"monday", &c.Monday},
+		{"tuesday", &c.Tuesday},
+		{"wednesday", &c.Wednesday},
+		{"thursday", &c.Thursday},
+		{"friday", &c.Friday},
+		{"saturday", &c.Saturday},
+		{"sunday", &c.Sunday},
+		{"start_date", &c.StartDate},
+		{"end_date", &c.EndDate},
+	}
+
+	for _, f := range fields {
+		validationErrors = append(validationErrors, validateFieldIsPresentAndValid(f.field, f.fieldName, c.LineNumber, CalendarFileName)...)
+	}
+
+	return validationErrors
+}
+
+var validCalendarHeaders = []string{
+	"service_id", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday", "start_date", "end_date",
+}
+
+// LoadCalendarItems reads and parses GTFS calendar data from the provided CSV reader.
 func LoadCalendarItems(csvReader *csv.Reader) ([]*CalendarItem, []error) {
-	calendarItems := make([]*CalendarItem, 0)
-	errs := make([]error, 0)
+	entities, errs := loadEntities(csvReader, validCalendarHeaders, CreateCalendarItem, CalendarFileName)
 
-	headers, err := ReadHeaderRow(csvReader)
-	if err != nil {
-		errs = append(errs, createFileError(CalendarFileName, fmt.Sprintf("read error: %v", err.Error())))
-		return calendarItems, errs
-	}
-	if headers == nil {
-		return calendarItems, errs
-	}
-
-	usedIds := make([]string, 0)
-	index := 0
-	for {
-		row, err := ReadDataRow(csvReader)
-		if err != nil {
-			errs = append(errs, createFileError(CalendarFileName, fmt.Sprintf("%v", err.Error())))
-			index++
-			break
+	calendarItems := make([]*CalendarItem, 0, len(entities))
+	for _, entity := range entities {
+		if calendarItem, ok := entity.(*CalendarItem); ok {
+			calendarItems = append(calendarItems, calendarItem)
 		}
-		if row == nil {
-			break
-		}
-
-		rowErrs := make([]error, 0)
-		calendarItem := CalendarItem{
-			lineNumber: index,
-		}
-
-		var (
-			mon, tue, wed, thu, fri, sat, sun *int
-			service                           *string
-			start, end                        *time.Time
-		)
-
-		for name, column := range headers {
-			switch name {
-			case "service_id":
-				service = handleIDField(row[column], CalendarFileName, name, index, &rowErrs)
-			case "monday":
-				mon = handleWeekdayField(row[column], CalendarFileName, name, index, &rowErrs)
-			case "tuesday":
-				tue = handleWeekdayField(row[column], CalendarFileName, name, index, &rowErrs)
-			case "wednesday":
-				wed = handleWeekdayField(row[column], CalendarFileName, name, index, &rowErrs)
-			case "thursday":
-				thu = handleWeekdayField(row[column], CalendarFileName, name, index, &rowErrs)
-			case "friday":
-				fri = handleWeekdayField(row[column], CalendarFileName, name, index, &rowErrs)
-			case "saturday":
-				sat = handleWeekdayField(row[column], CalendarFileName, name, index, &rowErrs)
-			case "sunday":
-				sun = handleWeekdayField(row[column], CalendarFileName, name, index, &rowErrs)
-			case "start_date":
-				start = handleDateField(row[column], CalendarFileName, name, index, false, &rowErrs)
-			case "end_date":
-				end = handleDateField(row[column], CalendarFileName, name, index, true, &rowErrs)
-			}
-		}
-
-		if service == nil {
-			rowErrs = append(rowErrs, createFileRowError(CalendarFileName, calendarItem.lineNumber, "service_id must be specified"))
-		} else {
-			calendarItem.ServiceId = *service
-			if StringArrayContainsItem(usedIds, *service) {
-				errs = append(errs, createFileRowError(CalendarFileName, index, fmt.Sprintf("%s: service_id", nonUniqueId)))
-			} else {
-				usedIds = append(usedIds, *service)
-			}
-		}
-
-		if mon == nil {
-			rowErrs = append(rowErrs, createFileRowError(CalendarFileName, calendarItem.lineNumber, "monday must be specified"))
-		} else {
-			calendarItem.Monday = *mon
-		}
-
-		if tue == nil {
-			rowErrs = append(rowErrs, createFileRowError(CalendarFileName, calendarItem.lineNumber, "tuesday must be specified"))
-		} else {
-			calendarItem.Tuesday = *tue
-		}
-
-		if wed == nil {
-			rowErrs = append(rowErrs, createFileRowError(CalendarFileName, calendarItem.lineNumber, "wednesday must be specified"))
-		} else {
-			calendarItem.Wednesday = *wed
-		}
-
-		if thu == nil {
-			rowErrs = append(rowErrs, createFileRowError(CalendarFileName, calendarItem.lineNumber, "thursday must be specified"))
-		} else {
-			calendarItem.Thursday = *thu
-		}
-
-		if fri == nil {
-			rowErrs = append(rowErrs, createFileRowError(CalendarFileName, calendarItem.lineNumber, "friday must be specified"))
-		} else {
-			calendarItem.Friday = *fri
-		}
-
-		if sat == nil {
-			rowErrs = append(rowErrs, createFileRowError(CalendarFileName, calendarItem.lineNumber, "saturday must be specified"))
-		} else {
-			calendarItem.Saturday = *sat
-		}
-
-		if sun == nil {
-			rowErrs = append(rowErrs, createFileRowError(CalendarFileName, calendarItem.lineNumber, "sunday must be specified"))
-		} else {
-			calendarItem.Sunday = *sun
-		}
-
-		if start == nil {
-			rowErrs = append(rowErrs, createFileRowError(CalendarFileName, calendarItem.lineNumber, "start_date must be specified"))
-		} else {
-			calendarItem.Start = *start
-		}
-
-		if end == nil {
-			rowErrs = append(rowErrs, createFileRowError(CalendarFileName, calendarItem.lineNumber, "end_date must be specified"))
-		} else {
-			calendarItem.End = *end
-		}
-
-		if len(rowErrs) > 0 {
-			errs = append(errs, rowErrs...)
-		} else {
-			calendarItems = append(calendarItems, &calendarItem)
-		}
-
-		index++
 	}
 
 	return calendarItems, errs
 }
 
-func handleWeekdayField(str string, fileName string, fieldName string, index int, errs *[]error) *int {
-	n, err := strconv.ParseInt(str, 10, 64)
-	if err != nil {
-		*errs = append(*errs, createFieldError(fileName, fieldName, index, err))
-		return nil
+// CreateCalendarItem creates a CalendarItem from a CSV row, using the provided headers.
+func CreateCalendarItem(row []string, headers map[string]int, lineNumber int) interface{} {
+	calendarItem := &CalendarItem{
+		LineNumber: lineNumber,
 	}
 
-	if v := int(n); v <= 1 {
-		return &v
-	} else {
-		*errs = append(*errs, createFieldError(fileName, fieldName, index, errors.New(invalidValue)))
-		return nil
+	for hName, hPos := range headers {
+		switch hName {
+		case "service_id":
+			calendarItem.ServiceId = NewID(getRowValue(row, hPos))
+		case "monday":
+			calendarItem.Monday = NewAvailableForWeekdayInfo(getRowValue(row, hPos))
+		case "tuesday":
+			calendarItem.Tuesday = NewAvailableForWeekdayInfo(getRowValue(row, hPos))
+		case "wednesday":
+			calendarItem.Wednesday = NewAvailableForWeekdayInfo(getRowValue(row, hPos))
+		case "thursday":
+			calendarItem.Thursday = NewAvailableForWeekdayInfo(getRowValue(row, hPos))
+		case "friday":
+			calendarItem.Friday = NewAvailableForWeekdayInfo(getRowValue(row, hPos))
+		case "saturday":
+			calendarItem.Saturday = NewAvailableForWeekdayInfo(getRowValue(row, hPos))
+		case "sunday":
+			calendarItem.Sunday = NewAvailableForWeekdayInfo(getRowValue(row, hPos))
+		case "start_date":
+			calendarItem.StartDate = NewDate(getRowValue(row, hPos))
+		case "end_date":
+			calendarItem.EndDate = NewDate(getRowValue(row, hPos))
+		}
 	}
+
+	return calendarItem
+}
+
+func ValidateCalendarItems(calendarItems []*CalendarItem) ([]error, []string) {
+	var validationErrors []error
+
+	for _, calendarItem := range calendarItems {
+		validationErrors = append(validationErrors, calendarItem.Validate()...)
+	}
+
+	return validationErrors, nil
+}
+
+const (
+	CalendarAvailableForWeekday    string = "1"
+	CalendarNotAvailableForWeekday string = "0"
+)
+
+type AvailableForWeekdayInfo struct {
+	Integer
+}
+
+func (w AvailableForWeekdayInfo) IsValid() bool {
+	val, err := strconv.Atoi(w.Integer.base.raw)
+
+	if err != nil {
+		return false
+	}
+
+	return val == 0 || val == 1
+}
+
+func NewAvailableForWeekdayInfo(raw *string) AvailableForWeekdayInfo {
+	if raw == nil {
+		return AvailableForWeekdayInfo{
+			Integer{base: base{raw: ""}}}
+	}
+	return AvailableForWeekdayInfo{Integer{base: base{raw: *raw, isPresent: true}}}
 }
