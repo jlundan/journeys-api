@@ -71,6 +71,13 @@ func NewID(raw *string) ID {
 	return ID{base{raw: *raw, isPresent: true}}
 }
 
+func NewOptionalID(raw *string) *ID {
+	if raw == nil {
+		return nil
+	}
+	return &ID{base{raw: *raw}}
+}
+
 // Color represents a color encoded as a six-digit hexadecimal number.
 type Color struct {
 	base
@@ -84,6 +91,13 @@ func (c *Color) IsValid() bool {
 
 	match, _ := regexp.MatchString(`^[0-9A-Fa-f]{6}$`, c.raw)
 	return match
+}
+
+func NewOptionalColor(raw *string) *Color {
+	if raw == nil {
+		return nil
+	}
+	return &Color{base{raw: *raw}}
 }
 
 // Email represents an email address.
@@ -129,6 +143,13 @@ func (i *Integer) IsValid() bool {
 func (i *Integer) Int() int {
 	val, _ := strconv.Atoi(i.raw)
 	return val
+}
+
+func NewOptionalInteger(raw *string) *Integer {
+	if raw == nil {
+		return nil
+	}
+	return &Integer{base{raw: *raw}}
 }
 
 // Float represents a number with a floating point.
@@ -341,6 +362,13 @@ func NewText(raw *string) Text {
 		return Text{base{raw: ""}}
 	}
 	return Text{base{raw: *raw, isPresent: true}}
+}
+
+func NewOptionalText(raw *string) *Text {
+	if raw == nil {
+		return nil
+	}
+	return &Text{base{raw: *raw}}
 }
 
 // Timezone represents a TZ timezone from the IANA timezone database.

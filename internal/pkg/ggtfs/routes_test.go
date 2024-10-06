@@ -58,36 +58,36 @@ func getRouteOKTestcases() map[string]ggtfsTestCase {
 	cdt := "3"
 
 	expected1 := Route{
-		Id:                id,
-		AgencyId:          agency,
-		ShortName:         &shortName,
-		LongName:          &longName,
-		Desc:              &desc,
-		Type:              routeType,
-		Url:               &u,
-		Color:             &rColor,
-		TextColor:         &textColor,
-		SortOrder:         &so,
-		ContinuousPickup:  &cpt,
-		ContinuousDropOff: &cdt,
+		Id:                NewID(stringPtr(id)),
+		AgencyId:          NewOptionalID(stringPtr(agency)),
+		ShortName:         NewOptionalText(stringPtr(shortName)),
+		LongName:          NewOptionalText(stringPtr(longName)),
+		Description:       NewOptionalText(stringPtr(desc)),
+		Type:              NewRouteType(stringPtr(routeType)),
+		Url:               NewOptionalURL(stringPtr(u)),
+		Color:             NewOptionalColor(stringPtr(rColor)),
+		TextColor:         NewOptionalColor(stringPtr(textColor)),
+		SortOrder:         NewOptionalInteger(stringPtr(so)),
+		ContinuousPickup:  NewOptionalContinuousPickupType(stringPtr(cpt)),
+		ContinuousDropOff: NewOptionalContinuousDropOffType(stringPtr(cdt)),
 	}
 
 	cpt2 := ""
 	cdt2 := ""
 
 	expected2 := Route{
-		Id:                id,
-		AgencyId:          agency,
-		ShortName:         &shortName,
-		LongName:          &longName,
-		Desc:              &desc,
-		Type:              routeType,
-		Url:               &u,
-		Color:             &rColor,
-		TextColor:         &textColor,
-		SortOrder:         &so,
-		ContinuousPickup:  &cpt2,
-		ContinuousDropOff: &cdt2,
+		Id:                NewID(stringPtr(id)),
+		AgencyId:          NewOptionalID(stringPtr(agency)),
+		ShortName:         NewOptionalText(stringPtr(shortName)),
+		LongName:          NewOptionalText(stringPtr(longName)),
+		Description:       NewOptionalText(stringPtr(desc)),
+		Type:              NewRouteType(stringPtr(routeType)),
+		Url:               NewOptionalURL(stringPtr(u)),
+		Color:             NewOptionalColor(stringPtr(rColor)),
+		TextColor:         NewOptionalColor(stringPtr(textColor)),
+		SortOrder:         NewOptionalInteger(stringPtr(so)),
+		ContinuousPickup:  NewOptionalContinuousPickupType(stringPtr(cpt2)),
+		ContinuousDropOff: NewOptionalContinuousDropOffType(stringPtr(cdt2)),
 	}
 	testCases := make(map[string]ggtfsTestCase)
 	testCases["1"] = ggtfsTestCase{
