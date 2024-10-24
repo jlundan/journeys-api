@@ -73,7 +73,8 @@ func LoadStops(csvReader *csv.Reader) ([]*Stop, []error) {
 			case "stop_lon":
 				stop.Lon = handleFloat64Field(row[column], StopsFileName, name, index, &rowErrs)
 			case "zone_id":
-				stop.ZoneId = handleIDField(row[column], StopsFileName, name, index, &rowErrs)
+				stop.ZoneId = &row[column]
+				//stop.ZoneId = handleIDField(row[column], StopsFileName, name, index, &rowErrs)
 			case "stop_url":
 				stop.Url = handleURLField(row[column], StopsFileName, name, index, &rowErrs)
 			case "location_type":
