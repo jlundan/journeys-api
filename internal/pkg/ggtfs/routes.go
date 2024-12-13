@@ -26,12 +26,9 @@ type Route struct {
 func (r Route) Validate() []error {
 	var validationErrors []error
 
-	// agency_id is handled in the ValidateRoute function
-	// route_short_name is handled in the ValidateRoute function
-	// route_long_name is handled in the ValidateRoute function
-	// continuous_pickup is handled in the ValidateRoute function
-	// continuous_drop_off is handled in the ValidateRoute function
-	// network_id is handled in the ValidateRoute function
+	// agency_id is handled in the ValidateRoute function since it is conditionally required
+	// route_short_name is handled in the ValidateRoute function since it is conditionally required
+	// route_long_name is handled in the ValidateRoute function since it is conditionally required
 
 	fields := []struct {
 		fieldName string
@@ -58,6 +55,15 @@ func (r Route) Validate() []error {
 	}
 	if r.SortOrder != nil && !r.SortOrder.IsValid() {
 		validationErrors = append(validationErrors, createFileRowError(RoutesFileName, r.LineNumber, createInvalidFieldString("route_sort_order")))
+	}
+	if r.ContinuousPickup != nil && !r.ContinuousPickup.IsValid() {
+		validationErrors = append(validationErrors, createFileRowError(RoutesFileName, r.LineNumber, createInvalidFieldString("continuous_pickup")))
+	}
+	if r.ContinuousDropOff != nil && !r.ContinuousDropOff.IsValid() {
+		validationErrors = append(validationErrors, createFileRowError(RoutesFileName, r.LineNumber, createInvalidFieldString("continuous_drop_off")))
+	}
+	if r.NetworkId != nil && !r.NetworkId.IsValid() {
+		validationErrors = append(validationErrors, createFileRowError(RoutesFileName, r.LineNumber, createInvalidFieldString("network_id")))
 	}
 
 	if r.ShortName == nil && r.LongName == nil {
@@ -127,19 +133,29 @@ func CreateRoute(row []string, headers map[string]int, lineNumber int) interface
 func ValidateRoutes(routes []*Route, agencies []*Agency) ([]error, []string) {
 	var validationErrors []error
 
-	if routes == nil {
-		return validationErrors, nil
-	}
-
+	usedIds := make(map[string]bool)
 	for _, route := range routes {
-		validationErrors = append(validationErrors, route.Validate()...)
+		if route == nil {
+			continue
+		}
+
+		vErr := route.Validate()
+		if len(vErr) > 0 {
+			validationErrors = append(validationErrors, vErr...)
+			continue
+		}
+
+		if usedIds[route.Id.String()] {
+			validationErrors = append(validationErrors, createFileRowError(RoutesFileName, route.LineNumber, fmt.Sprintf("route_id '%s' is not unique within the file", route.Id.String())))
+		} else {
+			usedIds[route.Id.String()] = true
+		}
 	}
 
 	if agencies == nil {
 		return validationErrors, nil
 	}
 
-	usedIds := make(map[string]bool)
 	for _, route := range routes {
 		if route == nil || route.AgencyId == nil {
 			continue
@@ -151,24 +167,14 @@ func ValidateRoutes(routes []*Route, agencies []*Agency) ([]error, []string) {
 				continue
 			}
 
-			errs := agency.Validate()
-			if len(errs) > 0 {
-				continue
-			}
-
 			if route.AgencyId.String() == agency.Id.String() {
 				matchingAgencyFound = true
 				break
 			}
 		}
+
 		if !matchingAgencyFound {
 			validationErrors = append(validationErrors, createFileRowError(RoutesFileName, route.LineNumber, fmt.Sprintf("referenced agency_id '%s' not found in %s", route.AgencyId.String(), AgenciesFileName)))
-		}
-
-		if usedIds[route.Id.String()] {
-			validationErrors = append(validationErrors, createFileRowError(RoutesFileName, route.LineNumber, fmt.Sprintf("route_id '%s' is not unique within the file", route.Id.String())))
-		} else {
-			usedIds[route.Id.String()] = true
 		}
 	}
 
@@ -223,13 +229,14 @@ type ContinuousPickupType struct {
 }
 
 func (cpt ContinuousPickupType) IsValid() bool {
-	// Spec says "1 or empty - No continuous stopping drop off."
+	// Spec says values "1 or empty mean No continuous stopping drop off."
 	// Empty = valid
 	if cpt.Integer.base.IsEmpty() {
 		return true
 	}
 
 	val, err := strconv.Atoi(cpt.Integer.base.raw)
+
 	if err != nil {
 		return false
 	}
