@@ -145,6 +145,13 @@ func (i *Integer) Int() int {
 	return val
 }
 
+func NewInteger(raw *string) Integer {
+	if raw == nil {
+		return Integer{base{raw: ""}}
+	}
+	return Integer{base{raw: *raw, isPresent: true}}
+}
+
 func NewOptionalInteger(raw *string) *Integer {
 	if raw == nil {
 		return nil
@@ -155,6 +162,13 @@ func NewOptionalInteger(raw *string) *Integer {
 // Float represents a number with a floating point.
 type Float struct {
 	base
+}
+
+func NewOptionalFloat(raw *string) *Float {
+	if raw == nil {
+		return nil
+	}
+	return &Float{base{raw: *raw}}
 }
 
 // IsValid if the value is a valid Float.
@@ -298,6 +312,13 @@ type Latitude struct {
 	base
 }
 
+func NewLatitude(raw *string) Latitude {
+	if raw == nil {
+		return Latitude{base{raw: ""}}
+	}
+	return Latitude{base{raw: *raw, isPresent: true}}
+}
+
 // IsValid checks if the Latitude is a valid decimal value between -90 and 90.
 func (lat *Latitude) IsValid() bool {
 	if lat == nil {
@@ -310,6 +331,13 @@ func (lat *Latitude) IsValid() bool {
 // Longitude represents a WGS84 longitude in decimal degrees.
 type Longitude struct {
 	base
+}
+
+func NewLongitude(raw *string) Longitude {
+	if raw == nil {
+		return Longitude{base{raw: ""}}
+	}
+	return Longitude{base{raw: *raw, isPresent: true}}
 }
 
 // IsValid checks if the Longitude is a valid decimal value between -180 and 180.
