@@ -143,7 +143,7 @@ func ValidateTrips(trips []*Trip, routes []*Route, calendarItems []*CalendarItem
 					if shape == nil {
 						continue
 					}
-					if *trip.ShapeId == shape.Id {
+					if *trip.ShapeId == shape.Id.String() {
 						shapeFound = true
 						break
 					}
