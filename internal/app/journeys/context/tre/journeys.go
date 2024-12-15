@@ -128,13 +128,13 @@ func buildJourneys(g GTFSContext, lines Lines, routes Routes, stopPoints StopPoi
 	calendarDateMap := buildCalendarDatesMap(g)
 
 	for _, trip := range g.Trips {
-		jp, ok := tripIdToJourneyPattern[trip.Id]
+		jp, ok := tripIdToJourneyPattern[trip.Id.String()]
 		if !ok {
 			fmt.Println(fmt.Sprintf("Journey with no journey pattern detected, ignoring it: %v", trip.Id))
 			continue
 		}
 
-		line, err := lines.GetOne(trip.RouteId)
+		line, err := lines.GetOne(trip.RouteId.String())
 		if err != nil {
 			fmt.Println(fmt.Sprintf("Journey with no line detected, ignoring it: %v", trip.Id))
 			continue
@@ -144,24 +144,24 @@ func buildJourneys(g GTFSContext, lines Lines, routes Routes, stopPoints StopPoi
 			fmt.Println(fmt.Sprintf("Journey with no route detected, ignoring it: %v", trip.Id))
 			continue
 		}
-		route, err := routes.GetOne(*trip.ShapeId)
+		route, err := routes.GetOne(trip.ShapeId.String())
 		if err != nil {
 			fmt.Println(fmt.Sprintf("Journey with no route detected, ignoring it: %v", trip.Id))
 			continue
 		}
 
-		cMapItem, ok := calendarMap[trip.ServiceId]
+		cMapItem, ok := calendarMap[trip.ServiceId.String()]
 		if !ok {
 			fmt.Println(fmt.Sprintf("Journey with no service detected, ignoring it: %v", trip.Id))
 			continue
 		}
 
-		cdMapItem, ok := calendarDateMap[trip.ServiceId]
+		cdMapItem, ok := calendarDateMap[trip.ServiceId.String()]
 		if !ok {
 			cdMapItem = make([]*model.DayTypeException, 0)
 		}
 
-		calls := tripIdToJourneyCalls[trip.Id]
+		calls := tripIdToJourneyCalls[trip.Id.String()]
 
 		dtParts := strings.Split(calls[0].DepartureTime, ":")
 		dt := strings.Join(dtParts[:2], "")
@@ -172,12 +172,12 @@ func buildJourneys(g GTFSContext, lines Lines, routes Routes, stopPoints StopPoi
 		activityId := fmt.Sprintf("%v_%v_%v_%v", line.Name, dt, lastCall.StopPoint.ShortName, firstCall.StopPoint.ShortName)
 
 		journey := model.Journey{
-			Id:                   trip.Id,
-			HeadSign:             *trip.HeadSign,
-			Direction:            *trip.DirectionId,
-			WheelchairAccessible: *trip.WheelchairAccessible == "1",
+			Id:                   trip.Id.String(),
+			HeadSign:             trip.HeadSign.String(),
+			Direction:            trip.DirectionId.String(),
+			WheelchairAccessible: trip.WheelchairAccessible.String() == "1",
 			GtfsInfo: &model.JourneyGtfsInfo{
-				TripId: trip.Id,
+				TripId: trip.Id.String(),
 			},
 			DayTypes:          cMapItem.dayTypes,
 			DayTypeExceptions: cdMapItem,
@@ -207,7 +207,7 @@ func buildJourneys(g GTFSContext, lines Lines, routes Routes, stopPoints StopPoi
 
 		byActivityId[activityId] = &journey
 		all = append(all, &journey)
-		byId[trip.Id] = &journey
+		byId[trip.Id.String()] = &journey
 	}
 
 	sort.Slice(all, func(x, y int) bool {

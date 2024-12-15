@@ -44,25 +44,17 @@ func TestTripParsing(t *testing.T) {
 }
 
 func getTripOKTestcases() map[string]ggtfsTestCase {
-	headSign := "Trip 1"
-	shortName := "trip1"
-	direction := "0"
-	block := "4"
-	shape := "5"
-	wca := "1"
-	ba := "2"
-
 	expected1 := Trip{
-		Id:                   "1",
-		RouteId:              "2",
-		ServiceId:            "3",
-		HeadSign:             &headSign,
-		ShortName:            &shortName,
-		DirectionId:          &direction,
-		BlockId:              &block,
-		ShapeId:              &shape,
-		WheelchairAccessible: &wca,
-		BikesAllowed:         &ba,
+		Id:                   NewID(stringPtr("1")),
+		RouteId:              NewID(stringPtr("2")),
+		ServiceId:            NewID(stringPtr("3")),
+		HeadSign:             NewOptionalText(stringPtr("Trip 1")),
+		ShortName:            NewOptionalText(stringPtr("trip1")),
+		DirectionId:          NewOptionalDirectionId(stringPtr("0")),
+		BlockId:              NewOptionalID(stringPtr("4")),
+		ShapeId:              NewOptionalID(stringPtr("5")),
+		WheelchairAccessible: NewOptionalWheelchairAccessible(stringPtr("1")),
+		BikesAllowed:         NewOptionalBikesAllowed(stringPtr("2")),
 	}
 
 	testCases := make(map[string]ggtfsTestCase)
@@ -87,9 +79,6 @@ func getTripNOKTestcases() map[string]ggtfsTestCase {
 		},
 		expectedErrors: []string{
 			"trips.txt: record on line 2: wrong number of fields",
-			//"trips.txt:1: route_id must be specified",
-			"trips.txt:1: service_id must be specified",
-			"trips.txt:1: trip_id must be specified",
 		},
 	}
 	testCases["2"] = ggtfsTestCase{
