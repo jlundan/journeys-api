@@ -233,6 +233,20 @@ func (t *Time) IsValid() bool {
 	return match
 }
 
+func NewTime(raw *string) Time {
+	if raw == nil {
+		return Time{base{raw: ""}}
+	}
+	return Time{base{raw: *raw, isPresent: true}}
+}
+
+func NewOptionalTime(raw *string) *Time {
+	if raw == nil {
+		return nil
+	}
+	return &Time{base{raw: *raw}}
+}
+
 // CurrencyCode represents a currency code according to ISO 4217.
 type CurrencyCode struct {
 	base
