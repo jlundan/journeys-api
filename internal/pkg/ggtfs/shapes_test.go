@@ -92,57 +92,27 @@ func getShapeNOKTestcases() map[string]ggtfsTestCase {
 		},
 	}
 
+	testCases["2"] = ggtfsTestCase{
+		csvRows: [][]string{
+			{"shape_id", "shape_pt_lat", "shape_pt_lon", "shape_pt_sequence", "shape_dist_traveled"},
+			{"1", "11.1", "11.1", "1", ""},
+			{"2", "11.1", "11.1", "1", "invalid"},
+			{"3", "11.1", "11.1", "1", "100"},
+		},
+		expectedErrors: []string{
+			"shapes.txt:0: invalid field: shape_dist_traveled",
+			"shapes.txt:1: invalid field: shape_dist_traveled",
+			"shapes.txt: shape (3) has less than two shape points",
+		},
+	}
+
 	return testCases
 }
 
-// TODO: Integrate these into tests run by runGenericGTFSParseTest
-//
-//	func TestValidateShapes(t *testing.T) {
-//		testCases := []struct {
-//			shapes         []*Shape
-//			expectedErrors []string
-//		}{
-//			{
-//				shapes: []*Shape{
-//					{Id: "1000", LineNumber: 0},
-//					{Id: "1000", LineNumber: 1},
-//					{Id: "1000", LineNumber: 2},
-//				},
-//				expectedErrors: []string{},
-//			},
-//			{
-//				shapes: []*Shape{
-//					{Id: "1000", LineNumber: 0},
-//					{Id: "1000", LineNumber: 1},
-//				},
-//				expectedErrors: []string{},
-//			},
-//			{
-//				shapes:         nil,
-//				expectedErrors: []string{},
-//			},
-//			{
-//				shapes: []*Shape{
-//					{Id: "1000", LineNumber: 0},
-//					nil,
-//				},
-//				expectedErrors: []string{
-//					"shapes.txt: shape (1000) has less than two shape points",
-//				},
-//			},
-//			{
-//				shapes: []*Shape{
-//					{Id: "1000", LineNumber: 0},
-//				},
-//				expectedErrors: []string{
-//					"shapes.txt: shape (1000) has less than two shape points",
-//				},
-//			},
-//		}
-//
-//		for _, tc := range testCases {
-//			err := ValidateShapes(tc.shapes)
-//
-//			checkErrors(tc.expectedErrors, err, t)
-//		}
-//	}
+func TestShouldNotFailValidationOnNilShapes(t *testing.T) {
+	ValidateShapes(nil)
+}
+
+func TestShouldNotFailValidationOnNilShapeItem(t *testing.T) {
+	ValidateShapes([]*Shape{nil})
+}
