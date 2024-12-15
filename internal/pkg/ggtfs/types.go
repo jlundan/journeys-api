@@ -319,6 +319,13 @@ func NewLatitude(raw *string) Latitude {
 	return Latitude{base{raw: *raw, isPresent: true}}
 }
 
+func NewOptionalLatitude(raw *string) *Latitude {
+	if raw == nil {
+		return nil
+	}
+	return &Latitude{base{raw: *raw}}
+}
+
 // IsValid checks if the Latitude is a valid decimal value between -90 and 90.
 func (lat *Latitude) IsValid() bool {
 	if lat == nil {
@@ -338,6 +345,13 @@ func NewLongitude(raw *string) Longitude {
 		return Longitude{base{raw: ""}}
 	}
 	return Longitude{base{raw: *raw, isPresent: true}}
+}
+
+func NewOptionalLongitude(raw *string) *Longitude {
+	if raw == nil {
+		return nil
+	}
+	return &Longitude{base{raw: *raw}}
 }
 
 // IsValid checks if the Longitude is a valid decimal value between -180 and 180.
@@ -402,6 +416,13 @@ func NewOptionalText(raw *string) *Text {
 // Timezone represents a TZ timezone from the IANA timezone database.
 type Timezone struct {
 	base
+}
+
+func NewOptionalTimezone(raw *string) *Timezone {
+	if raw == nil {
+		return nil
+	}
+	return &Timezone{base{raw: *raw}}
 }
 
 // IsValid checks if the Timezone is in a valid format (e.g., "America/New_York").

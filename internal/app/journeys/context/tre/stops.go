@@ -33,11 +33,11 @@ func buildStopPoints(g GTFSContext, municipalities Municipalities) StopPoints {
 	for _, stop := range g.Stops {
 
 		// FIXME: Nil-checks
-		lat, err := strconv.ParseFloat(*stop.Lat, 64)
+		lat, err := strconv.ParseFloat(stop.Lat.String(), 64)
 		if err != nil {
 			fmt.Println(fmt.Sprintf("Error parsing shape.PtLat: %v, line: %v", *stop.Lat, stop.LineNumber))
 		}
-		lon, err := strconv.ParseFloat(*stop.Lon, 64)
+		lon, err := strconv.ParseFloat(stop.Lon.String(), 64)
 		if err != nil {
 			fmt.Println(fmt.Sprintf("Error parsing shape.PtLon: %v, line: %v", *stop.Lon, stop.LineNumber))
 		}
@@ -46,15 +46,15 @@ func buildStopPoints(g GTFSContext, municipalities Municipalities) StopPoints {
 		lon2 := math.Round(lon*100000) / 100000
 
 		s := model.StopPoint{
-			Name:       *stop.Name,
-			ShortName:  *stop.Code,
+			Name:       stop.Name.String(),
+			ShortName:  stop.Code.String(),
 			Latitude:   lat2,
 			Longitude:  lon2,
-			TariffZone: *stop.ZoneId,
+			TariffZone: stop.ZoneId.String(),
 		}
 
-		if stop.MunicipalityId != nil {
-			m, err := municipalities.GetOne(*stop.MunicipalityId)
+		if stop.Extensions.MunicipalityId != nil {
+			m, err := municipalities.GetOne(stop.Extensions.MunicipalityId.String())
 			if err != nil {
 				warnings = append(warnings, errors.New(fmt.Sprintf("stop-point (%v): municipality information not found, ignoring the stop-point", stop.Id)))
 				continue
@@ -63,7 +63,7 @@ func buildStopPoints(g GTFSContext, municipalities Municipalities) StopPoints {
 		}
 
 		all = append(all, &s)
-		byId[stop.Id] = &s
+		byId[stop.Id.String()] = &s
 	}
 
 	sort.Slice(all, func(x, y int) bool {

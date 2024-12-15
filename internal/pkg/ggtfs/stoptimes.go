@@ -131,7 +131,7 @@ func ValidateStopTimes(stopTimes []*StopTime, stops []*Stop) ([]error, []string)
 				if stop == nil {
 					continue
 				}
-				if stopTimeItem.StopId == stop.Id {
+				if stopTimeItem.StopId == stop.Id.String() {
 					stopFound = true
 					break
 				}

@@ -44,35 +44,21 @@ func TestStopParsing(t *testing.T) {
 }
 
 func getStopOKTestcases() map[string]ggtfsTestCase {
-	code := "0001"
-	name := "Place 0001"
-	desc := "Stop at place 0001"
-	lat := "11.1111111"
-	lon := "-11.1111111"
-	zone := "Z1"
-	stopUrl := "https://acme.inc/stops/0001"
-	location := "0"
-	parentStation := "4"
-	timeZone := "Europe/Helsinki"
-	wheelchairBoarding := "0"
-	level := "1"
-	platformCode := "0001"
-
 	expected1 := Stop{
-		Id:                 "0001",
-		Code:               &code,
-		Name:               &name,
-		Desc:               &desc,
-		Lat:                &lat,
-		Lon:                &lon,
-		ZoneId:             &zone,
-		Url:                &stopUrl,
-		LocationType:       &location,
-		ParentStation:      &parentStation,
-		Timezone:           &timeZone,
-		WheelchairBoarding: &wheelchairBoarding,
-		PlatformCode:       &platformCode,
-		LevelId:            &level,
+		Id:                 NewID(stringPtr("0001")),
+		Code:               NewOptionalText(stringPtr("0001")),
+		Name:               NewOptionalText(stringPtr("Place 0001")),
+		Desc:               NewOptionalText(stringPtr("Stop at place 0001")),
+		Lat:                NewOptionalLatitude(stringPtr("11.1111111")),
+		Lon:                NewOptionalLongitude(stringPtr("-11.1111111")),
+		ZoneId:             NewOptionalID(stringPtr("Z1")),
+		Url:                NewOptionalURL(stringPtr("https://acme.inc/stops/0001")),
+		LocationType:       NewOptionalStopLocation(stringPtr("0")),
+		ParentStation:      NewOptionalID(stringPtr("4")),
+		Timezone:           NewOptionalTimezone(stringPtr("Europe/Helsinki")),
+		WheelchairBoarding: NewOptionalWheelchairBoarding(stringPtr("0")),
+		PlatformCode:       NewOptionalText(stringPtr("0001")),
+		LevelId:            NewOptionalID(stringPtr("1")),
 	}
 
 	testCases := make(map[string]ggtfsTestCase)
