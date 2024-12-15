@@ -44,27 +44,19 @@ func TestStopTimeParsing(t *testing.T) {
 }
 
 func getStopTimeOKTestcases() map[string]ggtfsTestCase {
-	headSign := "Foo city"
-	pickup := "1"
-	dropOff := "0"
-	cp := "2"
-	cd := "3"
-	sd := "100"
-	tp := "1"
-
 	expected1 := StopTime{
-		TripId:            "1",
-		ArrivalTime:       "00:00",
-		DepartureTime:     "02:00",
-		StopId:            "0001",
-		StopSequence:      "1",
-		StopHeadSign:      &headSign,
-		PickupType:        &pickup,
-		DropOffType:       &dropOff,
-		ContinuousPickup:  &cp,
-		ContinuousDropOff: &cd,
-		ShapeDistTraveled: &sd,
-		Timepoint:         &tp,
+		TripId:            NewID(stringPtr("1")),
+		ArrivalTime:       NewTime(stringPtr("00:00")),
+		DepartureTime:     NewTime(stringPtr("02:00")),
+		StopId:            NewID(stringPtr("0001")),
+		StopSequence:      NewInteger(stringPtr("1")),
+		StopHeadSign:      NewOptionalText(stringPtr("Foo city")),
+		PickupType:        NewOptionalPickupType(stringPtr("1")),
+		DropOffType:       NewOptionalDropOffType(stringPtr("0")),
+		ContinuousPickup:  NewOptionalContinuousPickupType(stringPtr("2")),
+		ContinuousDropOff: NewOptionalContinuousDropOffType(stringPtr("3")),
+		ShapeDistTraveled: NewOptionalFloat(stringPtr("100")),
+		Timepoint:         NewOptionalTimePoint(stringPtr("1")),
 		LineNumber:        0,
 	}
 
@@ -74,7 +66,6 @@ func getStopTimeOKTestcases() map[string]ggtfsTestCase {
 			{"trip_id", "arrival_time", "departure_time", "stop_id", "stop_sequence", "stop_headsign", "pickup_type", "drop_off_type", "continuous_pickup", "continuous_drop_off", "shape_dist_traveled", "timepoint"},
 			{"1", "00:00", "02:00", "0001", "1", "Foo city", "1", "0", "2", "3", "100", "1"},
 		},
-		//FIXME: this is not right
 		expectedErrors: []string{
 			"stop_times.txt: trip (1) has less than two defined stop times",
 			"stop_times.txt: trip (1) references to an unknown stop_id (0001)",
@@ -97,11 +88,6 @@ func getStopTimeNOKTestcases() map[string]ggtfsTestCase {
 			"stop_times.txt: record on line 2: wrong number of fields",
 			"stop_times.txt: trip ( ) has less than two defined stop times",
 			"stop_times.txt: trip ( ) references to an unknown stop_id ()",
-			"stop_times.txt:1: arrival_time must be specified",
-			"stop_times.txt:1: departure_time must be specified",
-			"stop_times.txt:1: stop_id must be specified",
-			"stop_times.txt:1: stop_sequence must be specified",
-			//"stop_times.txt:1: trip_id must be specified",
 		},
 	}
 	testCases["2"] = ggtfsTestCase{

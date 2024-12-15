@@ -63,14 +63,14 @@ func buildJourneys(g GTFSContext, lines Lines, routes Routes, stopPoints StopPoi
 	var tripIdToStopTimes = make(map[string][]*ggtfs.StopTime)
 
 	for _, st := range g.StopTimes {
-		tripIdToStopTimes[st.TripId] = append(tripIdToStopTimes[st.TripId], st)
+		tripIdToStopTimes[st.TripId.String()] = append(tripIdToStopTimes[st.TripId.String()], st)
 	}
 
 	usedHashes := make([]string, 0)
 
 	for tripId, stArr := range tripIdToStopTimes {
 		sort.Slice(stArr, func(x, y int) bool {
-			return stArr[x].StopSequence < stArr[y].StopSequence
+			return stArr[x].StopSequence.Int() < stArr[y].StopSequence.Int()
 		})
 
 		// GTFS stop_times.txt contains trips (Journeys) and sequence of stops (JourneyPatterns) merged into one stop time list
@@ -98,15 +98,15 @@ func buildJourneys(g GTFSContext, lines Lines, routes Routes, stopPoints StopPoi
 		}
 
 		for _, stopTime := range stArr {
-			sp, err := stopPoints.GetOne(stopTime.StopId)
+			sp, err := stopPoints.GetOne(stopTime.StopId.String())
 			if err != nil {
 				fmt.Println(fmt.Sprintf("Unknown stop point in trip, ignoring it. trip_id:%v, stop_id:%v", tripId, stopTime.TripId))
 				continue
 			}
 
 			tripIdToJourneyCalls[tripId] = append(tripIdToJourneyCalls[tripId], &model.JourneyCall{
-				DepartureTime: stopTime.DepartureTime,
-				ArrivalTime:   stopTime.ArrivalTime,
+				DepartureTime: stopTime.DepartureTime.String(),
+				ArrivalTime:   stopTime.ArrivalTime.String(),
 				StopPoint:     sp,
 			})
 
@@ -311,7 +311,7 @@ func buildCalendarDatesMap(g GTFSContext) map[string][]*model.DayTypeException {
 func stopPointIdsToMd5(arr []*ggtfs.StopTime) string {
 	bucket := md5.New()
 	for _, v := range arr {
-		bucket.Write([]byte(v.StopId))
+		bucket.Write([]byte(v.StopId.String()))
 	}
 
 	return hex.EncodeToString(bucket.Sum(nil))
