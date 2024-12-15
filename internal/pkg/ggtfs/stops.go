@@ -46,41 +46,41 @@ func (s Stop) Validate() []error {
 		{"stop_id", &s.Id},
 	}
 	for _, f := range fields {
-		validationErrors = append(validationErrors, validateFieldIsPresentAndValid(f.field, f.fieldName, s.LineNumber, RoutesFileName)...)
+		validationErrors = append(validationErrors, validateFieldIsPresentAndValid(f.field, f.fieldName, s.LineNumber, StopsFileName)...)
 	}
 
 	if s.Code != nil && !s.Code.IsValid() {
-		validationErrors = append(validationErrors, createFileRowError(RoutesFileName, s.LineNumber, createInvalidFieldString("stop_code")))
+		validationErrors = append(validationErrors, createFileRowError(StopsFileName, s.LineNumber, createInvalidFieldString("stop_code")))
 	}
 	if s.TTSName != nil && !s.TTSName.IsValid() {
-		validationErrors = append(validationErrors, createFileRowError(RoutesFileName, s.LineNumber, createInvalidFieldString("tts_stop_name")))
+		validationErrors = append(validationErrors, createFileRowError(StopsFileName, s.LineNumber, createInvalidFieldString("tts_stop_name")))
 	}
 	if s.Desc != nil && !s.Desc.IsValid() {
-		validationErrors = append(validationErrors, createFileRowError(RoutesFileName, s.LineNumber, createInvalidFieldString("stop_desc")))
+		validationErrors = append(validationErrors, createFileRowError(StopsFileName, s.LineNumber, createInvalidFieldString("stop_desc")))
 	}
 	if s.ZoneId != nil && !s.ZoneId.IsValid() {
-		validationErrors = append(validationErrors, createFileRowError(RoutesFileName, s.LineNumber, createInvalidFieldString("zone_id")))
+		validationErrors = append(validationErrors, createFileRowError(StopsFileName, s.LineNumber, createInvalidFieldString("zone_id")))
 	}
 	if s.Url != nil && !s.Url.IsValid() {
-		validationErrors = append(validationErrors, createFileRowError(RoutesFileName, s.LineNumber, createInvalidFieldString("stop_url")))
+		validationErrors = append(validationErrors, createFileRowError(StopsFileName, s.LineNumber, createInvalidFieldString("stop_url")))
 	}
 	if s.LocationType != nil && !s.LocationType.IsValid() {
-		validationErrors = append(validationErrors, createFileRowError(RoutesFileName, s.LineNumber, createInvalidFieldString("location_type")))
+		validationErrors = append(validationErrors, createFileRowError(StopsFileName, s.LineNumber, createInvalidFieldString("location_type")))
 	}
 	if s.Timezone != nil && !s.Timezone.IsValid() {
-		validationErrors = append(validationErrors, createFileRowError(RoutesFileName, s.LineNumber, createInvalidFieldString("stop_timezone")))
+		validationErrors = append(validationErrors, createFileRowError(StopsFileName, s.LineNumber, createInvalidFieldString("stop_timezone")))
 	}
 	if s.WheelchairBoarding != nil && !s.WheelchairBoarding.IsValid() {
-		validationErrors = append(validationErrors, createFileRowError(RoutesFileName, s.LineNumber, createInvalidFieldString("wheelchair_boarding")))
+		validationErrors = append(validationErrors, createFileRowError(StopsFileName, s.LineNumber, createInvalidFieldString("wheelchair_boarding")))
 	}
 	if s.LevelId != nil && !s.LevelId.IsValid() {
-		validationErrors = append(validationErrors, createFileRowError(RoutesFileName, s.LineNumber, createInvalidFieldString("level_id")))
+		validationErrors = append(validationErrors, createFileRowError(StopsFileName, s.LineNumber, createInvalidFieldString("level_id")))
 	}
 	if s.PlatformCode != nil && !s.PlatformCode.IsValid() {
-		validationErrors = append(validationErrors, createFileRowError(RoutesFileName, s.LineNumber, createInvalidFieldString("platform_code")))
+		validationErrors = append(validationErrors, createFileRowError(StopsFileName, s.LineNumber, createInvalidFieldString("platform_code")))
 	}
 	if s.Extensions.MunicipalityId != nil && !s.Extensions.MunicipalityId.IsValid() {
-		validationErrors = append(validationErrors, createFileRowError(RoutesFileName, s.LineNumber, createInvalidFieldString("municipality_id")))
+		validationErrors = append(validationErrors, createFileRowError(StopsFileName, s.LineNumber, createInvalidFieldString("municipality_id")))
 	}
 
 	return validationErrors
