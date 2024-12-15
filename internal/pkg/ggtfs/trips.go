@@ -3,21 +3,58 @@ package ggtfs
 import (
 	"encoding/csv"
 	"fmt"
+	"strconv"
 )
 
 // Trip struct with fields as strings and optional fields as string pointers.
 type Trip struct {
-	Id                   string  // trip_id
-	RouteId              string  // route_id
-	ServiceId            string  // service_id
-	HeadSign             *string // trip_headsign (optional)
-	ShortName            *string // trip_short_name (optional)
-	DirectionId          *string // direction_id (optional)
-	BlockId              *string // block_id (optional)
-	ShapeId              *string // shape_id (optional)
-	WheelchairAccessible *string // wheelchair_accessible (optional)
-	BikesAllowed         *string // bikes_allowed (optional)
-	LineNumber           int     // Line number in the CSV file for error reporting
+	Id                   ID                    // trip_id
+	RouteId              ID                    // route_id
+	ServiceId            ID                    // service_id
+	HeadSign             *Text                 // trip_headsign (optional)
+	ShortName            *Text                 // trip_short_name (optional)
+	DirectionId          *DirectionId          // direction_id (optional)
+	BlockId              *ID                   // block_id (optional)
+	ShapeId              *ID                   // shape_id (optional)
+	WheelchairAccessible *WheelchairAccessible // wheelchair_accessible (optional)
+	BikesAllowed         *BikesAllowed         // bikes_allowed (optional)
+	LineNumber           int                   // Line number in the CSV file for error reporting
+}
+
+func (t Trip) Validate() []error {
+	var validationErrors []error
+
+	// shape_id is handled in the ValidateStopTimes function since it is conditionally required
+
+	fields := []struct {
+		fieldName string
+		field     ValidAndPresentField
+	}{
+		{"route_id", &t.RouteId},
+		{"service_id", &t.ServiceId},
+		{"trip_id", &t.Id},
+	}
+	for _, f := range fields {
+		validationErrors = append(validationErrors, validateFieldIsPresentAndValid(f.field, f.fieldName, t.LineNumber, TripsFileName)...)
+	}
+
+	if t.HeadSign != nil && !t.HeadSign.IsValid() {
+		validationErrors = append(validationErrors, createFileRowError(TripsFileName, t.LineNumber, createInvalidFieldString("trip_headsign")))
+	}
+	if t.ShortName != nil && !t.ShortName.IsValid() {
+		validationErrors = append(validationErrors, createFileRowError(TripsFileName, t.LineNumber, createInvalidFieldString("trip_short_name")))
+	}
+	if t.DirectionId != nil && !t.DirectionId.IsValid() {
+		validationErrors = append(validationErrors, createFileRowError(TripsFileName, t.LineNumber, createInvalidFieldString("direction_id")))
+	}
+	if t.BlockId != nil && !t.BlockId.IsValid() {
+		validationErrors = append(validationErrors, createFileRowError(TripsFileName, t.LineNumber, createInvalidFieldString("block_id")))
+	}
+	if t.BikesAllowed != nil && !t.BikesAllowed.IsValid() {
+		validationErrors = append(validationErrors, createFileRowError(TripsFileName, t.LineNumber, createInvalidFieldString("wheelchair_accessible")))
+	}
+
+	return validationErrors
 }
 
 // ValidTripHeaders defines the headers expected in the trips CSV file.
@@ -49,25 +86,25 @@ func CreateTrip(row []string, headers map[string]int, lineNumber int) interface{
 	for hName, hPos := range headers {
 		switch hName {
 		case "trip_id":
-			trip.Id = getField(row, hName, hPos, &parseErrors, lineNumber, TripsFileName)
+			trip.Id = NewID(getRowValue(row, hPos))
 		case "route_id":
-			trip.RouteId = getField(row, hName, hPos, &parseErrors, lineNumber, TripsFileName)
+			trip.RouteId = NewID(getRowValue(row, hPos))
 		case "service_id":
-			trip.ServiceId = getField(row, hName, hPos, &parseErrors, lineNumber, TripsFileName)
+			trip.ServiceId = NewID(getRowValue(row, hPos))
 		case "trip_headsign":
-			trip.HeadSign = getOptionalField(row, hName, hPos, &parseErrors, lineNumber, TripsFileName)
+			trip.HeadSign = NewOptionalText(getRowValue(row, hPos))
 		case "trip_short_name":
-			trip.ShortName = getOptionalField(row, hName, hPos, &parseErrors, lineNumber, TripsFileName)
+			trip.ShortName = NewOptionalText(getRowValue(row, hPos))
 		case "direction_id":
-			trip.DirectionId = getOptionalField(row, hName, hPos, &parseErrors, lineNumber, TripsFileName)
+			trip.DirectionId = NewOptionalDirectionId(getRowValue(row, hPos))
 		case "block_id":
-			trip.BlockId = getOptionalField(row, hName, hPos, &parseErrors, lineNumber, TripsFileName)
+			trip.BlockId = NewOptionalID(getRowValue(row, hPos))
 		case "shape_id":
-			trip.ShapeId = getOptionalField(row, hName, hPos, &parseErrors, lineNumber, TripsFileName)
+			trip.ShapeId = NewOptionalID(getRowValue(row, hPos))
 		case "wheelchair_accessible":
-			trip.WheelchairAccessible = getOptionalField(row, hName, hPos, &parseErrors, lineNumber, TripsFileName)
+			trip.WheelchairAccessible = NewOptionalWheelchairAccessible(getRowValue(row, hPos))
 		case "bikes_allowed":
-			trip.BikesAllowed = getOptionalField(row, hName, hPos, &parseErrors, lineNumber, TripsFileName)
+			trip.BikesAllowed = NewOptionalBikesAllowed(getRowValue(row, hPos))
 		}
 	}
 
@@ -87,19 +124,6 @@ func ValidateTrips(trips []*Trip, routes []*Route, calendarItems []*CalendarItem
 	}
 
 	for _, trip := range trips {
-		// Additional required field checks for individual Trip.
-		if trip.Id == "" {
-			validationErrors = append(validationErrors, createFileRowError(TripsFileName, trip.LineNumber, "trip_id must be specified"))
-		}
-		if trip.RouteId == "" {
-			validationErrors = append(validationErrors, createFileRowError(TripsFileName, trip.LineNumber, "route_id must be specified"))
-		}
-		if trip.ServiceId == "" {
-			validationErrors = append(validationErrors, createFileRowError(TripsFileName, trip.LineNumber, "service_id must be specified"))
-		}
-	}
-
-	for _, trip := range trips {
 		if trip == nil {
 			continue
 		}
@@ -110,7 +134,7 @@ func ValidateTrips(trips []*Trip, routes []*Route, calendarItems []*CalendarItem
 				if route == nil {
 					continue
 				}
-				if trip.RouteId == route.Id.String() {
+				if trip.RouteId.String() == route.Id.String() {
 					routeFound = true
 					break
 				}
@@ -126,7 +150,7 @@ func ValidateTrips(trips []*Trip, routes []*Route, calendarItems []*CalendarItem
 				if calendarItem == nil {
 					continue
 				}
-				if trip.ServiceId == calendarItem.ServiceId.String() {
+				if trip.ServiceId.String() == calendarItem.ServiceId.String() {
 					serviceFound = true
 					break
 				}
@@ -143,7 +167,7 @@ func ValidateTrips(trips []*Trip, routes []*Route, calendarItems []*CalendarItem
 					if shape == nil {
 						continue
 					}
-					if *trip.ShapeId == shape.Id.String() {
+					if trip.ShapeId.String() == shape.Id.String() {
 						shapeFound = true
 						break
 					}
@@ -156,4 +180,86 @@ func ValidateTrips(trips []*Trip, routes []*Route, calendarItems []*CalendarItem
 	}
 
 	return validationErrors, recommendations
+}
+
+const (
+	BikesAllowedNoInformation     = 0
+	BikesAllowedAtLeastOneBicycle = 1
+	BikesAllowedNone              = 2
+)
+
+type BikesAllowed struct {
+	Integer
+}
+
+func (ba BikesAllowed) IsValid() bool {
+	val, err := strconv.Atoi(ba.Integer.base.raw)
+	if err != nil {
+		return false
+	}
+
+	return val == BikesAllowedNoInformation || val == BikesAllowedAtLeastOneBicycle ||
+		val == BikesAllowedNone
+}
+
+func NewOptionalBikesAllowed(raw *string) *BikesAllowed {
+	if raw == nil {
+		return &BikesAllowed{
+			Integer{base: base{raw: ""}}}
+	}
+	return &BikesAllowed{Integer{base: base{raw: *raw}}}
+}
+
+const (
+	WheelchairAccessibleNoInformation   = 0
+	WheelchairAccessibleAtLeastOneRider = 1
+	WheelchairAccessibleNoAccommodation = 2
+)
+
+type WheelchairAccessible struct {
+	Integer
+}
+
+func (wa WheelchairAccessible) IsValid() bool {
+	val, err := strconv.Atoi(wa.Integer.base.raw)
+	if err != nil {
+		return false
+	}
+
+	return val == WheelchairAccessibleNoInformation || val == WheelchairAccessibleAtLeastOneRider ||
+		val == WheelchairAccessibleNoAccommodation
+}
+
+func NewOptionalWheelchairAccessible(raw *string) *WheelchairAccessible {
+	if raw == nil {
+		return &WheelchairAccessible{
+			Integer{base: base{raw: ""}}}
+	}
+	return &WheelchairAccessible{Integer{base: base{raw: *raw}}}
+}
+
+const (
+	TripTravelInOneDirection      = 0
+	TripTravelInOppositeDirection = 1
+)
+
+type DirectionId struct {
+	Integer
+}
+
+func (di DirectionId) IsValid() bool {
+	val, err := strconv.Atoi(di.Integer.base.raw)
+	if err != nil {
+		return false
+	}
+
+	return val == TripTravelInOneDirection || val == TripTravelInOppositeDirection
+}
+
+func NewOptionalDirectionId(raw *string) *DirectionId {
+	if raw == nil {
+		return &DirectionId{
+			Integer{base: base{raw: ""}}}
+	}
+	return &DirectionId{Integer{base: base{raw: *raw}}}
 }
