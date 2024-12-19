@@ -8,8 +8,11 @@ import (
 	"testing"
 )
 
+var validTripHeaders = []string{"route_id", "service_id", "trip_id", "trip_headsign", "trip_short_name",
+	"direction_id", "block_id", "shape_id", "wheelchair_accessible", "bikes_allowed"}
+
 func TestShouldReturnEmptyTripArrayOnEmptyString(t *testing.T) {
-	trips, errors := LoadTrips(csv.NewReader(strings.NewReader("")))
+	trips, errors := LoadEntities[*Trip](csv.NewReader(strings.NewReader("")), validTripHeaders, CreateTrip, TripsFileName)
 	if len(errors) > 0 {
 		t.Error(errors)
 	}
@@ -20,7 +23,7 @@ func TestShouldReturnEmptyTripArrayOnEmptyString(t *testing.T) {
 
 func TestTripParsing(t *testing.T) {
 	loadTripsFunc := func(reader *csv.Reader) ([]interface{}, []error) {
-		trips, errs := LoadTrips(reader)
+		trips, errs := LoadEntities[*Trip](reader, validTripHeaders, CreateTrip, TripsFileName)
 		entities := make([]interface{}, len(trips))
 		for i, trip := range trips {
 			entities[i] = trip

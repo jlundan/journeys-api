@@ -55,6 +55,24 @@ func NewGTFSContextForDirectory(gtfsPath string) (*GTFSContext, []error) {
 	context := GTFSContext{}
 	var gtfsErrors []error
 
+	var validShapeHeaders = []string{"shape_id", "shape_pt_lat", "shape_pt_lon", "shape_pt_sequence", "shape_dist_traveled"}
+	var validStopHeaders = []string{"stop_id", "stop_code", "stop_name", "stop_desc", "stop_lat", "stop_lon", "zone_id",
+		"stop_url", "location_type", "parent_station", "stop_timezone", "wheelchair_boarding", "level_id", "platform_code", "municipality_id"}
+	var validAgencyHeaders = []string{"agency_id", "agency_name", "agency_url", "agency_timezone",
+		"agency_lang", "agency_phone", "agency_fare_url", "agency_email"}
+	var validCalendarHeaders = []string{
+		"service_id", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday", "start_date", "end_date",
+	}
+	var validCalendarDateHeaders = []string{"service_id", "date", "exception_type"}
+	var validRouteHeaders = []string{"route_id", "agency_id", "route_short_name", "route_long_name", "route_desc",
+		"route_type", "route_url", "route_color", "route_text_color", "route_sort_order", "continuous_pickup",
+		"continuous_drop_off", "network_id"}
+	var validStopTimeHeaders = []string{"trip_id", "arrival_time", "departure_time", "stop_id", "stop_sequence",
+		"stop_headsign", "pickup_type", "drop_off_type", "continuous_pickup", "continuous_drop_off",
+		"shape_dist_traveled", "timepoint"}
+	var validTripHeaders = []string{"route_id", "service_id", "trip_id", "trip_headsign", "trip_short_name",
+		"direction_id", "block_id", "shape_id", "wheelchair_accessible", "bikes_allowed"}
+
 	files := []string{ggtfs.AgenciesFileName, ggtfs.RoutesFileName, ggtfs.StopsFileName, ggtfs.TripsFileName, ggtfs.StopTimesFileName,
 		ggtfs.CalendarFileName, ggtfs.CalendarDatesFileName, ggtfs.ShapesFileName}
 
@@ -66,21 +84,21 @@ func NewGTFSContextForDirectory(gtfsPath string) (*GTFSContext, []error) {
 
 		switch file {
 		case ggtfs.AgenciesFileName:
-			context.Agencies, gtfsErrors = ggtfs.LoadAgencies(reader)
+			context.Agencies, gtfsErrors = ggtfs.LoadEntities[*ggtfs.Agency](reader, validAgencyHeaders, ggtfs.CreateAgency, ggtfs.AgenciesFileName)
 		case ggtfs.RoutesFileName:
-			context.Routes, gtfsErrors = ggtfs.LoadRoutes(reader)
+			context.Routes, gtfsErrors = ggtfs.LoadEntities[*ggtfs.Route](reader, validRouteHeaders, ggtfs.CreateRoute, ggtfs.RoutesFileName)
 		case ggtfs.StopsFileName:
-			context.Stops, gtfsErrors = ggtfs.LoadStops(reader)
+			context.Stops, gtfsErrors = ggtfs.LoadEntities[*ggtfs.Stop](reader, validStopHeaders, ggtfs.CreateStop, ggtfs.StopsFileName)
 		case ggtfs.TripsFileName:
-			context.Trips, gtfsErrors = ggtfs.LoadTrips(reader)
+			context.Trips, gtfsErrors = ggtfs.LoadEntities[*ggtfs.Trip](reader, validTripHeaders, ggtfs.CreateTrip, ggtfs.TripsFileName)
 		case ggtfs.StopTimesFileName:
-			context.StopTimes, gtfsErrors = ggtfs.LoadStopTimes(reader)
+			context.StopTimes, gtfsErrors = ggtfs.LoadEntities[*ggtfs.StopTime](reader, validStopTimeHeaders, ggtfs.CreateStopTime, ggtfs.StopTimesFileName)
 		case ggtfs.CalendarFileName:
-			context.CalendarItems, gtfsErrors = ggtfs.LoadCalendarItems(reader)
+			context.CalendarItems, gtfsErrors = ggtfs.LoadEntities[*ggtfs.CalendarItem](reader, validCalendarHeaders, ggtfs.CreateCalendarItem, ggtfs.CalendarFileName)
 		case ggtfs.CalendarDatesFileName:
-			context.CalendarDates, gtfsErrors = ggtfs.LoadCalendarDates(reader)
+			context.CalendarDates, gtfsErrors = ggtfs.LoadEntities[*ggtfs.CalendarDate](reader, validCalendarDateHeaders, ggtfs.CreateCalendarDate, ggtfs.CalendarDatesFileName)
 		case ggtfs.ShapesFileName:
-			context.Shapes, gtfsErrors = ggtfs.LoadShapes(reader)
+			context.Shapes, gtfsErrors = ggtfs.LoadEntities[*ggtfs.Shape](reader, validShapeHeaders, ggtfs.CreateShape, ggtfs.ShapesFileName)
 		}
 
 		if len(gtfsErrors) > 0 {

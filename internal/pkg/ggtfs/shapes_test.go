@@ -8,8 +8,10 @@ import (
 	"testing"
 )
 
+var validShapeHeaders = []string{"shape_id", "shape_pt_lat", "shape_pt_lon", "shape_pt_sequence", "shape_dist_traveled"}
+
 func TestShouldReturnEmptyShapeArrayOnEmptyString(t *testing.T) {
-	agencies, errors := LoadShapes(csv.NewReader(strings.NewReader("")))
+	agencies, errors := LoadEntities[*Shape](csv.NewReader(strings.NewReader("")), validShapeHeaders, CreateShape, ShapesFileName)
 	if len(errors) > 0 {
 		t.Error(errors)
 	}
@@ -20,7 +22,7 @@ func TestShouldReturnEmptyShapeArrayOnEmptyString(t *testing.T) {
 
 func TestShapeParsing(t *testing.T) {
 	loadShapesFunc := func(reader *csv.Reader) ([]interface{}, []error) {
-		shapes, errs := LoadShapes(reader)
+		shapes, errs := LoadEntities[*Shape](reader, validShapeHeaders, CreateShape, ShapesFileName)
 		entities := make([]interface{}, len(shapes))
 		for i, shape := range shapes {
 			entities[i] = shape

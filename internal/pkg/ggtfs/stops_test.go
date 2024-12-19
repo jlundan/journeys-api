@@ -8,8 +8,11 @@ import (
 	"testing"
 )
 
+var validStopHeaders = []string{"stop_id", "stop_code", "stop_name", "stop_desc", "stop_lat", "stop_lon", "zone_id",
+	"stop_url", "location_type", "parent_station", "stop_timezone", "wheelchair_boarding", "level_id", "platform_code", "municipality_id"}
+
 func TestShouldReturnEmptyStopArrayOnEmptyString(t *testing.T) {
-	stops, errors := LoadStops(csv.NewReader(strings.NewReader("")))
+	stops, errors := LoadEntities[*Stop](csv.NewReader(strings.NewReader("")), validStopHeaders, CreateStop, StopsFileName)
 	if len(errors) > 0 {
 		t.Error(errors)
 	}
@@ -20,7 +23,7 @@ func TestShouldReturnEmptyStopArrayOnEmptyString(t *testing.T) {
 
 func TestStopParsing(t *testing.T) {
 	loadStopsFunc := func(reader *csv.Reader) ([]interface{}, []error) {
-		stops, errs := LoadStops(reader)
+		stops, errs := LoadEntities[*Stop](reader, validStopHeaders, CreateStop, StopsFileName)
 		entities := make([]interface{}, len(stops))
 		for i, stop := range stops {
 			entities[i] = stop

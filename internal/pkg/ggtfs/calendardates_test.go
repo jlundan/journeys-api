@@ -10,8 +10,10 @@ import (
 	"testing"
 )
 
+var validCalendarDateHeaders = []string{"service_id", "date", "exception_type"}
+
 func TestShouldReturnEmptyCalendarDateArrayOnEmptyString(t *testing.T) {
-	agencies, errors := LoadCalendarDates(csv.NewReader(strings.NewReader("")))
+	agencies, errors := LoadEntities[*CalendarDate](csv.NewReader(strings.NewReader("")), validCalendarDateHeaders, CreateCalendarDate, CalendarDatesFileName)
 	if len(errors) > 0 {
 		t.Error(errors)
 	}
@@ -22,7 +24,7 @@ func TestShouldReturnEmptyCalendarDateArrayOnEmptyString(t *testing.T) {
 
 func TestCalendarDateParsing(t *testing.T) {
 	loadCalendarDatesFunc := func(reader *csv.Reader) ([]interface{}, []error) {
-		calendarDates, errs := LoadCalendarDates(reader)
+		calendarDates, errs := LoadEntities[*CalendarDate](reader, validCalendarDateHeaders, CreateCalendarDate, CalendarDatesFileName)
 		entities := make([]interface{}, len(calendarDates))
 		for i, calendarItem := range calendarDates {
 			entities[i] = calendarItem

@@ -1,7 +1,6 @@
 package ggtfs
 
 import (
-	"encoding/csv"
 	"fmt"
 )
 
@@ -38,25 +37,8 @@ func (s Shape) Validate() []error {
 	return validationErrors
 }
 
-// ValidShapeHeaders defines the headers expected in the shapes CSV file.
-var validShapeHeaders = []string{"shape_id", "shape_pt_lat", "shape_pt_lon", "shape_pt_sequence", "shape_dist_traveled"}
-
-// LoadShapes loads shapes from a CSV reader and returns them along with any errors.
-func LoadShapes(csvReader *csv.Reader) ([]*Shape, []error) {
-	entities, errs := loadEntities(csvReader, validShapeHeaders, CreateShape, ShapesFileName)
-
-	shapes := make([]*Shape, 0, len(entities))
-	for _, entity := range entities {
-		if shape, ok := entity.(*Shape); ok {
-			shapes = append(shapes, shape)
-		}
-	}
-
-	return shapes, errs
-}
-
 // CreateShape creates and validates a Shape instance from the CSV row data.
-func CreateShape(row []string, headers map[string]int, lineNumber int) interface{} {
+func CreateShape(row []string, headers map[string]int, lineNumber int) *Shape {
 
 	shape := Shape{
 		LineNumber: lineNumber,

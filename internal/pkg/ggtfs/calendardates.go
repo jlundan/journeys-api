@@ -1,7 +1,6 @@
 package ggtfs
 
 import (
-	"encoding/csv"
 	"fmt"
 	"strconv"
 )
@@ -32,23 +31,8 @@ func (cd CalendarDate) Validate() []error {
 	return validationErrors
 }
 
-var validCalendarDateHeaders = []string{"service_id", "date", "exception_type"}
-
-func LoadCalendarDates(csvReader *csv.Reader) ([]*CalendarDate, []error) {
-	entities, errs := loadEntities(csvReader, validCalendarDateHeaders, CreateCalendarDate, CalendarDatesFileName)
-
-	calendarDates := make([]*CalendarDate, 0, len(entities))
-	for _, entity := range entities {
-		if calendarDate, ok := entity.(*CalendarDate); ok {
-			calendarDates = append(calendarDates, calendarDate)
-		}
-	}
-
-	return calendarDates, errs
-}
-
 // CreateCalendarDate creates a CalendarDate from a CSV row using the provided headers.
-func CreateCalendarDate(row []string, headers map[string]int, lineNumber int) interface{} {
+func CreateCalendarDate(row []string, headers map[string]int, lineNumber int) *CalendarDate {
 	calendarDate := &CalendarDate{
 		LineNumber: lineNumber,
 	}

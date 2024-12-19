@@ -8,8 +8,12 @@ import (
 	"testing"
 )
 
+var validStopTimeHeaders = []string{"trip_id", "arrival_time", "departure_time", "stop_id", "stop_sequence",
+	"stop_headsign", "pickup_type", "drop_off_type", "continuous_pickup", "continuous_drop_off",
+	"shape_dist_traveled", "timepoint"}
+
 func TestShouldReturnEmptyStopTimeArrayOnEmptyString(t *testing.T) {
-	stopTimes, errors := LoadStopTimes(csv.NewReader(strings.NewReader("")))
+	stopTimes, errors := LoadEntities[*StopTime](csv.NewReader(strings.NewReader("")), validStopTimeHeaders, CreateStopTime, StopTimesFileName)
 	if len(errors) > 0 {
 		t.Error(errors)
 	}
@@ -20,7 +24,7 @@ func TestShouldReturnEmptyStopTimeArrayOnEmptyString(t *testing.T) {
 
 func TestStopTimeParsing(t *testing.T) {
 	loadStopTimesFunc := func(reader *csv.Reader) ([]interface{}, []error) {
-		stopTimes, errs := LoadStopTimes(reader)
+		stopTimes, errs := LoadEntities[*StopTime](reader, validStopTimeHeaders, CreateStopTime, StopTimesFileName)
 		entities := make([]interface{}, len(stopTimes))
 		for i, stopTime := range stopTimes {
 			entities[i] = stopTime

@@ -1,7 +1,6 @@
 package ggtfs
 
 import (
-	"encoding/csv"
 	"fmt"
 	"strconv"
 )
@@ -73,24 +72,7 @@ func (r Route) Validate() []error {
 	return validationErrors
 }
 
-var validRouteHeaders = []string{"route_id", "agency_id", "route_short_name", "route_long_name", "route_desc",
-	"route_type", "route_url", "route_color", "route_text_color", "route_sort_order", "continuous_pickup",
-	"continuous_drop_off", "network_id"}
-
-func LoadRoutes(csvReader *csv.Reader) ([]*Route, []error) {
-	entities, errs := loadEntities(csvReader, validRouteHeaders, CreateRoute, RoutesFileName)
-
-	routes := make([]*Route, 0, len(entities))
-	for _, entity := range entities {
-		if route, ok := entity.(*Route); ok {
-			routes = append(routes, route)
-		}
-	}
-
-	return routes, errs
-}
-
-func CreateRoute(row []string, headers map[string]int, lineNumber int) interface{} {
+func CreateRoute(row []string, headers map[string]int, lineNumber int) *Route {
 	route := Route{
 		LineNumber: lineNumber,
 	}
