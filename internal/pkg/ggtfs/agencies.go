@@ -1,7 +1,6 @@
 package ggtfs
 
 import (
-	"encoding/csv"
 	"fmt"
 )
 
@@ -57,24 +56,7 @@ func (a Agency) Validate() []error {
 	return validationErrors
 }
 
-var validAgencyHeaders = []string{"agency_id", "agency_name", "agency_url", "agency_timezone",
-	"agency_lang", "agency_phone", "agency_fare_url", "agency_email"}
-
-func LoadAgencies(csvReader *csv.Reader) ([]*Agency, []error) {
-	entities, errs := loadEntities(csvReader, validAgencyHeaders, CreateAgency, AgenciesFileName)
-
-	agencies := make([]*Agency, 0, len(entities))
-
-	for _, entity := range entities {
-		if agency, ok := entity.(*Agency); ok {
-			agencies = append(agencies, agency)
-		}
-	}
-
-	return agencies, errs
-}
-
-func CreateAgency(row []string, headers map[string]int, lineNumber int) interface{} {
+func CreateAgency(row []string, headers map[string]int, lineNumber int) *Agency {
 	agency := Agency{
 		LineNumber: lineNumber,
 	}

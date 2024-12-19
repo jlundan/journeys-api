@@ -1,7 +1,6 @@
 package ggtfs
 
 import (
-	"encoding/csv"
 	"fmt"
 	"strconv"
 )
@@ -57,26 +56,8 @@ func (t Trip) Validate() []error {
 	return validationErrors
 }
 
-// ValidTripHeaders defines the headers expected in the trips CSV file.
-var validTripHeaders = []string{"route_id", "service_id", "trip_id", "trip_headsign", "trip_short_name",
-	"direction_id", "block_id", "shape_id", "wheelchair_accessible", "bikes_allowed"}
-
-// LoadTrips loads trips from a CSV reader and returns them along with any errors.
-func LoadTrips(csvReader *csv.Reader) ([]*Trip, []error) {
-	entities, errs := loadEntities(csvReader, validTripHeaders, CreateTrip, TripsFileName)
-
-	trips := make([]*Trip, 0, len(entities))
-	for _, entity := range entities {
-		if trip, ok := entity.(*Trip); ok {
-			trips = append(trips, trip)
-		}
-	}
-
-	return trips, errs
-}
-
 // CreateTrip creates and validates a Trip instance from the CSV row data.
-func CreateTrip(row []string, headers map[string]int, lineNumber int) interface{} {
+func CreateTrip(row []string, headers map[string]int, lineNumber int) *Trip {
 	var parseErrors []error
 
 	trip := Trip{

@@ -7,6 +7,7 @@ import (
 	"io"
 )
 
+//goland:noinspection GoUnusedConst
 const (
 	AgenciesFileName      = "agency.txt"
 	RoutesFileName        = "routes.txt"
@@ -29,9 +30,6 @@ const (
 	nonUniqueId          = "non-unique id"
 )
 
-func createFieldError(fileName string, fieldName string, index int, err error) error {
-	return errors.New(fmt.Sprintf("%s:%v: %s: %s", fileName, index, fieldName, err.Error()))
-}
 func createFileRowError(fileName string, row int, err string) error {
 	return errors.New(fmt.Sprintf("%s:%v: %s", fileName, row, err))
 }
@@ -52,25 +50,11 @@ func createMissingMandatoryFieldString(fieldName string) string {
 	return fmt.Sprintf("missing mandatory field: %s", fieldName)
 }
 
-func getField(row []string, headerName string, headerPosition int, errs *[]error, lineNumber int, fileName string) string {
-	if len(row) <= int(headerPosition) {
-		*errs = append(*errs, createFileRowError(fileName, lineNumber, fmt.Sprintf("missing value for field: %s", headerName)))
-		return ""
-	}
-
-	return row[headerPosition]
+type GtfsEntity interface {
+	*Shape | *Stop | *Agency | *CalendarItem | *CalendarDate | *Route | *StopTime | *Trip
 }
 
-func getOptionalField(row []string, headerName string, headerPosition int, errs *[]error, lineNumber int, fileName string) *string {
-	if len(row) <= int(headerPosition) {
-		*errs = append(*errs, createFileRowError(fileName, lineNumber, fmt.Sprintf("missing value for field: %s", headerName)))
-		return nil
-	}
-
-	return &row[headerPosition]
-}
-
-type entityCreator func(row []string, headers map[string]int, lineNumber int) interface{}
+type entityCreator[T GtfsEntity] func(row []string, headers map[string]int, lineNumber int) T
 
 // LoadEntities is a generic function for loading entities from a CSV file using a provided entity creation callback.
 // This function reads each row from the given CSV reader, creates entities using the provided callback function, and
@@ -93,8 +77,8 @@ type entityCreator func(row []string, headers map[string]int, lineNumber int) in
 //     and should be type-asserted by the caller to their concrete types.
 //   - ([]error): A slice of errors encountered during the loading process, including errors from reading the CSV,
 //     missing or invalid headers, and errors returned from the entity creation callback.
-func loadEntities(csvReader *csv.Reader, validHeaders []string, entityCreator entityCreator, fileName string) ([]interface{}, []error) {
-	entities := make([]interface{}, 0)
+func LoadEntities[T GtfsEntity](csvReader *csv.Reader, validHeaders []string, entityCreator entityCreator[T], fileName string) ([]T, []error) {
+	entities := make([]T, 0)
 	errs := make([]error, 0)
 
 	headers, err := ReadHeaderRow(csvReader, validHeaders)

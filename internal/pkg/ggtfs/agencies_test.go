@@ -8,8 +8,11 @@ import (
 	"testing"
 )
 
+var validAgencyHeaders = []string{"agency_id", "agency_name", "agency_url", "agency_timezone",
+	"agency_lang", "agency_phone", "agency_fare_url", "agency_email"}
+
 func TestShouldReturnEmptyAgencyArrayOnEmptyString(t *testing.T) {
-	agencies, errors := LoadAgencies(csv.NewReader(strings.NewReader("")))
+	agencies, errors := LoadEntities[*Agency](csv.NewReader(strings.NewReader("")), validAgencyHeaders, CreateAgency, AgenciesFileName)
 	if len(errors) > 0 {
 		t.Error(errors)
 	}
@@ -20,7 +23,7 @@ func TestShouldReturnEmptyAgencyArrayOnEmptyString(t *testing.T) {
 
 func TestAgencyParsing(t *testing.T) {
 	loadAgenciesFunc := func(reader *csv.Reader) ([]interface{}, []error) {
-		agencies, errs := LoadAgencies(reader)
+		agencies, errs := LoadEntities[*Agency](reader, validAgencyHeaders, CreateAgency, AgenciesFileName)
 		entities := make([]interface{}, len(agencies))
 		for i, agency := range agencies {
 			entities[i] = agency

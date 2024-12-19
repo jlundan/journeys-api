@@ -1,7 +1,6 @@
 package ggtfs
 
 import (
-	"encoding/csv"
 	"strconv"
 )
 
@@ -46,26 +45,8 @@ func (c CalendarItem) Validate() []error {
 	return validationErrors
 }
 
-var validCalendarHeaders = []string{
-	"service_id", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday", "start_date", "end_date",
-}
-
-// LoadCalendarItems reads and parses GTFS calendar data from the provided CSV reader.
-func LoadCalendarItems(csvReader *csv.Reader) ([]*CalendarItem, []error) {
-	entities, errs := loadEntities(csvReader, validCalendarHeaders, CreateCalendarItem, CalendarFileName)
-
-	calendarItems := make([]*CalendarItem, 0, len(entities))
-	for _, entity := range entities {
-		if calendarItem, ok := entity.(*CalendarItem); ok {
-			calendarItems = append(calendarItems, calendarItem)
-		}
-	}
-
-	return calendarItems, errs
-}
-
 // CreateCalendarItem creates a CalendarItem from a CSV row, using the provided headers.
-func CreateCalendarItem(row []string, headers map[string]int, lineNumber int) interface{} {
+func CreateCalendarItem(row []string, headers map[string]int, lineNumber int) *CalendarItem {
 	calendarItem := &CalendarItem{
 		LineNumber: lineNumber,
 	}

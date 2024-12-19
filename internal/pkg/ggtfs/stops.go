@@ -1,7 +1,6 @@
 package ggtfs
 
 import (
-	"encoding/csv"
 	"fmt"
 	"strconv"
 )
@@ -86,26 +85,8 @@ func (s Stop) Validate() []error {
 	return validationErrors
 }
 
-// ValidStopHeaders defines the headers expected in the stops CSV file.
-var validStopHeaders = []string{"stop_id", "stop_code", "stop_name", "stop_desc", "stop_lat", "stop_lon", "zone_id",
-	"stop_url", "location_type", "parent_station", "stop_timezone", "wheelchair_boarding", "level_id", "platform_code", "municipality_id"}
-
-// LoadStops loads stops from a CSV reader and returns them along with any errors.
-func LoadStops(csvReader *csv.Reader) ([]*Stop, []error) {
-	entities, errs := loadEntities(csvReader, validStopHeaders, CreateStop, StopsFileName)
-
-	stops := make([]*Stop, 0, len(entities))
-	for _, entity := range entities {
-		if stop, ok := entity.(*Stop); ok {
-			stops = append(stops, stop)
-		}
-	}
-
-	return stops, errs
-}
-
 // CreateStop creates and validates a Stop instance from the CSV row data.
-func CreateStop(row []string, headers map[string]int, lineNumber int) interface{} {
+func CreateStop(row []string, headers map[string]int, lineNumber int) *Stop {
 	var parseErrors []error
 
 	stop := Stop{

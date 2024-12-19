@@ -8,9 +8,13 @@ import (
 	"testing"
 )
 
+var validRouteHeaders = []string{"route_id", "agency_id", "route_short_name", "route_long_name", "route_desc",
+	"route_type", "route_url", "route_color", "route_text_color", "route_sort_order", "continuous_pickup",
+	"continuous_drop_off", "network_id"}
+
 func TestRouteParsing(t *testing.T) {
 	loadRoutesFunc := func(reader *csv.Reader) ([]interface{}, []error) {
-		routes, errs := LoadRoutes(reader)
+		routes, errs := LoadEntities[*Route](reader, validRouteHeaders, CreateRoute, RoutesFileName)
 		entities := make([]interface{}, len(routes))
 		for i, route := range routes {
 			entities[i] = route
@@ -296,12 +300,12 @@ func getRouteNOKTestcases() map[string]ggtfsTestCase {
 }
 
 func TestShouldReturnEmptyRouteArrayOnEmptyString(t *testing.T) {
-	agencies, errors := LoadRoutes(csv.NewReader(strings.NewReader("")))
+	routes, errors := LoadEntities[*Route](csv.NewReader(strings.NewReader("")), validRouteHeaders, CreateRoute, RoutesFileName)
 	if len(errors) > 0 {
 		t.Error(errors)
 	}
-	if len(agencies) != 0 {
-		t.Error("expected zero calendar items")
+	if len(routes) != 0 {
+		t.Error("expected zero route items")
 	}
 }
 

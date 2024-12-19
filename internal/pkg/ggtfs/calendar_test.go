@@ -8,8 +8,12 @@ import (
 	"testing"
 )
 
+var validCalendarHeaders = []string{
+	"service_id", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday", "start_date", "end_date",
+}
+
 func TestShouldReturnEmptyCalendarItemArrayOnEmptyString(t *testing.T) {
-	agencies, errors := LoadCalendarItems(csv.NewReader(strings.NewReader("")))
+	agencies, errors := LoadEntities[*CalendarItem](csv.NewReader(strings.NewReader("")), validCalendarHeaders, CreateCalendarItem, CalendarFileName)
 	if len(errors) > 0 {
 		t.Error(errors)
 	}
@@ -28,7 +32,7 @@ func TestNewWeekdayEnumReturnsEmptyOnNil(t *testing.T) {
 
 func TestCalendarItemParsing(t *testing.T) {
 	loadCalendarItemsFunc := func(reader *csv.Reader) ([]interface{}, []error) {
-		calendarItems, errs := LoadCalendarItems(reader)
+		calendarItems, errs := LoadEntities[*CalendarItem](reader, validCalendarHeaders, CreateCalendarItem, CalendarFileName)
 		entities := make([]interface{}, len(calendarItems))
 		for i, calendarItem := range calendarItems {
 			entities[i] = calendarItem

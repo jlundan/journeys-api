@@ -1,7 +1,6 @@
 package ggtfs
 
 import (
-	"encoding/csv"
 	"fmt"
 	"strconv"
 )
@@ -77,27 +76,8 @@ func (st StopTime) Validate() []error {
 	return validationErrors
 }
 
-// ValidStopTimeHeaders defines the headers expected in the stop_times CSV file.
-var validStopTimeHeaders = []string{"trip_id", "arrival_time", "departure_time", "stop_id", "stop_sequence",
-	"stop_headsign", "pickup_type", "drop_off_type", "continuous_pickup", "continuous_drop_off",
-	"shape_dist_traveled", "timepoint"}
-
-// LoadStopTimes loads stop times from a CSV reader and returns them along with any errors.
-func LoadStopTimes(csvReader *csv.Reader) ([]*StopTime, []error) {
-	entities, errs := loadEntities(csvReader, validStopTimeHeaders, CreateStopTime, StopTimesFileName)
-
-	stopTimes := make([]*StopTime, 0, len(entities))
-	for _, entity := range entities {
-		if stopTime, ok := entity.(*StopTime); ok {
-			stopTimes = append(stopTimes, stopTime)
-		}
-	}
-
-	return stopTimes, errs
-}
-
 // CreateStopTime creates and validates a StopTime instance from the CSV row data.
-func CreateStopTime(row []string, headers map[string]int, lineNumber int) interface{} {
+func CreateStopTime(row []string, headers map[string]int, lineNumber int) *StopTime {
 	var parseErrors []error
 
 	stopTime := StopTime{
