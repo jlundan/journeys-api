@@ -40,6 +40,12 @@ func (r Route) Validate() []error {
 		validationErrors = append(validationErrors, validateFieldIsPresentAndValid(f.field, f.fieldName, r.LineNumber, RoutesFileName)...)
 	}
 
+	// Checking the underlying value of the field in ValidAndPresentField for nil would require reflection
+	// v := reflect.ValueOf(i)
+	// v.Kind() == reflect.Ptr && v.IsNil()
+	// which is slow, so we can't use the above mechanism to check optional fields, since they might be nil (pointer field's default value is nil)
+	// since CreateTrip might have not processed the field (if its header is missing from the csv).
+
 	if r.Description != nil && !r.Description.IsValid() {
 		validationErrors = append(validationErrors, createFileRowError(RoutesFileName, r.LineNumber, createInvalidFieldString("route_desc")))
 	}

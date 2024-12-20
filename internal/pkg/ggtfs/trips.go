@@ -37,6 +37,12 @@ func (t Trip) Validate() []error {
 		validationErrors = append(validationErrors, validateFieldIsPresentAndValid(f.field, f.fieldName, t.LineNumber, TripsFileName)...)
 	}
 
+	// Checking the underlying value of the field in ValidAndPresentField for nil would require reflection
+	// v := reflect.ValueOf(i)
+	// v.Kind() == reflect.Ptr && v.IsNil()
+	// which is slow, so we can't use the above mechanism to check optional fields, since they might be nil (pointer field's default value is nil)
+	// since CreateTrip might have not processed the field (if its header is missing from the csv).
+
 	if t.HeadSign != nil && !t.HeadSign.IsValid() {
 		validationErrors = append(validationErrors, createFileRowError(TripsFileName, t.LineNumber, createInvalidFieldString("trip_headsign")))
 	}
