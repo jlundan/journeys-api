@@ -114,13 +114,25 @@ func getAgencyNOKTestcases() map[string]ggtfsTestCase {
 			"agency.txt:1: agency_id is not unique within the file",
 		},
 	}
+	testCases["recommend-agency-id"] = ggtfsTestCase{
+		csvRows: [][]string{
+			{"agency_id", "agency_name", "agency_url", "agency_timezone"},
+			{"", "ACME", "http://acme2.inc", "Europe/Helsinki"},
+		},
+		expectedErrors: []string{
+			"agency.txt:0: invalid field: agency_id",
+		},
+		expectedRecommendations: []string{
+			"agency.txt:0: it is recommended that agency_id is specified even when there is only one agency",
+		},
+	}
 
 	return testCases
 }
 
 func getAgencyOKTestcases() map[string]ggtfsTestCase {
 	expected1 := Agency{
-		Id:       NewID(stringPtr("1")),
+		Id:       NewOptionalID(stringPtr("1")),
 		Name:     NewText(stringPtr("ACME")),
 		URL:      NewURL(stringPtr("https://acme.inc")),
 		Timezone: NewTimezone(stringPtr("Europe/Helsinki")),
@@ -131,7 +143,7 @@ func getAgencyOKTestcases() map[string]ggtfsTestCase {
 	}
 
 	expected2 := Agency{
-		Id:       NewID(stringPtr("2")),
+		Id:       NewOptionalID(stringPtr("2")),
 		Name:     NewText(stringPtr("FOO")),
 		URL:      NewURL(stringPtr("https://foo.com")),
 		Timezone: NewTimezone(stringPtr("Europe/Helsinki")),

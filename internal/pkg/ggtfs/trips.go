@@ -196,7 +196,7 @@ func NewOptionalBikesAllowed(raw *string) *BikesAllowed {
 		return &BikesAllowed{
 			Integer{base: base{raw: ""}}}
 	}
-	return &BikesAllowed{Integer{base: base{raw: *raw}}}
+	return &BikesAllowed{Integer{base: base{raw: *raw, isPresent: true}}}
 }
 
 const (
@@ -224,7 +224,7 @@ func NewOptionalWheelchairAccessible(raw *string) *WheelchairAccessible {
 		return &WheelchairAccessible{
 			Integer{base: base{raw: ""}}}
 	}
-	return &WheelchairAccessible{Integer{base: base{raw: *raw}}}
+	return &WheelchairAccessible{Integer{base: base{raw: *raw, isPresent: true}}}
 }
 
 const (
@@ -250,5 +250,5 @@ func NewOptionalDirectionId(raw *string) *DirectionId {
 		return &DirectionId{
 			Integer{base: base{raw: ""}}}
 	}
-	return &DirectionId{Integer{base: base{raw: *raw}}}
+	return &DirectionId{Integer{base: base{raw: *raw, isPresent: true}}}
 }

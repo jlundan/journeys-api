@@ -5,7 +5,7 @@ import (
 )
 
 type Agency struct {
-	Id         ID            // agency_id
+	Id         *ID           // agency_id
 	Name       Text          // agency_name
 	URL        URL           // agency_url
 	Timezone   Timezone      // agency_timezone
@@ -40,6 +40,10 @@ func (a Agency) Validate() []error {
 	// which is slow, so we can't use the above mechanism to check optional fields, since they might be nil (pointer field's default value is nil)
 	// since CreateTrip might have not processed the field (if its header is missing from the csv).
 
+	if a.Id != nil && !a.Id.IsValid() {
+		validationErrors = append(validationErrors, createFileRowError(AgenciesFileName, a.LineNumber, createInvalidFieldString("agency_id")))
+	}
+
 	if a.Lang != nil && !a.Lang.IsValid() {
 		validationErrors = append(validationErrors, createFileRowError(AgenciesFileName, a.LineNumber, createInvalidFieldString("agency_lang")))
 	}
@@ -67,7 +71,7 @@ func CreateAgency(row []string, headers map[string]int, lineNumber int) *Agency 
 	for hName, hPos := range headers {
 		switch hName {
 		case "agency_id":
-			agency.Id = NewID(&row[hPos])
+			agency.Id = NewOptionalID(&row[hPos])
 		case "agency_name":
 			agency.Name = NewText(&row[hPos])
 		case "agency_url":
@@ -117,9 +121,9 @@ func ValidateAgencies(agencies []*Agency) ([]error, []string) {
 			continue
 		}
 
-		if usedIds[a.Id.String()] {
+		if a.Id.IsValid() && usedIds[a.Id.String()] {
 			validationErrors = append(validationErrors, createFileRowError(AgenciesFileName, a.LineNumber, fmt.Sprintf("agency_id is not unique within the file")))
-		} else {
+		} else if a.Id.IsValid() {
 			usedIds[a.Id.String()] = true
 		}
 	}

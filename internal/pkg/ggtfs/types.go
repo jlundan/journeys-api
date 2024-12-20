@@ -61,7 +61,7 @@ func (id *ID) IsValid() bool {
 		return false
 	}
 
-	return !id.IsEmpty()
+	return !id.IsEmpty() && id.IsPresent()
 }
 
 func NewID(raw *string) ID {
@@ -75,7 +75,7 @@ func NewOptionalID(raw *string) *ID {
 	if raw == nil {
 		return nil
 	}
-	return &ID{base{raw: *raw}}
+	return &ID{base{raw: *raw, isPresent: true}}
 }
 
 // Color represents a color encoded as a six-digit hexadecimal number.
@@ -97,7 +97,7 @@ func NewOptionalColor(raw *string) *Color {
 	if raw == nil {
 		return nil
 	}
-	return &Color{base{raw: *raw}}
+	return &Color{base{raw: *raw, isPresent: true}}
 }
 
 // Email represents an email address.
@@ -119,7 +119,7 @@ func NewOptionalEmail(raw *string) *Email {
 	if raw == nil {
 		return nil
 	}
-	return &Email{base{raw: *raw}}
+	return &Email{base{raw: *raw, isPresent: true}}
 }
 
 // Integer represents a number without floating point.
@@ -156,7 +156,7 @@ func NewOptionalInteger(raw *string) *Integer {
 	if raw == nil {
 		return nil
 	}
-	return &Integer{base{raw: *raw}}
+	return &Integer{base{raw: *raw, isPresent: true}}
 }
 
 // Float represents a number with a floating point.
@@ -168,7 +168,7 @@ func NewOptionalFloat(raw *string) *Float {
 	if raw == nil {
 		return nil
 	}
-	return &Float{base{raw: *raw}}
+	return &Float{base{raw: *raw, isPresent: true}}
 }
 
 // IsValid if the value is a valid Float.
@@ -215,7 +215,7 @@ func NewOptionalURL(raw *string) *URL {
 	if raw == nil {
 		return nil
 	}
-	return &URL{base{raw: *raw}}
+	return &URL{base{raw: *raw, isPresent: true}}
 }
 
 // Time represents a time in HH:MM:SS or H:MM:SS format.
@@ -244,7 +244,7 @@ func NewOptionalTime(raw *string) *Time {
 	if raw == nil {
 		return nil
 	}
-	return &Time{base{raw: *raw}}
+	return &Time{base{raw: *raw, isPresent: true}}
 }
 
 // CurrencyCode represents a currency code according to ISO 4217.
@@ -318,7 +318,7 @@ func NewOptionalLanguageCode(raw *string) *LanguageCode {
 	if raw == nil {
 		return nil
 	}
-	return &LanguageCode{base{raw: *raw}}
+	return &LanguageCode{base{raw: *raw, isPresent: true}}
 }
 
 // Latitude represents a WGS84 latitude in decimal degrees.
@@ -337,7 +337,7 @@ func NewOptionalLatitude(raw *string) *Latitude {
 	if raw == nil {
 		return nil
 	}
-	return &Latitude{base{raw: *raw}}
+	return &Latitude{base{raw: *raw, isPresent: true}}
 }
 
 // IsValid checks if the Latitude is a valid decimal value between -90 and 90.
@@ -365,7 +365,7 @@ func NewOptionalLongitude(raw *string) *Longitude {
 	if raw == nil {
 		return nil
 	}
-	return &Longitude{base{raw: *raw}}
+	return &Longitude{base{raw: *raw, isPresent: true}}
 }
 
 // IsValid checks if the Longitude is a valid decimal value between -180 and 180.
@@ -397,7 +397,7 @@ func NewOptionalPhoneNumber(raw *string) *PhoneNumber {
 	if raw == nil {
 		return nil
 	}
-	return &PhoneNumber{base{raw: *raw}}
+	return &PhoneNumber{base{raw: *raw, isPresent: true}}
 }
 
 // Text represents a string of UTF-8 characters intended for display.
@@ -424,7 +424,7 @@ func NewOptionalText(raw *string) *Text {
 	if raw == nil {
 		return nil
 	}
-	return &Text{base{raw: *raw}}
+	return &Text{base{raw: *raw, isPresent: true}}
 }
 
 // Timezone represents a TZ timezone from the IANA timezone database.
@@ -436,7 +436,7 @@ func NewOptionalTimezone(raw *string) *Timezone {
 	if raw == nil {
 		return nil
 	}
-	return &Timezone{base{raw: *raw}}
+	return &Timezone{base{raw: *raw, isPresent: true}}
 }
 
 // IsValid checks if the Timezone is in a valid format (e.g., "America/New_York").

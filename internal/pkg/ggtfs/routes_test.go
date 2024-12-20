@@ -122,7 +122,7 @@ func getRouteOKTestcases() map[string]ggtfsTestCase {
 		expectedErrors: []string{},
 		fixtures: map[string][]interface{}{
 			"agencies": {
-				&Agency{Id: NewID(stringPtr("0"))},
+				&Agency{Id: NewOptionalID(stringPtr("0"))},
 			},
 		},
 	}
@@ -291,7 +291,7 @@ func getRouteNOKTestcases() map[string]ggtfsTestCase {
 		},
 		fixtures: map[string][]interface{}{
 			"agencies": {
-				&Agency{Id: NewID(stringPtr("0"))},
+				&Agency{Id: NewOptionalID(stringPtr("0"))},
 			},
 		},
 	}

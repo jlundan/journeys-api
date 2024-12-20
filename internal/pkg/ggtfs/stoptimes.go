@@ -214,7 +214,7 @@ func NewOptionalPickupType(raw *string) *PickupType {
 		return &PickupType{
 			Integer{base: base{raw: ""}}}
 	}
-	return &PickupType{Integer{base: base{raw: *raw}}}
+	return &PickupType{Integer{base: base{raw: *raw, isPresent: true}}}
 }
 
 const (
@@ -243,7 +243,7 @@ func NewOptionalDropOffType(raw *string) *DropOffType {
 		return &DropOffType{
 			Integer{base: base{raw: ""}}}
 	}
-	return &DropOffType{Integer{base: base{raw: *raw}}}
+	return &DropOffType{Integer{base: base{raw: *raw, isPresent: true}}}
 }
 
 const (
@@ -269,5 +269,5 @@ func NewOptionalTimePoint(raw *string) *TimePoint {
 		return &TimePoint{
 			Integer{base: base{raw: ""}}}
 	}
-	return &TimePoint{Integer{base: base{raw: *raw}}}
+	return &TimePoint{Integer{base: base{raw: *raw, isPresent: true}}}
 }
