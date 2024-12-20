@@ -71,11 +71,11 @@ func getCalendarItemNOKTestcases() map[string]ggtfsTestCase {
 			{" "},
 		},
 		expectedErrors: []string{
-			"calendar.txt:0: invalid field: service_id",
 			"calendar.txt:0: missing mandatory field: end_date",
 			"calendar.txt:0: missing mandatory field: friday",
 			"calendar.txt:0: missing mandatory field: monday",
 			"calendar.txt:0: missing mandatory field: saturday",
+			"calendar.txt:0: missing mandatory field: service_id",
 			"calendar.txt:0: missing mandatory field: start_date",
 			"calendar.txt:0: missing mandatory field: sunday",
 			"calendar.txt:0: missing mandatory field: thursday",

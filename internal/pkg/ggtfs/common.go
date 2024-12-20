@@ -118,7 +118,7 @@ func LoadEntities[T GtfsEntity](csvReader *csv.Reader, validHeaders []string, en
 func validateFieldIsPresentAndValid(field ValidAndPresentField, fieldName string, lineNumber int, fileName string) []error {
 	var validationErrors []error
 
-	if !field.IsPresent() {
+	if !field.IsPresent() || field.IsEmpty() {
 		validationErrors = append(validationErrors, createFileRowError(fileName, lineNumber, createMissingMandatoryFieldString(fieldName)))
 	} else if !field.IsValid() {
 		validationErrors = append(validationErrors, createFileRowError(fileName, lineNumber, createInvalidFieldString(fieldName)))
@@ -130,6 +130,7 @@ func validateFieldIsPresentAndValid(field ValidAndPresentField, fieldName string
 type ValidAndPresentField interface {
 	IsValid() bool
 	IsPresent() bool
+	IsEmpty() bool
 }
 
 func getRowValue(row []string, position int) *string {
