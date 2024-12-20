@@ -69,10 +69,11 @@ func formatDifferences(differences []string) string {
 }
 
 type ggtfsTestCase struct {
-	csvRows         [][]string
-	expectedStructs []interface{}
-	fixtures        map[string][]interface{}
-	expectedErrors  []string
+	csvRows                 [][]string
+	expectedStructs         []interface{}
+	fixtures                map[string][]interface{}
+	expectedErrors          []string
+	expectedRecommendations []string
 }
 
 type LoadFunction func(reader *csv.Reader) ([]interface{}, []error)
@@ -93,8 +94,9 @@ func loadAndValidateGTFS(csvReader *csv.Reader, loadFunc LoadFunction, validateF
 	// If strict mode is enabled, combine parse errors and validation errors and return an empty set of entities
 	if strictMode && (len(parseErrors) > 0 || len(validationErrors) > 0) {
 		return ParseResult{
-			Entities: nil,
-			Errors:   append(parseErrors, validationErrors...),
+			Entities:        nil,
+			Errors:          append(parseErrors, validationErrors...),
+			Recommendations: validationRecommendations,
 		}
 	}
 
@@ -127,12 +129,31 @@ func runGenericGTFSParseTest(t *testing.T, testName string, loadFunc LoadFunctio
 				for _, e := range tc.expectedErrors {
 					t.Logf("Expected error: %s", e)
 				}
-				return
+			} else {
+				for i, e := range result.Errors {
+					if e.Error() != tc.expectedErrors[i] {
+						t.Errorf("Expected error %q, got %q", tc.expectedErrors[i], e.Error())
+					}
+				}
 			}
 
-			for i, e := range result.Errors {
-				if e.Error() != tc.expectedErrors[i] {
-					t.Errorf("Expected error %q, got %q", tc.expectedErrors[i], e.Error())
+			sort.Strings(result.Recommendations)
+			sort.Strings(tc.expectedRecommendations)
+
+			if len(result.Recommendations) != len(tc.expectedRecommendations) {
+				t.Errorf("Expected %d recommendations, got %d", len(tc.expectedRecommendations), len(result.Recommendations))
+				for _, e := range result.Recommendations {
+					t.Logf("Actual recommendation: %s", e)
+				}
+
+				for _, e := range tc.expectedRecommendations {
+					t.Logf("Expected recommendation: %s", e)
+				}
+			} else {
+				for i, e := range result.Recommendations {
+					if e != tc.expectedRecommendations[i] {
+						t.Errorf("Expected recommendation %q, got %q", tc.expectedRecommendations[i], e)
+					}
 				}
 			}
 

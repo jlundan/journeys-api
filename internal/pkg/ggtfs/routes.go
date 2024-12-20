@@ -238,7 +238,7 @@ func NewOptionalContinuousPickupType(raw *string) *ContinuousPickupType {
 		return &ContinuousPickupType{
 			Integer{base: base{raw: ""}}}
 	}
-	return &ContinuousPickupType{Integer{base: base{raw: *raw}}}
+	return &ContinuousPickupType{Integer{base: base{raw: *raw, isPresent: true}}}
 }
 
 const (
@@ -273,5 +273,5 @@ func NewOptionalContinuousDropOffType(raw *string) *ContinuousDropOffType {
 		return &ContinuousDropOffType{
 			Integer{base: base{raw: ""}}}
 	}
-	return &ContinuousDropOffType{Integer{base: base{raw: *raw}}}
+	return &ContinuousDropOffType{Integer{base: base{raw: *raw, isPresent: true}}}
 }

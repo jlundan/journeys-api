@@ -228,7 +228,7 @@ func NewOptionalStopLocation(raw *string) *StopLocation {
 		return &StopLocation{
 			Integer{base: base{raw: ""}}}
 	}
-	return &StopLocation{Integer{base: base{raw: *raw}}}
+	return &StopLocation{Integer{base: base{raw: *raw, isPresent: true}}}
 }
 
 type WheelchairBoarding struct {
@@ -249,5 +249,5 @@ func NewOptionalWheelchairBoarding(raw *string) *WheelchairBoarding {
 		return &WheelchairBoarding{
 			Integer{base: base{raw: ""}}}
 	}
-	return &WheelchairBoarding{Integer{base: base{raw: *raw}}}
+	return &WheelchairBoarding{Integer{base: base{raw: *raw, isPresent: true}}}
 }

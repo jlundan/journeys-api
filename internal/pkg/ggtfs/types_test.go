@@ -4,16 +4,17 @@ import "testing"
 
 func TestID_IsValid(t *testing.T) {
 	tests := []struct {
-		name  string
-		value string
-		valid bool
+		name    string
+		value   string
+		valid   bool
+		present bool
 	}{
-		{"Valid ID", "route_123", true},
-		{"Empty ID", "", false},
+		{"Valid ID", "route_123", true, true},
+		{"Empty ID", "", false, false},
 	}
 
 	for _, tt := range tests {
-		id := ID{base{raw: tt.value}}
+		id := ID{base{raw: tt.value, isPresent: tt.present}}
 		if got := id.IsValid(); got != tt.valid {
 			t.Errorf("ID.IsValid() = %v, want %v, case: %s", got, tt.valid, tt.name)
 		}
