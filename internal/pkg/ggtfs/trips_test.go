@@ -79,9 +79,15 @@ func getTripNOKTestcases() map[string]ggtfsTestCase {
 			{"route_id"},
 			{","},
 			{" "},
+			{"1"},
 		},
 		expectedErrors: []string{
 			"trips.txt: record on line 2: wrong number of fields",
+			"trips.txt:1: invalid field: route_id",
+			"trips.txt:1: missing mandatory field: service_id",
+			"trips.txt:1: missing mandatory field: trip_id",
+			"trips.txt:2: missing mandatory field: service_id",
+			"trips.txt:2: missing mandatory field: trip_id",
 		},
 	}
 	testCases["2"] = ggtfsTestCase{
@@ -92,13 +98,12 @@ func getTripNOKTestcases() map[string]ggtfsTestCase {
 			{"002", "002", "001", "0", "0", "0"},
 		},
 		expectedErrors: []string{
-			//"trips.txt:0: bikes_allowed: strconv.ParseInt: parsing \"invalid\": invalid syntax",
-			//"trips.txt:0: direction_id: strconv.ParseInt: parsing \"invalid\": invalid syntax",
-			//"trips.txt:0: wheelchair_accessible: strconv.ParseInt: parsing \"invalid\": invalid syntax",
-			//"trips.txt:1: bikes_allowed: invalid value",
-			//"trips.txt:1: direction_id: invalid value",
-			//"trips.txt:1: wheelchair_accessible: invalid value",
-			//"trips.txt:2: non-unique id: trip_id",
+			"trips.txt:0: invalid field: direction_id",
+			"trips.txt:0: invalid field: wheelchair_accessible",
+			"trips.txt:1: invalid field: direction_id",
+			"trips.txt:1: invalid field: wheelchair_accessible",
+
+			// TODO: "trips.txt:2: non-unique id: trip_id",
 		},
 	}
 
