@@ -93,8 +93,8 @@ func getCalendarDateNOKTestcases() map[string]ggtfsTestCase {
 		},
 		expectedErrors: []string{
 			"calendar_dates.txt: record on line 2: wrong number of fields",
-			"calendar_dates.txt:1: invalid field: date",
-			"calendar_dates.txt:1: invalid field: service_id",
+			"calendar_dates.txt:1: missing mandatory field: date",
+			"calendar_dates.txt:1: missing mandatory field: service_id",
 			"calendar_dates.txt:2: invalid field: exception_type",
 			"calendar_dates.txt:3: invalid field: exception_type",
 		},

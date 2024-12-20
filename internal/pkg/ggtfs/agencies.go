@@ -92,28 +92,36 @@ func ValidateAgencies(agencies []*Agency) ([]error, []string) {
 	var validationErrors []error
 	var recommendations []string
 
-	if len(agencies) > 1 {
-		usedIds := make(map[string]bool)
+	aLength := len(agencies)
 
-		for _, a := range agencies {
-			validationErrors = append(validationErrors, a.Validate()...)
+	if aLength == 0 {
+		return validationErrors, recommendations
+	}
 
-			if !a.Id.IsValid() {
-				validationErrors = append(validationErrors, createFileRowError(AgenciesFileName, a.LineNumber, "a valid agency_id must be specified when multiple agencies are declared"))
-				continue
-			}
-
-			if usedIds[a.Id.String()] {
-				validationErrors = append(validationErrors, createFileRowError(AgenciesFileName, a.LineNumber, fmt.Sprintf("agency_id is not unique within the file")))
-			} else {
-				usedIds[a.Id.String()] = true
-			}
-		}
-	} else if len(agencies) == 1 && agencies[0].Id.IsEmpty() {
+	if aLength == 1 && (agencies[0] == nil || !agencies[0].Id.IsValid()) {
+		validationErrors = append(validationErrors, agencies[0].Validate()...)
 		recommendations = append(recommendations, createFileRowRecommendation(AgenciesFileName, agencies[0].LineNumber, "it is recommended that agency_id is specified even when there is only one agency"))
-		validationErrors = append(validationErrors, agencies[0].Validate()...)
-	} else if len(agencies) == 1 {
-		validationErrors = append(validationErrors, agencies[0].Validate()...)
+		return validationErrors, recommendations
+	}
+
+	usedIds := make(map[string]bool)
+	for _, a := range agencies {
+		if a == nil {
+			continue
+		}
+
+		validationErrors = append(validationErrors, a.Validate()...)
+
+		if aLength > 1 && !a.Id.IsValid() {
+			validationErrors = append(validationErrors, createFileRowError(AgenciesFileName, a.LineNumber, "a valid agency_id must be specified when multiple agencies are declared"))
+			continue
+		}
+
+		if usedIds[a.Id.String()] {
+			validationErrors = append(validationErrors, createFileRowError(AgenciesFileName, a.LineNumber, fmt.Sprintf("agency_id is not unique within the file")))
+		} else {
+			usedIds[a.Id.String()] = true
+		}
 	}
 
 	return validationErrors, recommendations

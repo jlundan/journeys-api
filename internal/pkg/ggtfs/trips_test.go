@@ -83,7 +83,7 @@ func getTripNOKTestcases() map[string]ggtfsTestCase {
 		},
 		expectedErrors: []string{
 			"trips.txt: record on line 2: wrong number of fields",
-			"trips.txt:1: invalid field: route_id",
+			"trips.txt:1: missing mandatory field: route_id",
 			"trips.txt:1: missing mandatory field: service_id",
 			"trips.txt:1: missing mandatory field: trip_id",
 			"trips.txt:2: missing mandatory field: service_id",
