@@ -115,6 +115,8 @@ func ValidateTrips(trips []*Trip, routes []*Route, calendarItems []*CalendarItem
 			continue
 		}
 
+		validationErrors = append(validationErrors, trip.Validate()...)
+
 		if routes != nil {
 			routeFound := false
 			for _, route := range routes {
