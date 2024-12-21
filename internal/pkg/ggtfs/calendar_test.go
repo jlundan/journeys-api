@@ -56,19 +56,54 @@ func TestCalendarItemParsing(t *testing.T) {
 
 func getCalendarItemNOKTestcases() map[string]ggtfsTestCase {
 	testCases := make(map[string]ggtfsTestCase)
-	testCases["1"] = ggtfsTestCase{
+
+	testCases["parse-failures"] = ggtfsTestCase{
 		csvRows: [][]string{
-			{"service_id"},
+			{"service_id", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday", "start_date", "end_date"},
+			{" "},
 			{","},
+			{"", ""},
+			{" ", " "},
+			{"", "", ""},
+			{" ", " ", " "},
+			{"", "", "", ""},
+			{" ", " ", " ", " "},
+			{"", "", "", "", ""},
+			{" ", " ", " ", " ", " "},
+			{"", "", "", "", "", ""},
+			{" ", " ", " ", " ", " ", " "},
+			{"", "", "", "", "", "", ""},
+			{" ", " ", " ", " ", " ", " ", " "},
+			{"", "", "", "", "", "", "", ""},
+			{" ", " ", " ", " ", " ", " ", " ", " "},
+			{" ", " ", " ", " ", " ", " ", " ", " ", " "},
 		},
 		expectedErrors: []string{
+			"calendar.txt: record on line 10: wrong number of fields",
+			"calendar.txt: record on line 11: wrong number of fields",
+			"calendar.txt: record on line 12: wrong number of fields",
+			"calendar.txt: record on line 13: wrong number of fields",
+			"calendar.txt: record on line 14: wrong number of fields",
+			"calendar.txt: record on line 15: wrong number of fields",
+			"calendar.txt: record on line 16: wrong number of fields",
+			"calendar.txt: record on line 17: wrong number of fields",
+			"calendar.txt: record on line 18: wrong number of fields",
 			"calendar.txt: record on line 2: wrong number of fields",
+			"calendar.txt: record on line 3: wrong number of fields",
+			"calendar.txt: record on line 4: wrong number of fields",
+			"calendar.txt: record on line 5: wrong number of fields",
+			"calendar.txt: record on line 6: wrong number of fields",
+			"calendar.txt: record on line 7: wrong number of fields",
+			"calendar.txt: record on line 8: wrong number of fields",
+			"calendar.txt: record on line 9: wrong number of fields",
 		},
 	}
-	testCases["2"] = ggtfsTestCase{
+
+	testCases["invalid-fields"] = ggtfsTestCase{
 		csvRows: [][]string{
-			{"service_id"},
-			{" "},
+			{"service_id", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday", "start_date", "end_date"},
+			{" ", " ", " ", " ", " ", " ", " ", " ", " ", " "},
+			{"SERVICE0", "3", "not a day", "-1", "2", "2", "2", "2", "not a date", "20181313"},
 		},
 		expectedErrors: []string{
 			"calendar.txt:0: missing mandatory field: end_date",
@@ -81,28 +116,15 @@ func getCalendarItemNOKTestcases() map[string]ggtfsTestCase {
 			"calendar.txt:0: missing mandatory field: thursday",
 			"calendar.txt:0: missing mandatory field: tuesday",
 			"calendar.txt:0: missing mandatory field: wednesday",
-		},
-	}
-
-	testCases["3"] = ggtfsTestCase{
-		csvRows: [][]string{
-			{"service_id", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday", "start_date", "end_date"},
-			{"1000", "not an int", "10", "1", "1", "1", "1", "1", "20210101", "20201011"},
-			{"1000", "1", "1", "1", "1", "1", "1", "1", "20210101", "20201011"},
-			{"1002", "1", "1", "1", "1", "1", "1", "1", "202x0101", "20201011"},
-			{"1003", "1", "1", "1", "1", "1", "1", "1", "2021x101", "20201011"},
-			{"1004", "1", "1", "1", "1", "1", "1", "1", "20210x01", "20201011"},
-			{"1005", "1", "1", "1", "1", "1", "1", "1", "202101x1", "20201011"},
-			{"1006", "1", "1", "1", "1", "1", "1", "1", "2021011", "20201011"},
-		},
-		expectedErrors: []string{
-			"calendar.txt:0: invalid field: monday",
-			"calendar.txt:0: invalid field: tuesday",
-			"calendar.txt:2: invalid field: start_date",
-			"calendar.txt:3: invalid field: start_date",
-			"calendar.txt:4: invalid field: start_date",
-			"calendar.txt:5: invalid field: start_date",
-			"calendar.txt:6: invalid field: start_date",
+			"calendar.txt:1: invalid field: end_date",
+			"calendar.txt:1: invalid field: friday",
+			"calendar.txt:1: invalid field: monday",
+			"calendar.txt:1: invalid field: saturday",
+			"calendar.txt:1: invalid field: start_date",
+			"calendar.txt:1: invalid field: sunday",
+			"calendar.txt:1: invalid field: thursday",
+			"calendar.txt:1: invalid field: tuesday",
+			"calendar.txt:1: invalid field: wednesday",
 		},
 	}
 
