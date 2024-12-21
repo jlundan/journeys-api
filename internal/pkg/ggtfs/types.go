@@ -288,7 +288,7 @@ func (d *Date) IsValid() bool {
 		return false
 	}
 
-	match, _ := regexp.MatchString(`^\d{8}$`, d.raw)
+	match, _ := regexp.MatchString(`^(19|20)\d{2}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])$`, d.raw)
 	return match
 }
 
