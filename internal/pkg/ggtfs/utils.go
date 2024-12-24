@@ -37,15 +37,6 @@ func ReadHeaderRow(r *csv.Reader, validHeaders []string) (map[string]int, error)
 	return headers, nil
 }
 
-func StringArrayContainsItem(arr []string, item string) bool {
-	for _, v := range arr {
-		if v == item {
-			return true
-		}
-	}
-	return false
-}
-
 func tableToString(rows [][]string) string {
 	var sb strings.Builder
 

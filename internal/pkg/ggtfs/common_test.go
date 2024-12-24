@@ -120,6 +120,6 @@ func TestLoadEntitiesFromCSV(t *testing.T) {
 	}
 }
 
-func dummyEntityCreator(row []string, headers map[string]int, lineNumber int) interface{} {
+func dummyEntityCreator(_ []string, _ map[string]int, _ int) interface{} {
 	return nil
 }
