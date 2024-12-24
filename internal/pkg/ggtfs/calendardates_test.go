@@ -83,24 +83,42 @@ func getCalendarDateOKTestcases() map[string]ggtfsTestCase {
 
 func getCalendarDateNOKTestcases() map[string]ggtfsTestCase {
 	testCases := make(map[string]ggtfsTestCase)
-	testCases["1"] = ggtfsTestCase{
+
+	testCases["parse-failures"] = ggtfsTestCase{
 		csvRows: [][]string{
 			{"service_id", "date", "exception_type"},
+			{" "},
 			{","},
-			{" ", " ", "1"},
-			{"1000", "20201011", "not an int"},
-			{"1001", "20201011", "10"},
+			{"", ""},
+			{" ", " "},
 		},
 		expectedErrors: []string{
 			"calendar_dates.txt: record on line 2: wrong number of fields",
-			"calendar_dates.txt:1: missing mandatory field: date",
-			"calendar_dates.txt:1: missing mandatory field: service_id",
+			"calendar_dates.txt: record on line 3: wrong number of fields",
+			"calendar_dates.txt: record on line 4: wrong number of fields",
+			"calendar_dates.txt: record on line 5: wrong number of fields",
+		},
+	}
+
+	testCases["invalid-fields"] = ggtfsTestCase{
+		csvRows: [][]string{
+			{"service_id", "date", "exception_type"},
+			{" ", " ", " "},
+			{"1000", "20201011", "not an int"},
+			{"1001", "20201011", "0"},
+			{"1001", "20201011", "3"},
+		},
+		expectedErrors: []string{
+			"calendar_dates.txt:0: missing mandatory field: date",
+			"calendar_dates.txt:0: missing mandatory field: exception_type",
+			"calendar_dates.txt:0: missing mandatory field: service_id",
+			"calendar_dates.txt:1: invalid field: exception_type",
 			"calendar_dates.txt:2: invalid field: exception_type",
 			"calendar_dates.txt:3: invalid field: exception_type",
 		},
 	}
 
-	testCases["2"] = ggtfsTestCase{
+	testCases["calendar-reference"] = ggtfsTestCase{
 		csvRows: [][]string{
 			{"service_id", "date", "exception_type"},
 			{"1000", "20201011", strconv.Itoa(ServiceAddedForCalendarDate)},
