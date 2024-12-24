@@ -12,6 +12,12 @@ test:
 test-v:
 	JOURNEYS_BASE_URL=http://localhost:5678 JOURNEYS_VA_BASE_URL="https://data.itsfactory.fi/journeys/api/1" go test --count=1 -v -tags=all_tests ./...
 
+test-v-ggtfs:
+	go test --count=1 -v -tags=ggtfs_tests ./internal/pkg/ggtfs
+
+test-v-ggtfs-common:
+	go test --count=1 -v -tags=ggtfs_tests_common ./internal/pkg/ggtfs
+
 coverage:
 	JOURNEYS_BASE_URL=http://localhost:5678 JOURNEYS_VA_BASE_URL="https://data.itsfactory.fi/journeys/api/1" go test -count=1 -tags=all_tests -coverprofile cover.out ./...
 

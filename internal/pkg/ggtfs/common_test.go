@@ -1,4 +1,4 @@
-//go:build ggtfs_tests || all_tests
+//go:build ggtfs_tests || all_tests || ggtfs_tests_common
 
 package ggtfs
 
