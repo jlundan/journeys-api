@@ -14,7 +14,7 @@ var validRouteHeaders = []string{"route_id", "agency_id", "route_short_name", "r
 
 func TestRouteParsing(t *testing.T) {
 	loadRoutesFunc := func(reader *csv.Reader) ([]interface{}, []error) {
-		routes, errs := LoadEntities[*Route](reader, validRouteHeaders, CreateRoute, RoutesFileName)
+		routes, errs := LoadEntitiesFromCSV[*Route](reader, validRouteHeaders, CreateRoute, RoutesFileName)
 		entities := make([]interface{}, len(routes))
 		for i, route := range routes {
 			entities[i] = route
@@ -65,18 +65,19 @@ func getRouteOKTestcases() map[string]ggtfsTestCase {
 
 	expected1 := Route{
 		Id:                NewID(stringPtr(id)),
-		AgencyId:          NewOptionalID(stringPtr(agency)),
-		ShortName:         NewOptionalText(stringPtr(shortName)),
-		LongName:          NewOptionalText(stringPtr(longName)),
-		Description:       NewOptionalText(stringPtr(desc)),
+		AgencyId:          NewID(stringPtr(agency)),
+		ShortName:         NewText(stringPtr(shortName)),
+		LongName:          NewText(stringPtr(longName)),
+		Description:       NewText(stringPtr(desc)),
 		Type:              NewRouteType(stringPtr(routeType)),
-		URL:               NewOptionalURL(stringPtr(u)),
-		Color:             NewOptionalColor(stringPtr(rColor)),
-		TextColor:         NewOptionalColor(stringPtr(textColor)),
-		SortOrder:         NewOptionalInteger(stringPtr(so)),
-		ContinuousPickup:  NewOptionalContinuousPickupType(stringPtr(cpt)),
-		ContinuousDropOff: NewOptionalContinuousDropOffType(stringPtr(cdt)),
-		NetworkId:         NewOptionalID(stringPtr(networkId)),
+		URL:               NewURL(stringPtr(u)),
+		Color:             NewColor(stringPtr(rColor)),
+		TextColor:         NewColor(stringPtr(textColor)),
+		SortOrder:         NewInteger(stringPtr(so)),
+		ContinuousPickup:  NewContinuousPickupType(stringPtr(cpt)),
+		ContinuousDropOff: NewContinuousDropOffType(stringPtr(cdt)),
+		NetworkId:         NewID(stringPtr(networkId)),
+		LineNumber:        2,
 	}
 
 	cpt2 := ""
@@ -84,18 +85,19 @@ func getRouteOKTestcases() map[string]ggtfsTestCase {
 
 	expected2 := Route{
 		Id:                NewID(stringPtr(id)),
-		AgencyId:          NewOptionalID(stringPtr(agency)),
-		ShortName:         NewOptionalText(stringPtr(shortName)),
-		LongName:          NewOptionalText(stringPtr(longName)),
-		Description:       NewOptionalText(stringPtr(desc)),
+		AgencyId:          NewID(stringPtr(agency)),
+		ShortName:         NewText(stringPtr(shortName)),
+		LongName:          NewText(stringPtr(longName)),
+		Description:       NewText(stringPtr(desc)),
 		Type:              NewRouteType(stringPtr(routeType)),
-		URL:               NewOptionalURL(stringPtr(u)),
-		Color:             NewOptionalColor(stringPtr(rColor)),
-		TextColor:         NewOptionalColor(stringPtr(textColor)),
-		SortOrder:         NewOptionalInteger(stringPtr(so)),
-		ContinuousPickup:  NewOptionalContinuousPickupType(stringPtr(cpt2)),
-		ContinuousDropOff: NewOptionalContinuousDropOffType(stringPtr(cdt2)),
-		NetworkId:         NewOptionalID(stringPtr(networkId)),
+		URL:               NewURL(stringPtr(u)),
+		Color:             NewColor(stringPtr(rColor)),
+		TextColor:         NewColor(stringPtr(textColor)),
+		SortOrder:         NewInteger(stringPtr(so)),
+		ContinuousPickup:  NewContinuousPickupType(stringPtr(cpt2)),
+		ContinuousDropOff: NewContinuousDropOffType(stringPtr(cdt2)),
+		NetworkId:         NewID(stringPtr(networkId)),
+		LineNumber:        2,
 	}
 	testCases := make(map[string]ggtfsTestCase)
 	testCases["1"] = ggtfsTestCase{
@@ -132,167 +134,65 @@ func getRouteOKTestcases() map[string]ggtfsTestCase {
 
 func getRouteNOKTestcases() map[string]ggtfsTestCase {
 	testCases := make(map[string]ggtfsTestCase)
-	testCases["1"] = ggtfsTestCase{
+	testCases["invalid-fields"] = ggtfsTestCase{
 		csvRows: [][]string{
-			{"route_id"},
-			{","},
-			{" "},
-			{"1"},
+			{"route_id", "agency_id", "route_short_name", "route_long_name", "route_desc", "route_type", "route_url", "route_color", "route_text_color", "route_sort_order", "continuous_pickup", "continuous_drop_off", "network_id"},
+			{"", "", "", "", "", "", "", "", "", "", "", "", ""},
+			{"id", "agency", "short name", "long name", "desc", "999", "not an url", "not a color", "not a color", "not an integer", "999", "999", "network id"},
+			{"id", "agency", "short name", "long name", "desc", "999", "not an url", "not a color", "not a color", "not an integer", "not a number", "not a number", "network id"},
 		},
 		expectedErrors: []string{
-			"routes.txt: record on line 2: wrong number of fields",
-			"routes.txt:1: either route_short_name or route_long_name must be specified",
-			"routes.txt:1: missing mandatory field: route_id",
-			"routes.txt:1: missing mandatory field: route_type",
-			"routes.txt:2: either route_short_name or route_long_name must be specified",
-			"routes.txt:2: missing mandatory field: route_type",
-		},
-	}
-	testCases["2"] = ggtfsTestCase{
-		csvRows: [][]string{
-			{"route_id", "agency_id"},
-			{"1", ""},
-		},
-		expectedErrors: []string{
-			"routes.txt:0: either route_short_name or route_long_name must be specified",
-			"routes.txt:0: missing mandatory field: route_type",
-		},
-	}
-	testCases["3"] = ggtfsTestCase{
-		csvRows: [][]string{
-			{"route_id", "route_short_name"},
-			{"1", ""},
-		},
-		expectedErrors: []string{
-			"routes.txt:0: missing mandatory field: route_type",
-		},
-	}
-	testCases["4"] = ggtfsTestCase{
-		csvRows: [][]string{
-			{"route_id", "route_long_name"},
-			{"1", ""},
-		},
-		expectedErrors: []string{
-			"routes.txt:0: missing mandatory field: route_type",
-		},
-	}
-	testCases["5"] = ggtfsTestCase{
-		csvRows: [][]string{
-			{"route_id", "route_desc"},
-			{"1", ""},
-		},
-		expectedErrors: []string{
-			"routes.txt:0: either route_short_name or route_long_name must be specified",
-			"routes.txt:0: invalid field: route_desc",
-			"routes.txt:0: missing mandatory field: route_type",
-		},
-	}
-	testCases["6"] = ggtfsTestCase{
-		csvRows: [][]string{
-			{"route_id", "route_type"},
-			{"1", "100"},
-		},
-		expectedErrors: []string{
-			"routes.txt:0: either route_short_name or route_long_name must be specified",
-			"routes.txt:0: invalid field: route_type",
-		},
-	}
-	testCases["7"] = ggtfsTestCase{
-		csvRows: [][]string{
-			{"route_id", "route_type"},
-			{"1", "malformed"},
-		},
-		expectedErrors: []string{
-			"routes.txt:0: either route_short_name or route_long_name must be specified",
-			"routes.txt:0: invalid field: route_type",
-		},
-	}
-	testCases["8"] = ggtfsTestCase{
-		csvRows: [][]string{
-			{"route_id", "route_type", "route_short_name", "route_url"},
-			{"1", "1", "1", "\000malformed"},
-		},
-		expectedErrors: []string{
-			"routes.txt:0: invalid field: route_url",
-		},
-	}
-	testCases["9"] = ggtfsTestCase{
-		csvRows: [][]string{
-			{"route_id", "route_type", "route_short_name", "route_color"},
-			{"1", "1", "1", "malformed"},
-			{"2", "1", "1", ""},
-		},
-		expectedErrors: []string{
-			"routes.txt:0: invalid field: route_color",
-			"routes.txt:1: invalid field: route_color",
-		},
-	}
-	testCases["10"] = ggtfsTestCase{
-		csvRows: [][]string{
-			{"route_id", "route_type", "route_short_name", "route_text_color"},
-			{"1", "1", "1", "malformed"},
-		},
-		expectedErrors: []string{
-			"routes.txt:0: invalid field: route_text_color",
-		},
-	}
-	testCases["11"] = ggtfsTestCase{
-		csvRows: [][]string{
-			{"route_id", "route_type", "route_short_name", "route_sort_order"},
-			{"1", "1", "1", "malformed"},
-		},
-		expectedErrors: []string{
-			"routes.txt:0: invalid field: route_sort_order",
-		},
-	}
-	testCases["12"] = ggtfsTestCase{
-		csvRows: [][]string{
-			{"route_id", "route_type", "route_short_name", "continuous_pickup"},
-			{"1", "1", "1", "100"},
-			{"2", "1", "1", "malformed"},
-		},
-		expectedErrors: []string{
-			"routes.txt:0: invalid field: continuous_pickup",
-			"routes.txt:1: invalid field: continuous_pickup",
-		},
-	}
-	testCases["13"] = ggtfsTestCase{
-		csvRows: [][]string{
-			{"route_id", "route_type", "route_short_name", "continuous_drop_off"},
-			{"1", "1", "1", "100"},
-			{"2", "1", "1", "malformed"},
-			{"3", "1", "1", "1"},
-			{"3", "2", "2", "1"},
-		},
-		expectedErrors: []string{
-			"routes.txt:0: invalid field: continuous_drop_off",
-			"routes.txt:1: invalid field: continuous_drop_off",
-			"routes.txt:3: route_id '3' is not unique within the file",
+			"routes.txt:2: invalid field: agency_id",
+			"routes.txt:2: invalid field: network_id",
+			"routes.txt:2: invalid field: route_color",
+			"routes.txt:2: invalid field: route_desc",
+			"routes.txt:2: invalid field: route_long_name",
+			"routes.txt:2: invalid field: route_short_name",
+			"routes.txt:2: invalid field: route_sort_order",
+			"routes.txt:2: invalid field: route_text_color",
+			"routes.txt:2: invalid field: route_url",
+			"routes.txt:2: invalid mandatory field: route_id",
+			"routes.txt:2: invalid mandatory field: route_type",
+			"routes.txt:3: invalid field: continuous_drop_off",
+			"routes.txt:3: invalid field: continuous_pickup",
+			"routes.txt:3: invalid field: route_color",
+			"routes.txt:3: invalid field: route_sort_order",
+			"routes.txt:3: invalid field: route_text_color",
+			"routes.txt:3: invalid field: route_url",
+			"routes.txt:3: invalid mandatory field: route_type",
+			"routes.txt:4: invalid field: continuous_drop_off",
+			"routes.txt:4: invalid field: continuous_pickup",
+			"routes.txt:4: invalid field: route_color",
+			"routes.txt:4: invalid field: route_sort_order",
+			"routes.txt:4: invalid field: route_text_color",
+			"routes.txt:4: invalid field: route_url",
+			"routes.txt:4: invalid mandatory field: route_type",
 		},
 	}
 
-	testCases["14"] = ggtfsTestCase{
-		csvRows: [][]string{
-			{"route_id", "route_type", "route_short_name", "network_id"},
-			{"1", "1", "1", ""},
-		},
-		expectedErrors: []string{
-			"routes.txt:0: invalid field: network_id",
-		},
-	}
-
-	testCases["15"] = ggtfsTestCase{
+	testCases["missing-references"] = ggtfsTestCase{
 		csvRows: [][]string{
 			{"route_id", "route_type", "route_short_name", "agency_id"},
 			{"2", "1", "2", "1"},
 		},
 		expectedErrors: []string{
-			"routes.txt:0: referenced agency_id '1' not found in agency.txt",
+			"routes.txt:2: referenced agency_id '1' not found in agency.txt",
 		},
 		fixtures: map[string][]interface{}{
 			"agencies": {
 				&Agency{Id: NewOptionalID(stringPtr("0"))},
 			},
+		},
+	}
+
+	testCases["duplicate-ids"] = ggtfsTestCase{
+		csvRows: [][]string{
+			{"route_id", "route_type", "route_short_name", "agency_id"},
+			{"1", "1", "2", "1"},
+			{"1", "1", "2", "1"},
+		},
+		expectedErrors: []string{
+			"routes.txt:3: route_id '1' is not unique within the file",
 		},
 	}
 
@@ -319,71 +219,22 @@ func TestShouldNotFailValidationOnNilRouteItem(t *testing.T) {
 
 func TestShouldNotFailValidationOnNilAgencyItem(t *testing.T) {
 	ValidateRoutes([]*Route{{
-		Id: ID{
-			base: base{
-				raw:       "",
-				isPresent: false,
-			},
-		},
-		AgencyId:    NewOptionalID(stringPtr("foo")),
-		ShortName:   nil,
-		LongName:    nil,
-		Description: nil,
-		Type: RouteType{
-			Integer: Integer{
-				base: base{
-					raw:       "",
-					isPresent: false,
-				},
-			},
-		},
-		URL:               nil,
-		Color:             nil,
-		TextColor:         nil,
-		SortOrder:         nil,
-		ContinuousPickup:  nil,
-		ContinuousDropOff: nil,
-		NetworkId:         nil,
-		LineNumber:        0,
+		AgencyId:   NewID(stringPtr("foo")),
+		LineNumber: 0,
 	}}, []*Agency{nil})
 
 	ValidateRoutes([]*Route{{
-		Id: ID{
-			base: base{
-				raw:       "",
-				isPresent: false,
-			},
-		},
-		AgencyId:    nil,
-		ShortName:   nil,
-		LongName:    nil,
-		Description: nil,
-		Type: RouteType{
-			Integer: Integer{
-				base: base{
-					raw:       "",
-					isPresent: false,
-				},
-			},
-		},
-		URL:               nil,
-		Color:             nil,
-		TextColor:         nil,
-		SortOrder:         nil,
-		ContinuousPickup:  nil,
-		ContinuousDropOff: nil,
-		NetworkId:         nil,
-		LineNumber:        0,
+		LineNumber: 0,
 	}}, []*Agency{nil})
 }
 
 func TestStructsShouldNotBePresentOnNilInput(t *testing.T) {
-	cpt := NewOptionalContinuousPickupType(nil)
+	cpt := NewContinuousPickupType(nil)
 	if cpt.IsPresent() {
 		t.Error("expected not present field")
 	}
 
-	cdo := NewOptionalContinuousDropOffType(nil)
+	cdo := NewContinuousDropOffType(nil)
 	if cdo.IsPresent() {
 		t.Error("expected not present field")
 	}
