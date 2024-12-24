@@ -42,9 +42,9 @@ func (r Route) Validate() []error {
 		field     ValidAndPresentField
 		fieldName string
 	}{
-		{&r.Description, "agency_id"},
-		{&r.Description, "route_short_name"},
-		{&r.Description, "route_long_name"},
+		{&r.Id, "agency_id"},
+		{&r.ShortName, "route_short_name"},
+		{&r.LongName, "route_long_name"},
 		{&r.Description, "route_desc"},
 		{&r.URL, "route_url"},
 		{&r.Color, "route_color"},

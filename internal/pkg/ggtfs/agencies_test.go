@@ -21,6 +21,16 @@ func TestShouldReturnEmptyAgencyArrayOnEmptyString(t *testing.T) {
 	}
 }
 
+func TestShouldValidateOnNilAgencies(t *testing.T) {
+	errors, recommendations := ValidateAgencies([]*Agency{nil, nil, nil})
+	if len(errors) > 0 {
+		t.Error(errors)
+	}
+	if len(recommendations) != 0 {
+		t.Error("expected zero recommendations")
+	}
+}
+
 func TestAgencyParsing(t *testing.T) {
 	loadAgenciesFunc := func(reader *csv.Reader) ([]interface{}, []error) {
 		agencies, errs := LoadEntities[*Agency](reader, validAgencyHeaders, CreateAgency, AgenciesFileName)
@@ -76,32 +86,32 @@ func getAgencyNOKTestcases() map[string]ggtfsTestCase {
 			"agency.txt:0: invalid field: agency_fare_url",
 			"agency.txt:0: invalid field: agency_lang",
 			"agency.txt:0: invalid field: agency_phone",
-			"agency.txt:0: missing mandatory field: agency_name",
-			"agency.txt:0: missing mandatory field: agency_timezone",
-			"agency.txt:0: missing mandatory field: agency_url",
+			"agency.txt:0: invalid mandatory field: agency_name",
+			"agency.txt:0: invalid mandatory field: agency_timezone",
+			"agency.txt:0: invalid mandatory field: agency_url",
 			"agency.txt:1: a valid agency_id must be specified when multiple agencies are declared",
 			"agency.txt:1: invalid field: agency_email",
 			"agency.txt:1: invalid field: agency_fare_url",
 			"agency.txt:1: invalid field: agency_lang",
 			"agency.txt:1: invalid field: agency_phone",
-			"agency.txt:1: missing mandatory field: agency_name",
-			"agency.txt:1: missing mandatory field: agency_timezone",
-			"agency.txt:1: missing mandatory field: agency_url",
+			"agency.txt:1: invalid mandatory field: agency_name",
+			"agency.txt:1: invalid mandatory field: agency_timezone",
+			"agency.txt:1: invalid mandatory field: agency_url",
 			"agency.txt:2: a valid agency_id must be specified when multiple agencies are declared",
 			"agency.txt:2: invalid field: agency_email",
 			"agency.txt:2: invalid field: agency_fare_url",
 			"agency.txt:2: invalid field: agency_lang",
 			"agency.txt:2: invalid field: agency_phone",
-			"agency.txt:2: missing mandatory field: agency_name",
-			"agency.txt:2: missing mandatory field: agency_timezone",
-			"agency.txt:2: missing mandatory field: agency_url",
+			"agency.txt:2: invalid mandatory field: agency_name",
+			"agency.txt:2: invalid mandatory field: agency_timezone",
+			"agency.txt:2: invalid mandatory field: agency_url",
 			"agency.txt:3: a valid agency_id must be specified when multiple agencies are declared",
 			"agency.txt:3: invalid field: agency_email",
 			"agency.txt:3: invalid field: agency_fare_url",
 			"agency.txt:3: invalid field: agency_lang",
 			"agency.txt:3: invalid field: agency_phone",
-			"agency.txt:3: invalid field: agency_timezone",
-			"agency.txt:3: invalid field: agency_url",
+			"agency.txt:3: invalid mandatory field: agency_timezone",
+			"agency.txt:3: invalid mandatory field: agency_url",
 		},
 	}
 	testCases["unique-agencies"] = ggtfsTestCase{
@@ -132,25 +142,21 @@ func getAgencyNOKTestcases() map[string]ggtfsTestCase {
 
 func getAgencyOKTestcases() map[string]ggtfsTestCase {
 	expected1 := Agency{
-		Id:       NewOptionalID(stringPtr("1")),
+		Id:       NewID(stringPtr("1")),
 		Name:     NewText(stringPtr("ACME")),
 		URL:      NewURL(stringPtr("https://acme.inc")),
 		Timezone: NewTimezone(stringPtr("Europe/Helsinki")),
-		Lang:     NewOptionalLanguageCode(stringPtr("fi")),
-		Phone:    NewOptionalPhoneNumber(stringPtr("+358123456")),
-		FareURL:  NewOptionalURL(stringPtr("https://acme.inc/fares")),
-		Email:    NewOptionalEmail(stringPtr("acme@acme.inc")),
+		Lang:     NewLanguageCode(stringPtr("fi")),
+		Phone:    NewPhoneNumber(stringPtr("+358123456")),
+		FareURL:  NewURL(stringPtr("https://acme.inc/fares")),
+		Email:    NewEmail(stringPtr("acme@acme.inc")),
 	}
 
 	expected2 := Agency{
-		Id:       NewOptionalID(stringPtr("2")),
+		Id:       NewID(stringPtr("2")),
 		Name:     NewText(stringPtr("FOO")),
 		URL:      NewURL(stringPtr("https://foo.com")),
 		Timezone: NewTimezone(stringPtr("Europe/Helsinki")),
-		Lang:     nil,
-		Phone:    nil,
-		FareURL:  nil,
-		Email:    nil,
 	}
 
 	testCases := make(map[string]ggtfsTestCase)
