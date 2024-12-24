@@ -6,73 +6,59 @@ import (
 )
 
 type Route struct {
-	Id                ID                     // route_id
-	AgencyId          *ID                    // agency_id
-	ShortName         *Text                  // route_short_name
-	LongName          *Text                  // route_long_name
-	Description       *Text                  // route_desc
-	Type              RouteType              // route_type
-	URL               *URL                   // route_url
-	Color             *Color                 // route_color
-	TextColor         *Color                 // route_text_color
-	SortOrder         *Integer               // route_sort_order
-	ContinuousPickup  *ContinuousPickupType  // continuous_pickup
-	ContinuousDropOff *ContinuousDropOffType // continuous_drop_off
-	NetworkId         *ID                    // network_id
+	Id                ID                    // route_id, required
+	AgencyId          ID                    // agency_id, conditionally required
+	ShortName         Text                  // route_short_name, conditionally required
+	LongName          Text                  // route_long_name, conditionally required
+	Description       Text                  // route_desc, optional
+	Type              RouteType             // route_type, required
+	URL               URL                   // route_url
+	Color             Color                 // route_color
+	TextColor         Color                 // route_text_color
+	SortOrder         Integer               // route_sort_order
+	ContinuousPickup  ContinuousPickupType  // continuous_pickup
+	ContinuousDropOff ContinuousDropOffType // continuous_drop_off
+	NetworkId         ID                    // network_id
 	LineNumber        int
 }
 
 func (r Route) Validate() []error {
 	var validationErrors []error
 
-	// agency_id is handled in the ValidateRoute function since it is conditionally required
-	// route_short_name is handled in the ValidateRoute function since it is conditionally required
-	// route_long_name is handled in the ValidateRoute function since it is conditionally required
-
-	fields := []struct {
+	requiredFields := []struct {
 		fieldName string
 		field     ValidAndPresentField
 	}{
 		{"route_id", &r.Id},
 		{"route_type", &r.Type},
 	}
-	for _, f := range fields {
-		validationErrors = append(validationErrors, validateFieldIsPresentAndValid(f.field, f.fieldName, r.LineNumber, RoutesFileName)...)
+	for _, f := range requiredFields {
+		if !f.field.IsValid() {
+			validationErrors = append(validationErrors, createFileRowError(RoutesFileName, r.LineNumber, createInvalidRequiredFieldString(f.fieldName)))
+		}
 	}
 
-	// Checking the underlying value of the field in ValidAndPresentField for nil would require reflection
-	// v := reflect.ValueOf(i)
-	// v.Kind() == reflect.Ptr && v.IsNil()
-	// which is slow, so we can't use the above mechanism to check optional fields, since they might be nil (pointer field's default value is nil)
-	// since CreateTrip might have not processed the field (if its header is missing from the csv).
-
-	if r.Description != nil && !r.Description.IsValid() {
-		validationErrors = append(validationErrors, createFileRowError(RoutesFileName, r.LineNumber, createInvalidFieldString("route_desc")))
-	}
-	if r.URL != nil && !r.URL.IsValid() {
-		validationErrors = append(validationErrors, createFileRowError(RoutesFileName, r.LineNumber, createInvalidFieldString("route_url")))
-	}
-	if r.Color != nil && !r.Color.IsValid() {
-		validationErrors = append(validationErrors, createFileRowError(RoutesFileName, r.LineNumber, createInvalidFieldString("route_color")))
-	}
-	if r.TextColor != nil && !r.TextColor.IsValid() {
-		validationErrors = append(validationErrors, createFileRowError(RoutesFileName, r.LineNumber, createInvalidFieldString("route_text_color")))
-	}
-	if r.SortOrder != nil && !r.SortOrder.IsValid() {
-		validationErrors = append(validationErrors, createFileRowError(RoutesFileName, r.LineNumber, createInvalidFieldString("route_sort_order")))
-	}
-	if r.ContinuousPickup != nil && !r.ContinuousPickup.IsValid() {
-		validationErrors = append(validationErrors, createFileRowError(RoutesFileName, r.LineNumber, createInvalidFieldString("continuous_pickup")))
-	}
-	if r.ContinuousDropOff != nil && !r.ContinuousDropOff.IsValid() {
-		validationErrors = append(validationErrors, createFileRowError(RoutesFileName, r.LineNumber, createInvalidFieldString("continuous_drop_off")))
-	}
-	if r.NetworkId != nil && !r.NetworkId.IsValid() {
-		validationErrors = append(validationErrors, createFileRowError(RoutesFileName, r.LineNumber, createInvalidFieldString("network_id")))
+	optionalFields := []struct {
+		field     ValidAndPresentField
+		fieldName string
+	}{
+		{&r.Description, "agency_id"},
+		{&r.Description, "route_short_name"},
+		{&r.Description, "route_long_name"},
+		{&r.Description, "route_desc"},
+		{&r.URL, "route_url"},
+		{&r.Color, "route_color"},
+		{&r.TextColor, "route_text_color"},
+		{&r.SortOrder, "route_sort_order"},
+		{&r.ContinuousPickup, "continuous_pickup"},
+		{&r.ContinuousDropOff, "continuous_drop_off"},
+		{&r.NetworkId, "network_id"},
 	}
 
-	if r.ShortName == nil && r.LongName == nil {
-		validationErrors = append(validationErrors, createFileRowError(RoutesFileName, r.LineNumber, "either route_short_name or route_long_name must be specified"))
+	for _, field := range optionalFields {
+		if field.field != nil && field.field.IsPresent() && !field.field.IsValid() {
+			validationErrors = append(validationErrors, createFileRowError(RoutesFileName, r.LineNumber, createInvalidFieldString(field.fieldName)))
+		}
 	}
 
 	return validationErrors
@@ -83,35 +69,36 @@ func CreateRoute(row []string, headers map[string]int, lineNumber int) *Route {
 		LineNumber: lineNumber,
 	}
 
-	for hName, hPos := range headers {
+	for hName := range headers {
+		v := getRowValueForHeaderName(row, headers, hName)
+
 		switch hName {
 		case "route_id":
-			route.Id = NewID(getRowValue(row, hPos))
+			route.Id = NewID(v)
 		case "agency_id":
-			route.AgencyId = NewOptionalID(getRowValue(row, hPos))
+			route.AgencyId = NewID(v)
 		case "route_short_name":
-			route.ShortName = NewOptionalText(getRowValue(row, hPos))
+			route.ShortName = NewText(v)
 		case "route_long_name":
-			route.LongName = NewOptionalText(getRowValue(row, hPos))
+			route.LongName = NewText(v)
 		case "route_desc":
-			route.Description = NewOptionalText(getRowValue(row, hPos))
+			route.Description = NewText(v)
 		case "route_type":
-			route.Type = NewRouteType(getRowValue(row, hPos))
+			route.Type = NewRouteType(v)
 		case "route_url":
-			route.URL = NewOptionalURL(getRowValue(row, hPos))
+			route.URL = NewURL(v)
 		case "route_color":
-			route.Color = NewOptionalColor(getRowValue(row, hPos))
+			route.Color = NewColor(v)
 		case "route_text_color":
-			route.TextColor = NewOptionalColor(getRowValue(row, hPos))
+			route.TextColor = NewColor(v)
 		case "route_sort_order":
-			route.SortOrder = NewOptionalInteger(getRowValue(row, hPos))
+			route.SortOrder = NewInteger(v)
 		case "continuous_pickup":
-			route.ContinuousPickup = NewOptionalContinuousPickupType(getRowValue(row, hPos))
+			route.ContinuousPickup = NewContinuousPickupType(v)
 		case "continuous_drop_off":
-			route.ContinuousDropOff = NewOptionalContinuousDropOffType(getRowValue(row, hPos))
-
+			route.ContinuousDropOff = NewContinuousDropOffType(v)
 		case "network_id":
-			route.NetworkId = NewOptionalID(getRowValue(row, hPos))
+			route.NetworkId = NewID(v)
 		}
 	}
 
@@ -145,7 +132,7 @@ func ValidateRoutes(routes []*Route, agencies []*Agency) ([]error, []string) {
 	}
 
 	for _, route := range routes {
-		if route == nil || route.AgencyId == nil {
+		if route == nil || !route.AgencyId.IsValid() {
 			continue
 		}
 
@@ -233,12 +220,12 @@ func (cpt ContinuousPickupType) IsValid() bool {
 		val == MustPhoneAgencyPickupType || val == MustCoordinateWithDriverPickupType
 }
 
-func NewOptionalContinuousPickupType(raw *string) *ContinuousPickupType {
+func NewContinuousPickupType(raw *string) ContinuousPickupType {
 	if raw == nil {
-		return &ContinuousPickupType{
+		return ContinuousPickupType{
 			Integer{base: base{raw: ""}}}
 	}
-	return &ContinuousPickupType{Integer{base: base{raw: *raw, isPresent: true}}}
+	return ContinuousPickupType{Integer{base: base{raw: *raw, isPresent: true}}}
 }
 
 const (
@@ -268,10 +255,10 @@ func (cpt ContinuousDropOffType) IsValid() bool {
 		val == MustPhoneAgencyDropOffType || val == MustCoordinateWithDriverDropOffType
 }
 
-func NewOptionalContinuousDropOffType(raw *string) *ContinuousDropOffType {
+func NewContinuousDropOffType(raw *string) ContinuousDropOffType {
 	if raw == nil {
-		return &ContinuousDropOffType{
+		return ContinuousDropOffType{
 			Integer{base: base{raw: ""}}}
 	}
-	return &ContinuousDropOffType{Integer{base: base{raw: *raw, isPresent: true}}}
+	return ContinuousDropOffType{Integer{base: base{raw: *raw, isPresent: true}}}
 }

@@ -57,6 +57,7 @@ type ID struct {
 
 // IsValid checks if the ID is not empty.
 func (id *ID) IsValid() bool {
+	// FIXME: none of the isValid methods needs pointer receiver
 	if id == nil {
 		return false
 	}
@@ -91,6 +92,13 @@ func (c *Color) IsValid() bool {
 
 	match, _ := regexp.MatchString(`^[0-9A-Fa-f]{6}$`, c.raw)
 	return match
+}
+
+func NewColor(raw *string) Color {
+	if raw == nil {
+		return Color{base{raw: ""}}
+	}
+	return Color{base{raw: *raw, isPresent: true}}
 }
 
 func NewOptionalColor(raw *string) *Color {

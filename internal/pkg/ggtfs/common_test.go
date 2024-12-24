@@ -4,178 +4,122 @@ package ggtfs
 
 import (
 	"encoding/csv"
-	"fmt"
-	"reflect"
-	"sort"
 	"strings"
 	"testing"
 )
 
-func compareStructs(expected, actual interface{}) (bool, string) {
-	if expected == nil || actual == nil {
-		if expected == actual {
-			return true, ""
-		}
-		return false, fmt.Sprintf("One of the structs is nil: expected = %v, actual = %v", expected, actual)
+func TestGetRowValueForHeaderName(t *testing.T) {
+	headerIndex := map[string]int{
+		"test1": 0,
+		"test2": 1,
+		"test3": 2,
+	}
+	if *getRowValueForHeaderName([]string{"foo", "bar", "baz"}, headerIndex, "test1") != "foo" {
+		t.Error("expected test1")
 	}
 
-	expectedVal := reflect.ValueOf(expected)
-	actualVal := reflect.ValueOf(actual)
-
-	// Check if both values are pointers and dereference them.
-	if expectedVal.Kind() == reflect.Ptr && actualVal.Kind() == reflect.Ptr {
-		expectedVal = expectedVal.Elem()
-		actualVal = actualVal.Elem()
+	if *getRowValueForHeaderName([]string{"foo", "bar", "baz"}, headerIndex, "test2") != "bar" {
+		t.Error("expected bar")
 	}
 
-	// Ensure both are of the same type.
-	if expectedVal.Type() != actualVal.Type() {
-		return false, fmt.Sprintf("Type mismatch: expected type = %v, actual type = %v", expectedVal.Type(), actualVal.Type())
+	if *getRowValueForHeaderName([]string{"foo", "bar", "baz"}, headerIndex, "test3") != "baz" {
+		t.Error("expected baz")
 	}
 
-	// Both values should be structs.
-	if expectedVal.Kind() != reflect.Struct || actualVal.Kind() != reflect.Struct {
-		return false, fmt.Sprintf("Both values must be structs: expected kind = %v, actual kind = %v", expectedVal.Kind(), actualVal.Kind())
-	}
-
-	var differences []string
-
-	// Iterate through the fields of the struct.
-	for i := 0; i < expectedVal.NumField(); i++ {
-		fieldName := expectedVal.Type().Field(i).Name
-		expectedField := expectedVal.Field(i)
-		actualField := actualVal.Field(i)
-
-		if !reflect.DeepEqual(expectedField.Interface(), actualField.Interface()) {
-			differences = append(differences, fmt.Sprintf(
-				"Field '%s': expected = %v, actual = %v",
-				fieldName, expectedField.Interface(), actualField.Interface(),
-			))
-		}
-	}
-
-	// If no differences are found, the structs are equal.
-	if len(differences) == 0 {
-		return true, ""
-	}
-
-	// Return the differences as a formatted string.
-	return false, fmt.Sprintf("Differences:\n%s", formatDifferences(differences))
-}
-
-// Helper function to format the differences as a readable string.
-func formatDifferences(differences []string) string {
-	return fmt.Sprintf("Found %d differences:\n- %s", len(differences), strings.Join(differences, "\n- "))
-}
-
-type ggtfsTestCase struct {
-	csvRows                 [][]string
-	expectedStructs         []interface{}
-	fixtures                map[string][]interface{}
-	expectedErrors          []string
-	expectedRecommendations []string
-}
-
-type LoadFunction func(reader *csv.Reader) ([]interface{}, []error)
-type ValidateFunction func(entities []interface{}, fixtures map[string][]interface{}) ([]error, []string)
-
-type ParseResult struct {
-	Entities        []interface{}
-	Errors          []error
-	Recommendations []string
-}
-
-// LoadAndValidateGTFS is a generic function to load and validate GTFS entities while allowing partial success.
-func loadAndValidateGTFS(csvReader *csv.Reader, loadFunc LoadFunction, validateFunc ValidateFunction, fixtures map[string][]interface{}, strictMode bool) ParseResult {
-	// Load the entities using the provided load function
-	entities, parseErrors := loadFunc(csvReader)
-	validationErrors, validationRecommendations := validateFunc(entities, fixtures)
-
-	// If strict mode is enabled, combine parse errors and validation errors and return an empty set of entities
-	if strictMode && (len(parseErrors) > 0 || len(validationErrors) > 0) {
-		return ParseResult{
-			Entities:        nil,
-			Errors:          append(parseErrors, validationErrors...),
-			Recommendations: validationRecommendations,
-		}
-	}
-
-	// Otherwise, return the parsed entities and the errors separately
-	return ParseResult{
-		Entities:        entities,
-		Errors:          append(parseErrors, validationErrors...),
-		Recommendations: validationRecommendations,
+	if getRowValueForHeaderName([]string{"foo", "bar", "baz"}, headerIndex, "test4") != nil {
+		t.Error("expected nil")
 	}
 }
 
-func runGenericGTFSParseTest(t *testing.T, testName string, loadFunc LoadFunction, validateFunc ValidateFunction, strictMode bool, testCases map[string]ggtfsTestCase) {
-	for tcName, tc := range testCases {
-		t.Run(fmt.Sprintf("%s/%s", testName, tcName), func(t *testing.T) {
-			result := loadAndValidateGTFS(csv.NewReader(strings.NewReader(tableToString(tc.csvRows))), loadFunc, validateFunc, tc.fixtures, strictMode)
+func TestGetHeaderIndex(t *testing.T) {
+	validHeaders := []string{"test1", "test2", "test3"}
+	headers := [][]string{
+		{"test1", "test2", "test3", "test4"},
+	}
+	headerIndex, errors := getHeaderIndex(csv.NewReader(strings.NewReader(tableToString(headers))), validHeaders)
 
-			// Sort errors for consistent comparison
-			sort.Slice(result.Errors, func(x, y int) bool {
-				return result.Errors[x].Error() < result.Errors[y].Error()
-			})
-			sort.Strings(tc.expectedErrors)
+	if len(errors) != 0 {
+		t.Error("expected zero errors")
+	}
 
-			// Check error count and contents
-			if len(result.Errors) != len(tc.expectedErrors) {
-				t.Errorf("Expected %d errors, got %d", len(tc.expectedErrors), len(result.Errors))
-				for _, e := range result.Errors {
-					t.Logf("Actual error: %s", e.Error())
-				}
+	if headerIndex["test1"] != 0 || headerIndex["test2"] != 1 || headerIndex["test3"] != 2 || headerIndex["test4"] != -1 {
+		t.Error("expected four items in the index")
+	}
 
-				for _, e := range tc.expectedErrors {
-					t.Logf("Expected error: %s", e)
-				}
-			} else {
-				for i, e := range result.Errors {
-					if e.Error() != tc.expectedErrors[i] {
-						t.Errorf("Expected error %q, got %q", tc.expectedErrors[i], e.Error())
-					}
-				}
-			}
+	headers = [][]string{
+		{"test1", "test2", "test2"},
+	}
+	headerIndex, errors = getHeaderIndex(csv.NewReader(strings.NewReader(tableToString(headers))), validHeaders)
 
-			sort.Strings(result.Recommendations)
-			sort.Strings(tc.expectedRecommendations)
+	if len(errors) != 1 && errors[0].Error() != "duplicate header found: test2" {
+		t.Error("expected duplicate header error")
+	}
 
-			if len(result.Recommendations) != len(tc.expectedRecommendations) {
-				t.Errorf("Expected %d recommendations, got %d", len(tc.expectedRecommendations), len(result.Recommendations))
-				for _, e := range result.Recommendations {
-					t.Logf("Actual recommendation: %s", e)
-				}
+	if len(headerIndex) != 2 {
+		t.Error("expected two items in the index")
+	}
 
-				for _, e := range tc.expectedRecommendations {
-					t.Logf("Expected recommendation: %s", e)
-				}
-			} else {
-				for i, e := range result.Recommendations {
-					if e != tc.expectedRecommendations[i] {
-						t.Errorf("Expected recommendation %q, got %q", tc.expectedRecommendations[i], e)
-					}
-				}
-			}
+	headers = [][]string{{}}
+	headerIndex, errors = getHeaderIndex(csv.NewReader(strings.NewReader(tableToString(headers))), validHeaders)
 
-			// Check that the parsed entities match the expected entities if they are provided
-			if len(tc.expectedStructs) > 0 {
-				if len(result.Entities) != len(tc.expectedStructs) {
-					t.Errorf("Expected %d parsed structs, got %d", len(tc.expectedStructs), len(result.Entities))
-					return
-				}
+	if len(errors) != 0 {
+		t.Error("expected zero errors")
+	}
 
-				for i, expected := range tc.expectedStructs {
-					// Use the provided compareStructs function to compare the actual struct with the expected one.
-					isEqual, diff := compareStructs(expected, result.Entities[i])
-					if !isEqual {
-						t.Errorf("Struct comparison failed for entity %d:\n%s", i, diff)
-					}
-				}
-			}
-		})
+	if len(headerIndex) != 0 {
+		t.Error("expected zero items in the index")
+	}
+
+	headerIndex, errors = getHeaderIndex(csv.NewReader(strings.NewReader("\"field1,field2\n")), validHeaders)
+	if len(errors) != 1 {
+		t.Error("expected one errors")
+	}
+
+}
+
+func TestLoadEntitiesFromCSV(t *testing.T) {
+	validHeaders := []string{"test1", "test2", "test3"}
+	headers := [][]string{
+		{"test1", "test2", "test3", "test3"},
+		{" "},
+		{","},
+		{"", ""},
+		{" ", " "},
+	}
+	_, errors := LoadEntitiesFromCSV(csv.NewReader(strings.NewReader(tableToString(headers))), validHeaders, dummyEntityCreator, "test.csv")
+
+	if len(errors) != 5 {
+		t.Error("expected four errors")
+	}
+
+	if errors[0].Error() != "test.csv: duplicate header name: test3" {
+		t.Error("unexpected error")
+	}
+	if errors[1].Error() != "test.csv: record on line 2: wrong number of fields" {
+		t.Error("unexpected error")
+	}
+	if errors[2].Error() != "test.csv: record on line 3: wrong number of fields" {
+		t.Error("unexpected error")
+	}
+	if errors[3].Error() != "test.csv: record on line 4: wrong number of fields" {
+		t.Error("unexpected error")
+	}
+	if errors[4].Error() != "test.csv: record on line 5: wrong number of fields" {
+		t.Error("unexpected error")
+	}
+
+	headers = [][]string{}
+	index, errors := LoadEntitiesFromCSV(csv.NewReader(strings.NewReader(tableToString(headers))), validHeaders, dummyEntityCreator, "test.csv")
+
+	if len(errors) != 0 {
+		t.Error("expected zero errors")
+	}
+
+	if len(index) != 0 {
+		t.Error("expected zero items in the index")
 	}
 }
 
-func stringPtr(s string) *string {
-	return &s
+func dummyEntityCreator(row []string, headers map[string]int, lineNumber int) interface{} {
+	return nil
 }

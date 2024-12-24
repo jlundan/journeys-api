@@ -29,8 +29,7 @@ func buildLines(g GTFSContext) Lines {
 		ln := v.LongName
 		sn := v.ShortName
 
-		//if ln == nil || sn == nil || *ln == "" || *sn == "" {
-		if ln == nil || sn == nil || (ln.String() == "" && sn.String() == "") {
+		if !ln.IsValid() || !sn.IsValid() {
 			fmt.Println(fmt.Sprintf("skipping malformed line: %v", v.Id))
 			continue
 		}

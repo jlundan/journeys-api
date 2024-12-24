@@ -7,24 +7,24 @@ import (
 
 // StopTime struct with fields as strings and optional fields as string pointers.
 type StopTime struct {
-	TripId                   ID                     // trip_id
-	ArrivalTime              Time                   // arrival_time
-	DepartureTime            Time                   // departure_time
-	StopId                   ID                     // stop_id
-	LocationGroupId          *ID                    // location_group_id (optional)
-	LocationId               *ID                    // location_id (optional)
-	StopSequence             Integer                // stop_sequence
-	StopHeadSign             *Text                  // stop_headsign (optional)
-	StartPickupDropOffWindow *Time                  // start_pickup_drop_off_window (optional)
-	EndPickupDropOffWindow   *Time                  // end_pickup_drop_off_window (optional)
-	PickupType               *PickupType            // pickup_type (optional)
-	DropOffType              *DropOffType           // drop_off_type (optional)
-	ContinuousPickup         *ContinuousPickupType  // continuous_pickup (optional)
-	ContinuousDropOff        *ContinuousDropOffType // continuous_drop_off (optional)
-	ShapeDistTraveled        *Float                 // shape_dist_traveled (optional)
-	Timepoint                *TimePoint             // timepoint (optional)
-	PickupBookingRuleId      *ID                    // pickup_booking_rule_id (optional)
-	DropOffBookingRuleId     *ID                    // drop_off_booking_rule_id (optional)
+	TripId                   ID                    // trip_id
+	ArrivalTime              Time                  // arrival_time
+	DepartureTime            Time                  // departure_time
+	StopId                   ID                    // stop_id
+	LocationGroupId          *ID                   // location_group_id (optional)
+	LocationId               *ID                   // location_id (optional)
+	StopSequence             Integer               // stop_sequence
+	StopHeadSign             *Text                 // stop_headsign (optional)
+	StartPickupDropOffWindow *Time                 // start_pickup_drop_off_window (optional)
+	EndPickupDropOffWindow   *Time                 // end_pickup_drop_off_window (optional)
+	PickupType               *PickupType           // pickup_type (optional)
+	DropOffType              *DropOffType          // drop_off_type (optional)
+	ContinuousPickup         ContinuousPickupType  // continuous_pickup (optional)
+	ContinuousDropOff        ContinuousDropOffType // continuous_drop_off (optional)
+	ShapeDistTraveled        *Float                // shape_dist_traveled (optional)
+	Timepoint                *TimePoint            // timepoint (optional)
+	PickupBookingRuleId      *ID                   // pickup_booking_rule_id (optional)
+	DropOffBookingRuleId     *ID                   // drop_off_booking_rule_id (optional)
 	LineNumber               int
 }
 
@@ -117,9 +117,9 @@ func CreateStopTime(row []string, headers map[string]int, lineNumber int) *StopT
 		case "drop_off_type":
 			stopTime.DropOffType = NewOptionalDropOffType(getRowValue(row, hPos))
 		case "continuous_pickup":
-			stopTime.ContinuousPickup = NewOptionalContinuousPickupType(getRowValue(row, hPos))
+			stopTime.ContinuousPickup = NewContinuousPickupType(getRowValue(row, hPos))
 		case "continuous_drop_off":
-			stopTime.ContinuousDropOff = NewOptionalContinuousDropOffType(getRowValue(row, hPos))
+			stopTime.ContinuousDropOff = NewContinuousDropOffType(getRowValue(row, hPos))
 		case "shape_dist_traveled":
 			stopTime.ShapeDistTraveled = NewOptionalFloat(getRowValue(row, hPos))
 		case "timepoint":
