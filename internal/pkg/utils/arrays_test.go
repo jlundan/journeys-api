@@ -1,3 +1,5 @@
+//go:build utils_tests || all_tests
+
 package utils
 
 import "testing"
