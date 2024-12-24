@@ -51,28 +51,29 @@ func CreateCalendarItem(row []string, headers map[string]int, lineNumber int) *C
 		LineNumber: lineNumber,
 	}
 
-	for hName, hPos := range headers {
+	for hName := range headers {
+		v := getRowValueForHeaderName(row, headers, hName)
 		switch hName {
 		case "service_id":
-			calendarItem.ServiceId = NewID(getRowValue(row, hPos))
+			calendarItem.ServiceId = NewID(v)
 		case "monday":
-			calendarItem.Monday = NewAvailableForWeekdayInfo(getRowValue(row, hPos))
+			calendarItem.Monday = NewAvailableForWeekdayInfo(v)
 		case "tuesday":
-			calendarItem.Tuesday = NewAvailableForWeekdayInfo(getRowValue(row, hPos))
+			calendarItem.Tuesday = NewAvailableForWeekdayInfo(v)
 		case "wednesday":
-			calendarItem.Wednesday = NewAvailableForWeekdayInfo(getRowValue(row, hPos))
+			calendarItem.Wednesday = NewAvailableForWeekdayInfo(v)
 		case "thursday":
-			calendarItem.Thursday = NewAvailableForWeekdayInfo(getRowValue(row, hPos))
+			calendarItem.Thursday = NewAvailableForWeekdayInfo(v)
 		case "friday":
-			calendarItem.Friday = NewAvailableForWeekdayInfo(getRowValue(row, hPos))
+			calendarItem.Friday = NewAvailableForWeekdayInfo(v)
 		case "saturday":
-			calendarItem.Saturday = NewAvailableForWeekdayInfo(getRowValue(row, hPos))
+			calendarItem.Saturday = NewAvailableForWeekdayInfo(v)
 		case "sunday":
-			calendarItem.Sunday = NewAvailableForWeekdayInfo(getRowValue(row, hPos))
+			calendarItem.Sunday = NewAvailableForWeekdayInfo(v)
 		case "start_date":
-			calendarItem.StartDate = NewDate(getRowValue(row, hPos))
+			calendarItem.StartDate = NewDate(v)
 		case "end_date":
-			calendarItem.EndDate = NewDate(getRowValue(row, hPos))
+			calendarItem.EndDate = NewDate(v)
 		}
 	}
 
