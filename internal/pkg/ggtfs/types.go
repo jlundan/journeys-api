@@ -101,13 +101,6 @@ func NewColor(raw *string) Color {
 	return Color{base{raw: *raw, isPresent: true}}
 }
 
-func NewOptionalColor(raw *string) *Color {
-	if raw == nil {
-		return nil
-	}
-	return &Color{base{raw: *raw, isPresent: true}}
-}
-
 // Email represents an email address.
 type Email struct {
 	base
@@ -123,11 +116,11 @@ func (e *Email) IsValid() bool {
 	return err == nil
 }
 
-func NewOptionalEmail(raw *string) *Email {
+func NewEmail(raw *string) Email {
 	if raw == nil {
-		return nil
+		return Email{base{raw: ""}}
 	}
-	return &Email{base{raw: *raw, isPresent: true}}
+	return Email{base{raw: *raw, isPresent: true}}
 }
 
 // Integer represents a number without floating point.
@@ -158,13 +151,6 @@ func NewInteger(raw *string) Integer {
 		return Integer{base{raw: ""}}
 	}
 	return Integer{base{raw: *raw, isPresent: true}}
-}
-
-func NewOptionalInteger(raw *string) *Integer {
-	if raw == nil {
-		return nil
-	}
-	return &Integer{base{raw: *raw, isPresent: true}}
 }
 
 // Float represents a number with a floating point.
@@ -322,11 +308,11 @@ func (lc *LanguageCode) IsValid() bool {
 	return match
 }
 
-func NewOptionalLanguageCode(raw *string) *LanguageCode {
+func NewLanguageCode(raw *string) LanguageCode {
 	if raw == nil {
-		return nil
+		return LanguageCode{base{raw: ""}}
 	}
-	return &LanguageCode{base{raw: *raw, isPresent: true}}
+	return LanguageCode{base{raw: *raw, isPresent: true}}
 }
 
 // Latitude represents a WGS84 latitude in decimal degrees.
@@ -401,11 +387,11 @@ func (pn *PhoneNumber) IsValid() bool {
 	return match
 }
 
-func NewOptionalPhoneNumber(raw *string) *PhoneNumber {
+func NewPhoneNumber(raw *string) PhoneNumber {
 	if raw == nil {
-		return nil
+		return PhoneNumber{base{raw: ""}}
 	}
-	return &PhoneNumber{base{raw: *raw, isPresent: true}}
+	return PhoneNumber{base{raw: *raw, isPresent: true}}
 }
 
 // Text represents a string of UTF-8 characters intended for display.

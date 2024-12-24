@@ -5,23 +5,21 @@ import (
 )
 
 type Agency struct {
-	Id         *ID           // agency_id
-	Name       Text          // agency_name
-	URL        URL           // agency_url
-	Timezone   Timezone      // agency_timezone
-	Lang       *LanguageCode // agency_lang
-	Phone      *PhoneNumber  // agency_phone
-	FareURL    *URL          // agency_fare_url
-	Email      *Email        // agency_email
+	Id         ID           // agency_id, conditionally required
+	Name       Text         // agency_name, required
+	URL        URL          // agency_url, required
+	Timezone   Timezone     // agency_timezone, required
+	Lang       LanguageCode // agency_lang, optional
+	Phone      PhoneNumber  // agency_phone, optional
+	FareURL    URL          // agency_fare_url, optional
+	Email      Email        // agency_email, optional
 	LineNumber int
 }
 
 func (a Agency) Validate() []error {
 	var validationErrors []error
 
-	// The 'agency_id' field is conditionally required, check it in the ValidateAgencies function.
-
-	fields := []struct {
+	requiredFields := []struct {
 		fieldName string
 		field     ValidAndPresentField
 	}{
@@ -29,35 +27,27 @@ func (a Agency) Validate() []error {
 		{"agency_url", &a.URL},
 		{"agency_timezone", &a.Timezone},
 	}
-
-	for _, f := range fields {
-		validationErrors = append(validationErrors, validateFieldIsPresentAndValid(f.field, f.fieldName, a.LineNumber, AgenciesFileName)...)
+	for _, f := range requiredFields {
+		if !f.field.IsValid() {
+			validationErrors = append(validationErrors, createFileRowError(AgenciesFileName, a.LineNumber, createInvalidRequiredFieldString(f.fieldName)))
+		}
 	}
 
-	// Checking the underlying value of the field in ValidAndPresentField for nil would require reflection
-	// v := reflect.ValueOf(i)
-	// v.Kind() == reflect.Ptr && v.IsNil()
-	// which is slow, so we can't use the above mechanism to check optional fields, since they might be nil (pointer field's default value is nil)
-	// since CreateTrip might have not processed the field (if its header is missing from the csv).
-
-	if a.Id != nil && !a.Id.IsValid() {
-		validationErrors = append(validationErrors, createFileRowError(AgenciesFileName, a.LineNumber, createInvalidFieldString("agency_id")))
+	optionalFields := []struct {
+		field     ValidAndPresentField
+		fieldName string
+	}{
+		{&a.Id, "agency_id"},
+		{&a.Lang, "agency_lang"},
+		{&a.Phone, "agency_phone"},
+		{&a.FareURL, "agency_fare_url"},
+		{&a.Email, "agency_email"},
 	}
 
-	if a.Lang != nil && !a.Lang.IsValid() {
-		validationErrors = append(validationErrors, createFileRowError(AgenciesFileName, a.LineNumber, createInvalidFieldString("agency_lang")))
-	}
-
-	if a.Phone != nil && !a.Phone.IsValid() {
-		validationErrors = append(validationErrors, createFileRowError(AgenciesFileName, a.LineNumber, createInvalidFieldString("agency_phone")))
-	}
-
-	if a.FareURL != nil && !a.FareURL.IsValid() {
-		validationErrors = append(validationErrors, createFileRowError(AgenciesFileName, a.LineNumber, createInvalidFieldString("agency_fare_url")))
-	}
-
-	if a.Email != nil && !a.Email.IsValid() {
-		validationErrors = append(validationErrors, createFileRowError(AgenciesFileName, a.LineNumber, createInvalidFieldString("agency_email")))
+	for _, field := range optionalFields {
+		if field.field != nil && field.field.IsPresent() && !field.field.IsValid() {
+			validationErrors = append(validationErrors, createFileRowError(AgenciesFileName, a.LineNumber, createInvalidFieldString(field.fieldName)))
+		}
 	}
 
 	return validationErrors
@@ -68,24 +58,26 @@ func CreateAgency(row []string, headers map[string]int, lineNumber int) *Agency 
 		LineNumber: lineNumber,
 	}
 
-	for hName, hPos := range headers {
+	for hName := range headers {
+		v := getRowValueForHeaderName(row, headers, hName)
+
 		switch hName {
 		case "agency_id":
-			agency.Id = NewOptionalID(&row[hPos])
+			agency.Id = NewID(v)
 		case "agency_name":
-			agency.Name = NewText(&row[hPos])
+			agency.Name = NewText(v)
 		case "agency_url":
-			agency.URL = NewURL(&row[hPos])
+			agency.URL = NewURL(v)
 		case "agency_timezone":
-			agency.Timezone = NewTimezone(&row[hPos])
+			agency.Timezone = NewTimezone(v)
 		case "agency_lang":
-			agency.Lang = NewOptionalLanguageCode(&row[hPos])
+			agency.Lang = NewLanguageCode(v)
 		case "agency_phone":
-			agency.Phone = NewOptionalPhoneNumber(&row[hPos])
+			agency.Phone = NewPhoneNumber(v)
 		case "agency_fare_url":
-			agency.FareURL = NewOptionalURL(&row[hPos])
+			agency.FareURL = NewURL(v)
 		case "agency_email":
-			agency.Email = NewOptionalEmail(&row[hPos])
+			agency.Email = NewEmail(v)
 		}
 	}
 
