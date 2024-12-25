@@ -6,11 +6,11 @@ import (
 
 // Shape struct with fields as strings and optional fields as string pointers.
 type Shape struct {
-	Id           ID        // shape_id
-	PtLat        Latitude  // shape_pt_lat
-	PtLon        Longitude // shape_pt_lon
-	PtSequence   Integer   // shape_pt_sequence
-	DistTraveled *Float    // shape_dist_traveled (optional)
+	Id           ID        // shape_id, required
+	PtLat        Latitude  // shape_pt_lat, required
+	PtLon        Longitude // shape_pt_lon, required
+	PtSequence   Integer   // shape_pt_sequence, required
+	DistTraveled Float     // shape_dist_traveled, optional
 	LineNumber   int       // Line number in the CSV file for error reporting
 }
 
@@ -30,14 +30,17 @@ func (s Shape) Validate() []error {
 		validationErrors = append(validationErrors, validateFieldIsPresentAndValid(f.field, f.fieldName, s.LineNumber, ShapesFileName)...)
 	}
 
-	// Checking the underlying value of the field in ValidAndPresentField for nil would require reflection
-	// v := reflect.ValueOf(i)
-	// v.Kind() == reflect.Ptr && v.IsNil()
-	// which is slow, so we can't use the above mechanism to check optional fields, since they might be nil (pointer field's default value is nil)
-	// since CreateTrip might have not processed the field (if its header is missing from the csv).
+	optionalFields := []struct {
+		field     ValidAndPresentField
+		fieldName string
+	}{
+		{&s.DistTraveled, "shape_dist_traveled"},
+	}
 
-	if s.DistTraveled != nil && !s.DistTraveled.IsValid() {
-		validationErrors = append(validationErrors, createFileRowError(ShapesFileName, s.LineNumber, createInvalidFieldString("shape_dist_traveled")))
+	for _, field := range optionalFields {
+		if field.field != nil && field.field.IsPresent() && !field.field.IsValid() {
+			validationErrors = append(validationErrors, createFileRowError(ShapesFileName, s.LineNumber, createInvalidFieldString(field.fieldName)))
+		}
 	}
 
 	return validationErrors
@@ -50,18 +53,20 @@ func CreateShape(row []string, headers map[string]int, lineNumber int) *Shape {
 		LineNumber: lineNumber,
 	}
 
-	for hName, hPos := range headers {
+	for hName := range headers {
+		v := getRowValueForHeaderName(row, headers, hName)
+
 		switch hName {
 		case "shape_id":
-			shape.Id = NewID(getRowValue(row, hPos))
+			shape.Id = NewID(v)
 		case "shape_pt_lat":
-			shape.PtLat = NewLatitude(getRowValue(row, hPos))
+			shape.PtLat = NewLatitude(v)
 		case "shape_pt_lon":
-			shape.PtLon = NewLongitude(getRowValue(row, hPos))
+			shape.PtLon = NewLongitude(v)
 		case "shape_pt_sequence":
-			shape.PtSequence = NewInteger(getRowValue(row, hPos))
+			shape.PtSequence = NewInteger(v)
 		case "shape_dist_traveled":
-			shape.DistTraveled = NewOptionalFloat(getRowValue(row, hPos))
+			shape.DistTraveled = NewFloat(v)
 		}
 	}
 

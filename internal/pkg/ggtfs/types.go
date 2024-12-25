@@ -165,6 +165,13 @@ func NewOptionalFloat(raw *string) *Float {
 	return &Float{base{raw: *raw, isPresent: true}}
 }
 
+func NewFloat(raw *string) Float {
+	if raw == nil {
+		return Float{base{raw: ""}}
+	}
+	return Float{base{raw: *raw, isPresent: true}}
+}
+
 // IsValid if the value is a valid Float.
 func (f *Float) IsValid() bool {
 	if f == nil {

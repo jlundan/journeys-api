@@ -51,7 +51,7 @@ func getShapeOKTestcases() map[string]ggtfsTestCase {
 		PtLat:        NewLatitude(stringPtr("1.111")),
 		PtLon:        NewLongitude(stringPtr("1.111")),
 		PtSequence:   NewInteger(stringPtr("1")),
-		DistTraveled: NewOptionalFloat(stringPtr("100")),
+		DistTraveled: NewFloat(stringPtr("100")),
 		LineNumber:   0,
 	}
 
@@ -60,7 +60,7 @@ func getShapeOKTestcases() map[string]ggtfsTestCase {
 		PtLat:        NewLatitude(stringPtr("1.211")),
 		PtLon:        NewLongitude(stringPtr("1.211")),
 		PtSequence:   NewInteger(stringPtr("2")),
-		DistTraveled: NewOptionalFloat(stringPtr("100")),
+		DistTraveled: NewFloat(stringPtr("100")),
 		LineNumber:   1,
 	}
 
