@@ -35,11 +35,11 @@ func buildStopPoints(g GTFSContext, municipalities Municipalities) StopPoints {
 		// FIXME: Nil-checks
 		lat, err := strconv.ParseFloat(stop.Lat.String(), 64)
 		if err != nil {
-			fmt.Println(fmt.Sprintf("Error parsing shape.PtLat: %v, line: %v", *stop.Lat, stop.LineNumber))
+			fmt.Println(fmt.Sprintf("Error parsing shape.PtLat: %v, line: %v", stop.Lat.String(), stop.LineNumber))
 		}
 		lon, err := strconv.ParseFloat(stop.Lon.String(), 64)
 		if err != nil {
-			fmt.Println(fmt.Sprintf("Error parsing shape.PtLon: %v, line: %v", *stop.Lon, stop.LineNumber))
+			fmt.Println(fmt.Sprintf("Error parsing shape.PtLon: %v, line: %v", stop.Lon.String(), stop.LineNumber))
 		}
 
 		lat2 := math.Round(lat*100000) / 100000
@@ -53,7 +53,7 @@ func buildStopPoints(g GTFSContext, municipalities Municipalities) StopPoints {
 			TariffZone: stop.ZoneId.String(),
 		}
 
-		if stop.Extensions.MunicipalityId != nil {
+		if stop.Extensions.MunicipalityId.IsValid() {
 			m, err := municipalities.GetOne(stop.Extensions.MunicipalityId.String())
 			if err != nil {
 				warnings = append(warnings, errors.New(fmt.Sprintf("stop-point (%v): municipality information not found, ignoring the stop-point", stop.Id)))
