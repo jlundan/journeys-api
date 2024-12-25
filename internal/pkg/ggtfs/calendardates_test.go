@@ -5,7 +5,6 @@ package ggtfs
 import (
 	"encoding/csv"
 	"fmt"
-	"strconv"
 	"strings"
 	"testing"
 )
@@ -122,8 +121,8 @@ func getCalendarDateNOKTestcases() map[string]ggtfsTestCase {
 	testCases["calendar-reference"] = ggtfsTestCase{
 		csvRows: [][]string{
 			{"service_id", "date", "exception_type"},
-			{"1000", "20201011", strconv.Itoa(ServiceAddedForCalendarDate)},
-			{"1001", "20201011", strconv.Itoa(ServiceRemovedForCalendarDate)},
+			{"1000", "20201011", "1"},
+			{"1001", "20201011", "2"},
 		},
 		expectedErrors: []string{
 			"calendar_dates.txt:3: referenced service_id '1001' not found in calendar.txt",
@@ -131,17 +130,7 @@ func getCalendarDateNOKTestcases() map[string]ggtfsTestCase {
 		fixtures: map[string][]interface{}{
 			"calendarItems": {
 				&CalendarItem{
-					ServiceId:  NewID(stringPtr("1000")),
-					Monday:     NewAvailableForWeekdayInfo(stringPtr(CalendarAvailableForWeekday)),
-					Tuesday:    NewAvailableForWeekdayInfo(stringPtr(CalendarAvailableForWeekday)),
-					Wednesday:  NewAvailableForWeekdayInfo(stringPtr(CalendarAvailableForWeekday)),
-					Thursday:   NewAvailableForWeekdayInfo(stringPtr(CalendarAvailableForWeekday)),
-					Friday:     NewAvailableForWeekdayInfo(stringPtr(CalendarAvailableForWeekday)),
-					Saturday:   NewAvailableForWeekdayInfo(stringPtr(CalendarNotAvailableForWeekday)),
-					Sunday:     NewAvailableForWeekdayInfo(stringPtr(CalendarNotAvailableForWeekday)),
-					StartDate:  NewDate(stringPtr("20201011")),
-					EndDate:    NewDate(stringPtr("20201011")),
-					LineNumber: 2,
+					ServiceId: NewID(stringPtr("1000")),
 				},
 			},
 		},
