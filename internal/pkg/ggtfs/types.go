@@ -72,13 +72,6 @@ func NewID(raw *string) ID {
 	return ID{base{raw: *raw, isPresent: true}}
 }
 
-func NewOptionalID(raw *string) *ID {
-	if raw == nil {
-		return nil
-	}
-	return &ID{base{raw: *raw, isPresent: true}}
-}
-
 // Color represents a color encoded as a six-digit hexadecimal number.
 type Color struct {
 	base
