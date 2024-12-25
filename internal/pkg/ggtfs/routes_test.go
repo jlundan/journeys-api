@@ -68,7 +68,7 @@ func getRouteOKTestcases() map[string]ggtfsTestCase {
 		AgencyId:          NewID(stringPtr(agency)),
 		ShortName:         NewText(stringPtr(shortName)),
 		LongName:          NewText(stringPtr(longName)),
-		Description:       NewText(stringPtr(desc)),
+		Desc:              NewText(stringPtr(desc)),
 		Type:              NewRouteType(stringPtr(routeType)),
 		URL:               NewURL(stringPtr(u)),
 		Color:             NewColor(stringPtr(rColor)),
@@ -88,7 +88,7 @@ func getRouteOKTestcases() map[string]ggtfsTestCase {
 		AgencyId:          NewID(stringPtr(agency)),
 		ShortName:         NewText(stringPtr(shortName)),
 		LongName:          NewText(stringPtr(longName)),
-		Description:       NewText(stringPtr(desc)),
+		Desc:              NewText(stringPtr(desc)),
 		Type:              NewRouteType(stringPtr(routeType)),
 		URL:               NewURL(stringPtr(u)),
 		Color:             NewColor(stringPtr(rColor)),
@@ -134,16 +134,18 @@ func getRouteOKTestcases() map[string]ggtfsTestCase {
 
 func getRouteNOKTestcases() map[string]ggtfsTestCase {
 	testCases := make(map[string]ggtfsTestCase)
-	testCases["invalid-fields"] = ggtfsTestCase{
+	testCases["invalid-fields-must-error-out"] = ggtfsTestCase{
 		csvRows: [][]string{
 			{"route_id", "agency_id", "route_short_name", "route_long_name", "route_desc", "route_type", "route_url", "route_color", "route_text_color", "route_sort_order", "continuous_pickup", "continuous_drop_off", "network_id"},
 			{"", "", "", "", "", "", "", "", "", "", "", "", ""},
-			{"id", "agency", "short name", "long name", "desc", "999", "not an url", "not a color", "not a color", "not an integer", "999", "999", "network id"},
-			{"id", "agency", "short name", "long name", "desc", "999", "not an url", "not a color", "not a color", "not an integer", "not a number", "not a number", "network id"},
+			{"id3", "valid agency", "OK short n", "valid long name", "valid desc", "-1", "not an url", "not a color", "not a color", "not an integer", "999", "999", "network id"},
+			{"id4", "valid agency", "OK short n", "valid long name", "valid desc", "8", "http://example.com", "FFFFFF", "FFFFFF", "-1", "-1", "-1", "valid network id"},
+			{"id5", "valid agency", "OK short n", "valid long name", "valid desc", "9", "http://example.com", "FFFFFF", "FFFFFF", "1", "4", "4", "valid network id"},
+			{"id6", "valid agency", "OK short n", "valid long name", "valid desc", "10", "http://example.com", "FFFFFF", "FFFFFF", "1", "1", "1", "valid network id"},
+			{"id7", "valid agency", "OK short n", "valid long name", "valid desc", "13", "http://example.com", "FFFFFF", "FFFFFF", "1", "1", "1", "valid network id"},
 		},
 		expectedErrors: []string{
-			"routes.txt:2: invalid field: agency_id",
-			"routes.txt:2: invalid field: network_id",
+			// "routes.txt:2: invalid field: network_id", // validation not implemented yet
 			"routes.txt:2: invalid field: route_color",
 			"routes.txt:2: invalid field: route_desc",
 			"routes.txt:2: invalid field: route_sort_order",
@@ -162,15 +164,20 @@ func getRouteNOKTestcases() map[string]ggtfsTestCase {
 			"routes.txt:3: invalid mandatory field: route_type",
 			"routes.txt:4: invalid field: continuous_drop_off",
 			"routes.txt:4: invalid field: continuous_pickup",
-			"routes.txt:4: invalid field: route_color",
-			"routes.txt:4: invalid field: route_sort_order",
-			"routes.txt:4: invalid field: route_text_color",
-			"routes.txt:4: invalid field: route_url",
+			"routes.txt:4: invalid field: sort_order",
 			"routes.txt:4: invalid mandatory field: route_type",
+			"routes.txt:5: invalid field: continuous_drop_off",
+			"routes.txt:5: invalid field: continuous_pickup",
+			"routes.txt:5: invalid mandatory field: route_type",
+			"routes.txt:6: invalid mandatory field: route_type",
+			"routes.txt:7: invalid mandatory field: route_type",
+		},
+		expectedRecommendations: []string{
+			"routes.txt:2: specifying agency_id is recommended", // when there isn't multiple agencies in agencies.txt (or agencies.txt is not present)
 		},
 	}
 
-	testCases["short_name-length"] = ggtfsTestCase{
+	testCases["short_name-length-should-be-less-than-12-chars"] = ggtfsTestCase{
 		csvRows: [][]string{
 			{"route_id", "agency_id", "route_short_name", "route_long_name", "route_desc", "route_type", "route_url", "route_color", "route_text_color", "route_sort_order", "continuous_pickup", "continuous_drop_off", "network_id"},
 			{"id", "agency", "a name longer than thirteen characters", "long name", "desc", "1", "http://example.com", "FFFFFF", "FFFFFF", "1", "1", "1", "1"},
@@ -183,7 +190,7 @@ func getRouteNOKTestcases() map[string]ggtfsTestCase {
 	// route_short_name is required if routes.route_long_name is empty (id)
 	// route_long_name is required if routes.route_short_name is empty (id)
 	// there should be no errors if either (id2 and id3) or both (id4) are present
-	testCases["short_name-and-long_name"] = ggtfsTestCase{
+	testCases["short_name-and-long_name-must-be-present-if-the-other-is-not"] = ggtfsTestCase{
 		csvRows: [][]string{
 			{"route_id", "agency_id", "route_short_name", "route_long_name", "route_desc", "route_type", "route_url", "route_color", "route_text_color", "route_sort_order", "continuous_pickup", "continuous_drop_off", "network_id"},
 			{"id", "agency", "", "", "desc", "1", "http://example.com", "FFFFFF", "FFFFFF", "1", "1", "1", "1"},
@@ -197,7 +204,7 @@ func getRouteNOKTestcases() map[string]ggtfsTestCase {
 		},
 	}
 
-	testCases["missing-references"] = ggtfsTestCase{
+	testCases["agency-id-must-match-valid-agency"] = ggtfsTestCase{
 		csvRows: [][]string{
 			{"route_id", "route_type", "route_short_name", "agency_id"},
 			{"2", "1", "2", "1"},
@@ -212,7 +219,23 @@ func getRouteNOKTestcases() map[string]ggtfsTestCase {
 		},
 	}
 
-	testCases["duplicate-ids"] = ggtfsTestCase{
+	testCases["agency-id-must-be-specified-when-multiple-agencies-in-agency.txt"] = ggtfsTestCase{
+		csvRows: [][]string{
+			{"route_id", "route_type", "route_short_name", "agency_id"},
+			{"2", "1", "2", ""},
+		},
+		expectedErrors: []string{
+			"routes.txt:2: agency_id is required when there are multiple agencies in agencies.txt",
+		},
+		fixtures: map[string][]interface{}{
+			"agencies": {
+				&Agency{Id: NewID(stringPtr("0"))},
+				&Agency{Id: NewID(stringPtr("1"))},
+			},
+		},
+	}
+
+	testCases["route-ids-must-be-unique"] = ggtfsTestCase{
 		csvRows: [][]string{
 			{"route_id", "route_type", "route_short_name", "agency_id"},
 			{"1", "1", "2", "1"},
@@ -220,6 +243,18 @@ func getRouteNOKTestcases() map[string]ggtfsTestCase {
 		},
 		expectedErrors: []string{
 			"routes.txt:3: route_id '1' is not unique within the file",
+		},
+	}
+
+	testCases["route-desc-should-not-match-short-or-long-name"] = ggtfsTestCase{
+		csvRows: [][]string{
+			{"route_id", "route_type", "agency_id", "route_short_name", "route_long_name", "route_desc"},
+			{"1", "1", "1", "foo", "", "foo"},
+			{"2", "1", "2", "", "foo", "foo"},
+		},
+		expectedRecommendations: []string{
+			"routes.txt:2: route_desc should not be the same as route_short_name or route_long_name",
+			"routes.txt:3: route_desc should not be the same as route_short_name or route_long_name",
 		},
 	}
 
