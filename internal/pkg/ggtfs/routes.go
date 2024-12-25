@@ -15,7 +15,7 @@ type Route struct {
 	URL               URL                   // route_url 			(optional)
 	Color             Color                 // route_color 			(optional)
 	TextColor         Color                 // route_text_color 	(optional)
-	SortOrder         Integer               // route_sort_order 	(optional)
+	SortOrder         PositiveInteger       // route_sort_order 	(optional)
 	ContinuousPickup  ContinuousPickupType  // continuous_pickup 	(conditionally forbidden)
 	ContinuousDropOff ContinuousDropOffType // continuous_drop_off 	(conditionally forbidden)
 	NetworkId         ID                    // network_id 			(conditionally forbidden)
@@ -78,10 +78,6 @@ func (r Route) Validate() ([]error, []string) {
 		recommendations = append(recommendations, createFileRowRecommendation(RoutesFileName, r.LineNumber, "route_desc should not be the same as route_short_name or route_long_name"))
 	}
 
-	if r.SortOrder.IsValid() && r.SortOrder.Int() < 0 {
-		validationErrors = append(validationErrors, createFileRowError(RoutesFileName, r.LineNumber, createInvalidFieldString("sort_order")))
-	}
-
 	// TODO: VALIDATION: route_color: The color difference between route_color and route_text_color should provide sufficient contrast when viewed on a black and white screen.
 	// Implement this if there is a way to check the contrast between two colors
 
@@ -119,7 +115,7 @@ func CreateRoute(row []string, headers map[string]int, lineNumber int) *Route {
 		case "route_text_color":
 			route.TextColor = NewColor(v)
 		case "route_sort_order":
-			route.SortOrder = NewInteger(v)
+			route.SortOrder = NewPositiveInteger(v)
 		case "continuous_pickup":
 			route.ContinuousPickup = NewContinuousPickupType(v)
 		case "continuous_drop_off":
