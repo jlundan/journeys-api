@@ -15,7 +15,7 @@ type CalendarDate struct {
 func (cd CalendarDate) Validate() []error {
 	var validationErrors []error
 
-	fields := []struct {
+	requiredFields := []struct {
 		fieldName string
 		field     ValidAndPresentField
 	}{
@@ -24,14 +24,10 @@ func (cd CalendarDate) Validate() []error {
 		{"exception_type", &cd.ExceptionType},
 	}
 
-	// Checking the underlying value of the field in ValidAndPresentField for nil would require reflection
-	// v := reflect.ValueOf(i)
-	// v.Kind() == reflect.Ptr && v.IsNil()
-	// which is slow, so we can't use the above mechanism to check optional fields, since they might be nil (pointer field's default value is nil)
-	// since CreateTrip might have not processed the field (if its header is missing from the csv).
-
-	for _, f := range fields {
-		validationErrors = append(validationErrors, validateFieldIsPresentAndValid(f.field, f.fieldName, cd.LineNumber, CalendarDatesFileName)...)
+	for _, f := range requiredFields {
+		if !f.field.IsValid() {
+			validationErrors = append(validationErrors, createFileRowError(CalendarDatesFileName, cd.LineNumber, createInvalidRequiredFieldString(f.fieldName)))
+		}
 	}
 
 	return validationErrors
