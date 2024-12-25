@@ -5,12 +5,12 @@ import (
 )
 
 type Shape struct {
-	Id           ID        // shape_id, required
-	PtLat        Latitude  // shape_pt_lat, required
-	PtLon        Longitude // shape_pt_lon, required
-	PtSequence   Integer   // shape_pt_sequence, required
-	DistTraveled Float     // shape_dist_traveled, optional
-	LineNumber   int       // Line number in the CSV file for error reporting
+	Id           ID              // shape_id, required
+	PtLat        Latitude        // shape_pt_lat, required
+	PtLon        Longitude       // shape_pt_lon, required
+	PtSequence   PositiveInteger // shape_pt_sequence, required
+	DistTraveled PositiveFloat   // shape_dist_traveled, optional
+	LineNumber   int             // Line number in the CSV file for error reporting
 }
 
 func (s Shape) Validate() []error {
@@ -65,9 +65,9 @@ func CreateShape(row []string, headers map[string]int, lineNumber int) *Shape {
 		case "shape_pt_lon":
 			shape.PtLon = NewLongitude(v)
 		case "shape_pt_sequence":
-			shape.PtSequence = NewInteger(v)
+			shape.PtSequence = NewPositiveInteger(v)
 		case "shape_dist_traveled":
-			shape.DistTraveled = NewFloat(v)
+			shape.DistTraveled = NewPositiveFloat(v)
 		}
 	}
 
@@ -103,6 +103,9 @@ func ValidateShapes(shapes []*Shape) ([]error, []string) {
 			validationErrors = append(validationErrors, createFileError(ShapesFileName, fmt.Sprintf("shape (%v) has less than two shape points", shapeId)))
 		}
 	}
+
+	// TODO: VALIDATION: shape_pt_sequence: Sequence in which the shape points connect to form the shape. Values must increase along the trip but do not need to be consecutive.
+	// Implement this if there is a way to check the contrast between two colors
 
 	return validationErrors, []string{}
 }
