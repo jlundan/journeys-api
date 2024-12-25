@@ -12,7 +12,7 @@ var validStopHeaders = []string{"stop_id", "stop_code", "stop_name", "stop_desc"
 	"stop_url", "location_type", "parent_station", "stop_timezone", "wheelchair_boarding", "level_id", "platform_code", "municipality_id"}
 
 func TestShouldReturnEmptyStopArrayOnEmptyString(t *testing.T) {
-	stops, errors := LoadEntities[*Stop](csv.NewReader(strings.NewReader("")), validStopHeaders, CreateStop, StopsFileName)
+	stops, errors := LoadEntitiesFromCSV[*Stop](csv.NewReader(strings.NewReader("")), validStopHeaders, CreateStop, StopsFileName)
 	if len(errors) > 0 {
 		t.Error(errors)
 	}
@@ -23,7 +23,7 @@ func TestShouldReturnEmptyStopArrayOnEmptyString(t *testing.T) {
 
 func TestStopParsing(t *testing.T) {
 	loadStopsFunc := func(reader *csv.Reader) ([]interface{}, []error) {
-		stops, errs := LoadEntities[*Stop](reader, validStopHeaders, CreateStop, StopsFileName)
+		stops, errs := LoadEntitiesFromCSV[*Stop](reader, validStopHeaders, CreateStop, StopsFileName)
 		entities := make([]interface{}, len(stops))
 		for i, stop := range stops {
 			entities[i] = stop
@@ -62,6 +62,7 @@ func getStopOKTestcases() map[string]ggtfsTestCase {
 		WheelchairBoarding: NewWheelchairBoarding(stringPtr("0")),
 		PlatformCode:       NewText(stringPtr("0001")),
 		LevelId:            NewID(stringPtr("1")),
+		LineNumber:         2,
 	}
 
 	testCases := make(map[string]ggtfsTestCase)
@@ -90,9 +91,9 @@ func getStopNOKTestcases() map[string]ggtfsTestCase {
 		},
 		expectedErrors: []string{
 			"stops.txt: record on line 2: wrong number of fields",
-			"stops.txt:1: invalid field: stop_code",
-			"stops.txt:1: invalid mandatory field: stop_id",
-			"stops.txt:3: invalid field: stop_lat",
+			"stops.txt:3: invalid field: stop_code",
+			"stops.txt:3: invalid mandatory field: stop_id",
+			"stops.txt:5: invalid field: stop_lat",
 			//"stops.txt:1: stop_id: empty value not allowed",
 			//"stops.txt:1: stop_id must be specified",
 			//"stops.txt:3: non-unique id: stop_id",
@@ -105,10 +106,10 @@ func getStopNOKTestcases() map[string]ggtfsTestCase {
 			{"0001", "2"},
 		},
 		expectedErrors: []string{
-			"stops.txt:0: parent_station must be specified for location types 2, 3, and 4",
-			"stops.txt:0: stop_lat must be specified for location types 0, 1, and 2",
-			"stops.txt:0: stop_lon must be specified for location types 0, 1, and 2",
-			"stops.txt:0: stop_name must be specified for location types 0, 1, and 2",
+			"stops.txt:2: parent_station must be specified for location types 2, 3, and 4",
+			"stops.txt:2: stop_lat must be specified for location types 0, 1, and 2",
+			"stops.txt:2: stop_lon must be specified for location types 0, 1, and 2",
+			"stops.txt:2: stop_name must be specified for location types 0, 1, and 2",
 		},
 	}
 	testCases["3"] = ggtfsTestCase{
@@ -120,12 +121,12 @@ func getStopNOKTestcases() map[string]ggtfsTestCase {
 			{"0003", "foo", "11.11", "22.22", "0002", "4", "invalid"},
 		},
 		expectedErrors: []string{
-			"stops.txt:0: invalid field: location_type",
-			"stops.txt:0: invalid field: wheelchair_boarding",
-			"stops.txt:1: invalid field: wheelchair_boarding",
 			"stops.txt:2: invalid field: location_type",
 			"stops.txt:2: invalid field: wheelchair_boarding",
 			"stops.txt:3: invalid field: wheelchair_boarding",
+			"stops.txt:4: invalid field: location_type",
+			"stops.txt:4: invalid field: wheelchair_boarding",
+			"stops.txt:5: invalid field: wheelchair_boarding",
 		},
 	}
 

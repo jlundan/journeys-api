@@ -12,7 +12,7 @@ var validTripHeaders = []string{"route_id", "service_id", "trip_id", "trip_heads
 	"direction_id", "block_id", "shape_id", "wheelchair_accessible", "bikes_allowed"}
 
 func TestShouldReturnEmptyTripArrayOnEmptyString(t *testing.T) {
-	trips, errors := LoadEntities[*Trip](csv.NewReader(strings.NewReader("")), validTripHeaders, CreateTrip, TripsFileName)
+	trips, errors := LoadEntitiesFromCSV[*Trip](csv.NewReader(strings.NewReader("")), validTripHeaders, CreateTrip, TripsFileName)
 	if len(errors) > 0 {
 		t.Error(errors)
 	}
@@ -23,7 +23,7 @@ func TestShouldReturnEmptyTripArrayOnEmptyString(t *testing.T) {
 
 func TestTripParsing(t *testing.T) {
 	loadTripsFunc := func(reader *csv.Reader) ([]interface{}, []error) {
-		trips, errs := LoadEntities[*Trip](reader, validTripHeaders, CreateTrip, TripsFileName)
+		trips, errs := LoadEntitiesFromCSV[*Trip](reader, validTripHeaders, CreateTrip, TripsFileName)
 		entities := make([]interface{}, len(trips))
 		for i, trip := range trips {
 			entities[i] = trip
@@ -58,6 +58,7 @@ func getTripOKTestcases() map[string]ggtfsTestCase {
 		ShapeId:              NewID(stringPtr("5")),
 		WheelchairAccessible: NewWheelchairAccessible(stringPtr("1")),
 		BikesAllowed:         NewBikesAllowed(stringPtr("2")),
+		LineNumber:           2,
 	}
 
 	testCases := make(map[string]ggtfsTestCase)
@@ -83,11 +84,11 @@ func getTripNOKTestcases() map[string]ggtfsTestCase {
 		},
 		expectedErrors: []string{
 			"trips.txt: record on line 2: wrong number of fields",
-			"trips.txt:1: invalid mandatory field: route_id",
-			"trips.txt:1: invalid mandatory field: service_id",
-			"trips.txt:1: invalid mandatory field: trip_id",
-			"trips.txt:2: invalid mandatory field: service_id",
-			"trips.txt:2: invalid mandatory field: trip_id",
+			"trips.txt:3: invalid mandatory field: route_id",
+			"trips.txt:3: invalid mandatory field: service_id",
+			"trips.txt:3: invalid mandatory field: trip_id",
+			"trips.txt:4: invalid mandatory field: service_id",
+			"trips.txt:4: invalid mandatory field: trip_id",
 		},
 	}
 	testCases["2"] = ggtfsTestCase{
@@ -98,12 +99,12 @@ func getTripNOKTestcases() map[string]ggtfsTestCase {
 			{"002", "002", "001", "0", "0", "0"},
 		},
 		expectedErrors: []string{
-			"trips.txt:0: invalid field: bikes_allowed",
-			"trips.txt:0: invalid field: direction_id",
-			"trips.txt:0: invalid field: wheelchair_accessible",
-			"trips.txt:1: invalid field: bikes_allowed",
-			"trips.txt:1: invalid field: direction_id",
-			"trips.txt:1: invalid field: wheelchair_accessible",
+			"trips.txt:2: invalid field: bikes_allowed",
+			"trips.txt:2: invalid field: direction_id",
+			"trips.txt:2: invalid field: wheelchair_accessible",
+			"trips.txt:3: invalid field: bikes_allowed",
+			"trips.txt:3: invalid field: direction_id",
+			"trips.txt:3: invalid field: wheelchair_accessible",
 
 			// TODO: "trips.txt:2: non-unique id: trip_id",
 		},

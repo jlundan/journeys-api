@@ -11,7 +11,7 @@ import (
 var validShapeHeaders = []string{"shape_id", "shape_pt_lat", "shape_pt_lon", "shape_pt_sequence", "shape_dist_traveled"}
 
 func TestShouldReturnEmptyShapeArrayOnEmptyString(t *testing.T) {
-	agencies, errors := LoadEntities[*Shape](csv.NewReader(strings.NewReader("")), validShapeHeaders, CreateShape, ShapesFileName)
+	agencies, errors := LoadEntitiesFromCSV[*Shape](csv.NewReader(strings.NewReader("")), validShapeHeaders, CreateShape, ShapesFileName)
 	if len(errors) > 0 {
 		t.Error(errors)
 	}
@@ -22,7 +22,7 @@ func TestShouldReturnEmptyShapeArrayOnEmptyString(t *testing.T) {
 
 func TestShapeParsing(t *testing.T) {
 	loadShapesFunc := func(reader *csv.Reader) ([]interface{}, []error) {
-		shapes, errs := LoadEntities[*Shape](reader, validShapeHeaders, CreateShape, ShapesFileName)
+		shapes, errs := LoadEntitiesFromCSV[*Shape](reader, validShapeHeaders, CreateShape, ShapesFileName)
 		entities := make([]interface{}, len(shapes))
 		for i, shape := range shapes {
 			entities[i] = shape
@@ -52,7 +52,7 @@ func getShapeOKTestcases() map[string]ggtfsTestCase {
 		PtLon:        NewLongitude(stringPtr("1.111")),
 		PtSequence:   NewInteger(stringPtr("1")),
 		DistTraveled: NewFloat(stringPtr("100")),
-		LineNumber:   0,
+		LineNumber:   2,
 	}
 
 	expected2 := Shape{
@@ -61,7 +61,7 @@ func getShapeOKTestcases() map[string]ggtfsTestCase {
 		PtLon:        NewLongitude(stringPtr("1.211")),
 		PtSequence:   NewInteger(stringPtr("2")),
 		DistTraveled: NewFloat(stringPtr("100")),
-		LineNumber:   1,
+		LineNumber:   3,
 	}
 
 	testCases := make(map[string]ggtfsTestCase)
@@ -87,10 +87,10 @@ func getShapeNOKTestcases() map[string]ggtfsTestCase {
 		},
 		expectedErrors: []string{
 			"shapes.txt: record on line 2: wrong number of fields",
-			"shapes.txt:1: invalid mandatory field: shape_id",
-			"shapes.txt:1: invalid mandatory field: shape_pt_lat",
-			"shapes.txt:1: invalid mandatory field: shape_pt_lon",
-			"shapes.txt:1: invalid mandatory field: shape_pt_sequence",
+			"shapes.txt:3: invalid mandatory field: shape_id",
+			"shapes.txt:3: invalid mandatory field: shape_pt_lat",
+			"shapes.txt:3: invalid mandatory field: shape_pt_lon",
+			"shapes.txt:3: invalid mandatory field: shape_pt_sequence",
 		},
 	}
 
@@ -102,8 +102,8 @@ func getShapeNOKTestcases() map[string]ggtfsTestCase {
 			{"3", "11.1", "11.1", "1", "100"},
 		},
 		expectedErrors: []string{
-			"shapes.txt:0: invalid field: shape_dist_traveled",
-			"shapes.txt:1: invalid field: shape_dist_traveled",
+			"shapes.txt:2: invalid field: shape_dist_traveled",
+			"shapes.txt:3: invalid field: shape_dist_traveled",
 			"shapes.txt: shape (3) has less than two shape points",
 		},
 	}
