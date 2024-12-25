@@ -9,7 +9,6 @@ type StopExtensions struct {
 	MunicipalityId ID // municipality_id (optional)
 }
 
-// Stop struct with fields as strings and optional fields as string pointers.
 type Stop struct {
 	Id                 ID                 // stop_id 			 (required)
 	Code               Text               // stop_code 			 (optional)
@@ -33,19 +32,16 @@ type Stop struct {
 func (s Stop) Validate() []error {
 	var validationErrors []error
 
-	// stop_name is handled in the ValidateStops function since it is conditionally required
-	// stop_lat is handled in the ValidateStops function since it is conditionally required
-	// stop_lon is handled in the ValidateStops function since it is conditionally required
-	// parent_station is handled in the ValidateStops function since it is conditionally required
-
-	fields := []struct {
+	requiredFields := []struct {
 		fieldName string
 		field     ValidAndPresentField
 	}{
 		{"stop_id", &s.Id},
 	}
-	for _, f := range fields {
-		validationErrors = append(validationErrors, validateFieldIsPresentAndValid(f.field, f.fieldName, s.LineNumber, StopsFileName)...)
+	for _, f := range requiredFields {
+		if !f.field.IsValid() {
+			validationErrors = append(validationErrors, createFileRowError(StopsFileName, s.LineNumber, createInvalidRequiredFieldString(f.fieldName)))
+		}
 	}
 
 	optionalFields := []struct {

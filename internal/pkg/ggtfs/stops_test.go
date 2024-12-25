@@ -91,7 +91,7 @@ func getStopNOKTestcases() map[string]ggtfsTestCase {
 		expectedErrors: []string{
 			"stops.txt: record on line 2: wrong number of fields",
 			"stops.txt:1: invalid field: stop_code",
-			"stops.txt:1: missing mandatory field: stop_id",
+			"stops.txt:1: invalid mandatory field: stop_id",
 			"stops.txt:3: invalid field: stop_lat",
 			//"stops.txt:1: stop_id: empty value not allowed",
 			//"stops.txt:1: stop_id must be specified",
