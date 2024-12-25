@@ -5,25 +5,22 @@ import (
 	"strconv"
 )
 
-// Trip struct with fields as strings and optional fields as string pointers.
 type Trip struct {
-	Id                   ID                    // trip_id
-	RouteId              ID                    // route_id
-	ServiceId            ID                    // service_id
-	HeadSign             *Text                 // trip_headsign (optional)
-	ShortName            *Text                 // trip_short_name (optional)
-	DirectionId          *DirectionId          // direction_id (optional)
-	BlockId              *ID                   // block_id (optional)
-	ShapeId              *ID                   // shape_id (optional)
-	WheelchairAccessible *WheelchairAccessible // wheelchair_accessible (optional)
-	BikesAllowed         *BikesAllowed         // bikes_allowed (optional)
-	LineNumber           int                   // Line number in the CSV file for error reporting
+	RouteId              ID                   // route_id 				(required)
+	ServiceId            ID                   // service_id 			(required)
+	Id                   ID                   // trip_id 				(required)
+	HeadSign             Text                 // trip_headsign 			(optional)
+	ShortName            Text                 // trip_short_name 		(optional)
+	DirectionId          DirectionId          // direction_id 			(optional)
+	BlockId              ID                   // block_id 				(optional)
+	ShapeId              ID                   // shape_id 				(conditionally required)
+	WheelchairAccessible WheelchairAccessible // wheelchair_accessible 	(optional)
+	BikesAllowed         BikesAllowed         // bikes_allowed 			(optional)
+	LineNumber           int
 }
 
 func (t Trip) Validate() []error {
 	var validationErrors []error
-
-	// shape_id is handled in the ValidateStopTimes function since it is conditionally required
 
 	fields := []struct {
 		fieldName string
@@ -37,26 +34,23 @@ func (t Trip) Validate() []error {
 		validationErrors = append(validationErrors, validateFieldIsPresentAndValid(f.field, f.fieldName, t.LineNumber, TripsFileName)...)
 	}
 
-	// Checking the underlying value of the field in ValidAndPresentField for nil would require reflection
-	// v := reflect.ValueOf(i)
-	// v.Kind() == reflect.Ptr && v.IsNil()
-	// which is slow, so we can't use the above mechanism to check optional fields, since they might be nil (pointer field's default value is nil)
-	// since CreateTrip might have not processed the field (if its header is missing from the csv).
+	optionalFields := []struct {
+		field     ValidAndPresentField
+		fieldName string
+	}{
+		{&t.HeadSign, "trip_headsign"},
+		{&t.ShortName, "trip_short_name"},
+		{&t.DirectionId, "direction_id"},
+		{&t.BlockId, "block_id"},
+		{&t.ShapeId, "shape_id"},
+		{&t.WheelchairAccessible, "wheelchair_accessible"},
+		{&t.BikesAllowed, "bikes_allowed"},
+	}
 
-	if t.HeadSign != nil && !t.HeadSign.IsValid() {
-		validationErrors = append(validationErrors, createFileRowError(TripsFileName, t.LineNumber, createInvalidFieldString("trip_headsign")))
-	}
-	if t.ShortName != nil && !t.ShortName.IsValid() {
-		validationErrors = append(validationErrors, createFileRowError(TripsFileName, t.LineNumber, createInvalidFieldString("trip_short_name")))
-	}
-	if t.DirectionId != nil && !t.DirectionId.IsValid() {
-		validationErrors = append(validationErrors, createFileRowError(TripsFileName, t.LineNumber, createInvalidFieldString("direction_id")))
-	}
-	if t.BlockId != nil && !t.BlockId.IsValid() {
-		validationErrors = append(validationErrors, createFileRowError(TripsFileName, t.LineNumber, createInvalidFieldString("block_id")))
-	}
-	if t.BikesAllowed != nil && !t.BikesAllowed.IsValid() {
-		validationErrors = append(validationErrors, createFileRowError(TripsFileName, t.LineNumber, createInvalidFieldString("wheelchair_accessible")))
+	for _, field := range optionalFields {
+		if field.field != nil && field.field.IsPresent() && !field.field.IsValid() {
+			validationErrors = append(validationErrors, createFileRowError(TripsFileName, t.LineNumber, createInvalidFieldString(field.fieldName)))
+		}
 	}
 
 	return validationErrors
@@ -70,28 +64,30 @@ func CreateTrip(row []string, headers map[string]int, lineNumber int) *Trip {
 		LineNumber: lineNumber,
 	}
 
-	for hName, hPos := range headers {
+	for hName := range headers {
+		v := getRowValueForHeaderName(row, headers, hName)
+
 		switch hName {
 		case "trip_id":
-			trip.Id = NewID(getRowValue(row, hPos))
+			trip.Id = NewID(v)
 		case "route_id":
-			trip.RouteId = NewID(getRowValue(row, hPos))
+			trip.RouteId = NewID(v)
 		case "service_id":
-			trip.ServiceId = NewID(getRowValue(row, hPos))
+			trip.ServiceId = NewID(v)
 		case "trip_headsign":
-			trip.HeadSign = NewOptionalText(getRowValue(row, hPos))
+			trip.HeadSign = NewText(v)
 		case "trip_short_name":
-			trip.ShortName = NewOptionalText(getRowValue(row, hPos))
+			trip.ShortName = NewText(v)
 		case "direction_id":
-			trip.DirectionId = NewOptionalDirectionId(getRowValue(row, hPos))
+			trip.DirectionId = NewDirectionId(v)
 		case "block_id":
-			trip.BlockId = NewOptionalID(getRowValue(row, hPos))
+			trip.BlockId = NewID(v)
 		case "shape_id":
-			trip.ShapeId = NewOptionalID(getRowValue(row, hPos))
+			trip.ShapeId = NewID(v)
 		case "wheelchair_accessible":
-			trip.WheelchairAccessible = NewOptionalWheelchairAccessible(getRowValue(row, hPos))
+			trip.WheelchairAccessible = NewWheelchairAccessible(v)
 		case "bikes_allowed":
-			trip.BikesAllowed = NewOptionalBikesAllowed(getRowValue(row, hPos))
+			trip.BikesAllowed = NewBikesAllowed(v)
 		}
 	}
 
@@ -150,7 +146,7 @@ func ValidateTrips(trips []*Trip, routes []*Route, calendarItems []*CalendarItem
 		}
 
 		if shapes != nil {
-			if trip.ShapeId != nil {
+			if trip.ShapeId.IsValid() {
 				shapeFound := false
 				for _, shape := range shapes {
 					if shape == nil {
@@ -191,12 +187,12 @@ func (ba BikesAllowed) IsValid() bool {
 		val == BikesAllowedNone
 }
 
-func NewOptionalBikesAllowed(raw *string) *BikesAllowed {
+func NewBikesAllowed(raw *string) BikesAllowed {
 	if raw == nil {
-		return &BikesAllowed{
+		return BikesAllowed{
 			Integer{base: base{raw: ""}}}
 	}
-	return &BikesAllowed{Integer{base: base{raw: *raw, isPresent: true}}}
+	return BikesAllowed{Integer{base: base{raw: *raw, isPresent: true}}}
 }
 
 const (
@@ -219,12 +215,12 @@ func (wa WheelchairAccessible) IsValid() bool {
 		val == WheelchairAccessibleNoAccommodation
 }
 
-func NewOptionalWheelchairAccessible(raw *string) *WheelchairAccessible {
+func NewWheelchairAccessible(raw *string) WheelchairAccessible {
 	if raw == nil {
-		return &WheelchairAccessible{
+		return WheelchairAccessible{
 			Integer{base: base{raw: ""}}}
 	}
-	return &WheelchairAccessible{Integer{base: base{raw: *raw, isPresent: true}}}
+	return WheelchairAccessible{Integer{base: base{raw: *raw, isPresent: true}}}
 }
 
 const (
@@ -245,10 +241,10 @@ func (di DirectionId) IsValid() bool {
 	return val == TripTravelInOneDirection || val == TripTravelInOppositeDirection
 }
 
-func NewOptionalDirectionId(raw *string) *DirectionId {
+func NewDirectionId(raw *string) DirectionId {
 	if raw == nil {
-		return &DirectionId{
+		return DirectionId{
 			Integer{base: base{raw: ""}}}
 	}
-	return &DirectionId{Integer{base: base{raw: *raw, isPresent: true}}}
+	return DirectionId{Integer{base: base{raw: *raw, isPresent: true}}}
 }

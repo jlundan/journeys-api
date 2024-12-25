@@ -140,7 +140,7 @@ func buildJourneys(g GTFSContext, lines Lines, routes Routes, stopPoints StopPoi
 			continue
 		}
 
-		if trip.ShapeId == nil {
+		if !trip.ShapeId.IsValid() {
 			fmt.Println(fmt.Sprintf("Journey with no route detected, ignoring it: %v", trip.Id))
 			continue
 		}
