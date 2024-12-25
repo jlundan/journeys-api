@@ -4,25 +4,24 @@ import (
 	"strconv"
 )
 
-// CalendarItem represents the GTFS calendar file structure.
 type CalendarItem struct {
-	ServiceId  ID                      // service_id
-	Monday     AvailableForWeekdayInfo // monday
-	Tuesday    AvailableForWeekdayInfo // tuesday
-	Wednesday  AvailableForWeekdayInfo // wednesday
-	Thursday   AvailableForWeekdayInfo // thursday
-	Friday     AvailableForWeekdayInfo // friday
-	Saturday   AvailableForWeekdayInfo // saturday
-	Sunday     AvailableForWeekdayInfo // sunday
-	StartDate  Date                    // start_date
-	EndDate    Date                    // end_date
-	LineNumber int                     // CSV row number
+	ServiceId  ID                      // service_id 	(required)
+	Monday     AvailableForWeekdayInfo // monday		(required)
+	Tuesday    AvailableForWeekdayInfo // tuesday		(required)
+	Wednesday  AvailableForWeekdayInfo // wednesday		(required)
+	Thursday   AvailableForWeekdayInfo // thursday		(required)
+	Friday     AvailableForWeekdayInfo // friday		(required)
+	Saturday   AvailableForWeekdayInfo // saturday		(required)
+	Sunday     AvailableForWeekdayInfo // sunday		(required)
+	StartDate  Date                    // start_date	(required)
+	EndDate    Date                    // end_date		(required)
+	LineNumber int
 }
 
 func (c CalendarItem) Validate() []error {
 	var validationErrors []error
 
-	fields := []struct {
+	requiredFields := []struct {
 		fieldName string
 		field     ValidAndPresentField
 	}{
@@ -38,8 +37,10 @@ func (c CalendarItem) Validate() []error {
 		{"end_date", &c.EndDate},
 	}
 
-	for _, f := range fields {
-		validationErrors = append(validationErrors, validateFieldIsPresentAndValid(f.field, f.fieldName, c.LineNumber, CalendarFileName)...)
+	for _, f := range requiredFields {
+		if !f.field.IsValid() {
+			validationErrors = append(validationErrors, createFileRowError(CalendarFileName, c.LineNumber, createInvalidRequiredFieldString(f.fieldName)))
+		}
 	}
 
 	return validationErrors
