@@ -146,13 +146,13 @@ func getRouteNOKTestcases() map[string]ggtfsTestCase {
 			"routes.txt:2: invalid field: network_id",
 			"routes.txt:2: invalid field: route_color",
 			"routes.txt:2: invalid field: route_desc",
-			"routes.txt:2: invalid field: route_long_name",
-			"routes.txt:2: invalid field: route_short_name",
 			"routes.txt:2: invalid field: route_sort_order",
 			"routes.txt:2: invalid field: route_text_color",
 			"routes.txt:2: invalid field: route_url",
 			"routes.txt:2: invalid mandatory field: route_id",
 			"routes.txt:2: invalid mandatory field: route_type",
+			"routes.txt:2: route_long_name must be specified when route_short_name is empty or not present",
+			"routes.txt:2: route_short_name must be specified when route_long_name is empty or not present",
 			"routes.txt:3: invalid field: continuous_drop_off",
 			"routes.txt:3: invalid field: continuous_pickup",
 			"routes.txt:3: invalid field: route_color",
@@ -167,6 +167,33 @@ func getRouteNOKTestcases() map[string]ggtfsTestCase {
 			"routes.txt:4: invalid field: route_text_color",
 			"routes.txt:4: invalid field: route_url",
 			"routes.txt:4: invalid mandatory field: route_type",
+		},
+	}
+
+	testCases["short_name-length"] = ggtfsTestCase{
+		csvRows: [][]string{
+			{"route_id", "agency_id", "route_short_name", "route_long_name", "route_desc", "route_type", "route_url", "route_color", "route_text_color", "route_sort_order", "continuous_pickup", "continuous_drop_off", "network_id"},
+			{"id", "agency", "a name longer than thirteen characters", "long name", "desc", "1", "http://example.com", "FFFFFF", "FFFFFF", "1", "1", "1", "1"},
+		},
+		expectedRecommendations: []string{
+			"routes.txt:2: route_short_name should be less than 12 characters",
+		},
+	}
+
+	// route_short_name is required if routes.route_long_name is empty (id)
+	// route_long_name is required if routes.route_short_name is empty (id)
+	// there should be no errors if either (id2 and id3) or both (id4) are present
+	testCases["short_name-and-long_name"] = ggtfsTestCase{
+		csvRows: [][]string{
+			{"route_id", "agency_id", "route_short_name", "route_long_name", "route_desc", "route_type", "route_url", "route_color", "route_text_color", "route_sort_order", "continuous_pickup", "continuous_drop_off", "network_id"},
+			{"id", "agency", "", "", "desc", "1", "http://example.com", "FFFFFF", "FFFFFF", "1", "1", "1", "1"},
+			{"id2", "agency", "short", "", "desc", "1", "http://example.com", "FFFFFF", "FFFFFF", "1", "1", "1", "1"},
+			{"id3", "agency", "", "long", "desc", "1", "http://example.com", "FFFFFF", "FFFFFF", "1", "1", "1", "1"},
+			{"id4", "agency", "short", "long", "desc", "1", "http://example.com", "FFFFFF", "FFFFFF", "1", "1", "1", "1"},
+		},
+		expectedErrors: []string{
+			"routes.txt:2: route_long_name must be specified when route_short_name is empty or not present",
+			"routes.txt:2: route_short_name must be specified when route_long_name is empty or not present",
 		},
 	}
 
