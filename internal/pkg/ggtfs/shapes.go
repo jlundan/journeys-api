@@ -4,7 +4,6 @@ import (
 	"fmt"
 )
 
-// Shape struct with fields as strings and optional fields as string pointers.
 type Shape struct {
 	Id           ID        // shape_id, required
 	PtLat        Latitude  // shape_pt_lat, required
@@ -17,7 +16,7 @@ type Shape struct {
 func (s Shape) Validate() []error {
 	var validationErrors []error
 
-	fields := []struct {
+	requiredFields := []struct {
 		fieldName string
 		field     ValidAndPresentField
 	}{
@@ -26,8 +25,10 @@ func (s Shape) Validate() []error {
 		{"shape_pt_lon", &s.PtLon},
 		{"shape_pt_sequence", &s.PtSequence},
 	}
-	for _, f := range fields {
-		validationErrors = append(validationErrors, validateFieldIsPresentAndValid(f.field, f.fieldName, s.LineNumber, ShapesFileName)...)
+	for _, f := range requiredFields {
+		if !f.field.IsValid() {
+			validationErrors = append(validationErrors, createFileRowError(ShapesFileName, s.LineNumber, createInvalidRequiredFieldString(f.fieldName)))
+		}
 	}
 
 	optionalFields := []struct {

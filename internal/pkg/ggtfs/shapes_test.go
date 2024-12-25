@@ -87,10 +87,10 @@ func getShapeNOKTestcases() map[string]ggtfsTestCase {
 		},
 		expectedErrors: []string{
 			"shapes.txt: record on line 2: wrong number of fields",
-			"shapes.txt:1: missing mandatory field: shape_id",
-			"shapes.txt:1: missing mandatory field: shape_pt_lat",
-			"shapes.txt:1: missing mandatory field: shape_pt_lon",
-			"shapes.txt:1: missing mandatory field: shape_pt_sequence",
+			"shapes.txt:1: invalid mandatory field: shape_id",
+			"shapes.txt:1: invalid mandatory field: shape_pt_lat",
+			"shapes.txt:1: invalid mandatory field: shape_pt_lon",
+			"shapes.txt:1: invalid mandatory field: shape_pt_sequence",
 		},
 	}
 
