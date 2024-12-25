@@ -6,10 +6,10 @@ import (
 )
 
 type CalendarDate struct {
-	ServiceId     ID                // service_id
-	Date          Date              // date
-	ExceptionType ExceptionTypeEnum // exception_type
-	LineNumber    int               // CSV row number
+	ServiceId     ID                // service_id 		(required)
+	Date          Date              // date 			(required)
+	ExceptionType ExceptionTypeEnum // exception_type 	(required)
+	LineNumber    int
 }
 
 func (cd CalendarDate) Validate() []error {
@@ -33,7 +33,6 @@ func (cd CalendarDate) Validate() []error {
 	return validationErrors
 }
 
-// CreateCalendarDate creates a CalendarDate from a CSV row using the provided headers.
 func CreateCalendarDate(row []string, headers map[string]int, lineNumber int) *CalendarDate {
 	calendarDate := &CalendarDate{
 		LineNumber: lineNumber,
@@ -53,7 +52,6 @@ func CreateCalendarDate(row []string, headers map[string]int, lineNumber int) *C
 	return calendarDate
 }
 
-// ValidateCalendarDates validates the parsed CalendarDate structs for logical consistency.
 func ValidateCalendarDates(calendarDates []*CalendarDate, calendarItems []*CalendarItem) ([]error, []string) {
 	var validationErrors []error
 
@@ -61,7 +59,6 @@ func ValidateCalendarDates(calendarDates []*CalendarDate, calendarItems []*Calen
 		validationErrors = append(validationErrors, calendarDate.Validate()...)
 	}
 
-	// Cross-validate service_id references with CalendarItems (if provided)
 	if calendarItems != nil {
 		validateCalendarDateReferences(calendarDates, calendarItems, &validationErrors)
 	}
@@ -69,9 +66,7 @@ func ValidateCalendarDates(calendarDates []*CalendarDate, calendarItems []*Calen
 	return validationErrors, nil
 }
 
-// validateCalendarDateReferences checks if the service_id in CalendarDate has a matching entry in CalendarItem.
 func validateCalendarDateReferences(calendarDates []*CalendarDate, calendarItems []*CalendarItem, validationErrors *[]error) {
-	// Create a map of CalendarItem service_ids for quick lookup
 	serviceIDMap := make(map[string]struct{})
 	for _, item := range calendarItems {
 		if item != nil && !item.ServiceId.IsEmpty() {
@@ -79,7 +74,6 @@ func validateCalendarDateReferences(calendarDates []*CalendarDate, calendarItems
 		}
 	}
 
-	// Check if each CalendarDate service_id is present in CalendarItems
 	for _, calendarDate := range calendarDates {
 		if calendarDate == nil || calendarDate.ServiceId.IsEmpty() {
 			continue
