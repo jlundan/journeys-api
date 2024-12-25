@@ -30,15 +30,17 @@ type StopTime struct {
 func (st StopTime) Validate() []error {
 	var validationErrors []error
 
-	fields := []struct {
+	requiredFields := []struct {
 		fieldName string
 		field     ValidAndPresentField
 	}{
 		{"trip_id", &st.TripId},
 		{"stop_sequence", &st.StopSequence},
 	}
-	for _, f := range fields {
-		validationErrors = append(validationErrors, validateFieldIsPresentAndValid(f.field, f.fieldName, st.LineNumber, StopTimesFileName)...)
+	for _, f := range requiredFields {
+		if !f.field.IsValid() {
+			validationErrors = append(validationErrors, createFileRowError(StopTimesFileName, st.LineNumber, createInvalidRequiredFieldString(f.fieldName)))
+		}
 	}
 
 	optionalFields := []struct {
