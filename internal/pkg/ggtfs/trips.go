@@ -22,7 +22,7 @@ type Trip struct {
 func (t Trip) Validate() []error {
 	var validationErrors []error
 
-	fields := []struct {
+	requiredFields := []struct {
 		fieldName string
 		field     ValidAndPresentField
 	}{
@@ -30,8 +30,10 @@ func (t Trip) Validate() []error {
 		{"service_id", &t.ServiceId},
 		{"trip_id", &t.Id},
 	}
-	for _, f := range fields {
-		validationErrors = append(validationErrors, validateFieldIsPresentAndValid(f.field, f.fieldName, t.LineNumber, TripsFileName)...)
+	for _, f := range requiredFields {
+		if !f.field.IsValid() {
+			validationErrors = append(validationErrors, createFileRowError(TripsFileName, t.LineNumber, createInvalidRequiredFieldString(f.fieldName)))
+		}
 	}
 
 	optionalFields := []struct {
