@@ -5,78 +5,68 @@ import (
 	"strconv"
 )
 
-// StopTime struct with fields as strings and optional fields as string pointers.
 type StopTime struct {
-	TripId                   ID                    // trip_id
-	ArrivalTime              Time                  // arrival_time
-	DepartureTime            Time                  // departure_time
-	StopId                   ID                    // stop_id
-	LocationGroupId          *ID                   // location_group_id (optional)
-	LocationId               *ID                   // location_id (optional)
-	StopSequence             Integer               // stop_sequence
-	StopHeadSign             *Text                 // stop_headsign (optional)
-	StartPickupDropOffWindow *Time                 // start_pickup_drop_off_window (optional)
-	EndPickupDropOffWindow   *Time                 // end_pickup_drop_off_window (optional)
-	PickupType               *PickupType           // pickup_type (optional)
-	DropOffType              *DropOffType          // drop_off_type (optional)
-	ContinuousPickup         ContinuousPickupType  // continuous_pickup (optional)
-	ContinuousDropOff        ContinuousDropOffType // continuous_drop_off (optional)
-	ShapeDistTraveled        *Float                // shape_dist_traveled (optional)
-	Timepoint                *TimePoint            // timepoint (optional)
-	PickupBookingRuleId      *ID                   // pickup_booking_rule_id (optional)
-	DropOffBookingRuleId     *ID                   // drop_off_booking_rule_id (optional)
+	TripId                   ID                    // trip_id 						(required)
+	ArrivalTime              Time                  // arrival_time 					(conditionally required)
+	DepartureTime            Time                  // departure_time 				(conditionally required)
+	StopId                   ID                    // stop_id 						(conditionally required)
+	LocationGroupId          ID                    // location_group_id 			(conditionally forbidden)
+	LocationId               ID                    // location_id 					(conditionally forbidden)
+	StopSequence             Integer               // stop_sequence 				(required)
+	StopHeadSign             Text                  // stop_headsign 				(optional)
+	StartPickupDropOffWindow Time                  // start_pickup_drop_off_window 	(conditionally required)
+	EndPickupDropOffWindow   Time                  // end_pickup_drop_off_window 	(conditionally required)
+	PickupType               PickupType            // pickup_type 					(conditionally required)
+	DropOffType              DropOffType           // drop_off_type 				(conditionally required)
+	ContinuousPickup         ContinuousPickupType  // continuous_pickup 			(conditionally required)
+	ContinuousDropOff        ContinuousDropOffType // continuous_drop_off 			(conditionally required)
+	ShapeDistTraveled        Float                 // shape_dist_traveled 			(optional)
+	Timepoint                TimePoint             // timepoint 					(optional)
+	PickupBookingRuleId      ID                    // pickup_booking_rule_id 		(optional)
+	DropOffBookingRuleId     ID                    // drop_off_booking_rule_id 		(optional)
 	LineNumber               int
 }
 
 func (st StopTime) Validate() []error {
 	var validationErrors []error
 
-	// arrival_time is handled in the ValidateStopTimes function since it is conditionally required
-	// departure_time is handled in the ValidateStopTimes function since it is conditionally required
-	// stop_id is handled in the ValidateStopTimes function since it is conditionally required
-	// location_group_id is handled in the ValidateStopTimes function since it is conditionally forbidden
-	// location_id is handled in the ValidateStopTimes function since it is conditionally forbidden
-	// start_pickup_drop_off_window is handled in the ValidateStopTimes function since it is conditionally required
-	// end_pickup_drop_off_window is handled in the ValidateStopTimes function since it is conditionally required
-	// pickup_type is handled in the ValidateStopTimes function since it is conditionally forbidden
-	// drop_off_type is handled in the ValidateStopTimes function since it is conditionally forbidden
-	// continuous_pickup is handled in the ValidateStopTimes function since it is conditionally forbidden
-	// continuous_drop_off is handled in the ValidateStopTimes function since it is conditionally forbidden
-
 	fields := []struct {
 		fieldName string
 		field     ValidAndPresentField
 	}{
 		{"trip_id", &st.TripId},
-		{"arrival_time", &st.ArrivalTime},
-		{"departure_time", &st.DepartureTime},
-		{"stop_id", &st.StopId},
 		{"stop_sequence", &st.StopSequence},
 	}
 	for _, f := range fields {
 		validationErrors = append(validationErrors, validateFieldIsPresentAndValid(f.field, f.fieldName, st.LineNumber, StopTimesFileName)...)
 	}
 
-	// Checking the underlying value of the field in ValidAndPresentField for nil would require reflection
-	// v := reflect.ValueOf(i)
-	// v.Kind() == reflect.Ptr && v.IsNil()
-	// which is slow, so we can't use the above mechanism to check optional fields, since they might be nil (pointer field's default value is nil)
-	// since CreateTrip might have not processed the field (if its header is missing from the csv).
+	optionalFields := []struct {
+		field     ValidAndPresentField
+		fieldName string
+	}{
+		{&st.ArrivalTime, "arrival_time"},
+		{&st.DepartureTime, "departure_time"},
+		{&st.StopId, "stop_id"},
+		{&st.LocationGroupId, "location_group_id"},
+		{&st.LocationId, "location_id"},
+		{&st.StopHeadSign, "stop_headsign"},
+		{&st.StartPickupDropOffWindow, "start_pickup_drop_off_window"},
+		{&st.EndPickupDropOffWindow, "end_pickup_drop_off_window"},
+		{&st.PickupType, "pickup_type"},
+		{&st.DropOffType, "drop_off_type"},
+		{&st.ContinuousPickup, "continuous_pickup"},
+		{&st.ContinuousDropOff, "continuous_drop_off"},
+		{&st.ShapeDistTraveled, "shape_dist_traveled"},
+		{&st.Timepoint, "timepoint"},
+		{&st.PickupBookingRuleId, "pickup_booking_rule_id"},
+		{&st.DropOffBookingRuleId, "drop_off_booking_rule_id"},
+	}
 
-	if st.StopHeadSign != nil && !st.StopHeadSign.IsValid() {
-		validationErrors = append(validationErrors, createFileRowError(StopTimesFileName, st.LineNumber, createInvalidFieldString("stop_headsign")))
-	}
-	if st.ShapeDistTraveled != nil && !st.ShapeDistTraveled.IsValid() {
-		validationErrors = append(validationErrors, createFileRowError(StopTimesFileName, st.LineNumber, createInvalidFieldString("shape_dist_traveled")))
-	}
-	if st.Timepoint != nil && !st.Timepoint.IsValid() {
-		validationErrors = append(validationErrors, createFileRowError(StopTimesFileName, st.LineNumber, createInvalidFieldString("timepoint")))
-	}
-	if st.PickupBookingRuleId != nil && !st.PickupBookingRuleId.IsValid() {
-		validationErrors = append(validationErrors, createFileRowError(StopTimesFileName, st.LineNumber, createInvalidFieldString("pickup_booking_rule_id")))
-	}
-	if st.DropOffBookingRuleId != nil && !st.DropOffBookingRuleId.IsValid() {
-		validationErrors = append(validationErrors, createFileRowError(StopTimesFileName, st.LineNumber, createInvalidFieldString("drop_off_booking_rule_id")))
+	for _, field := range optionalFields {
+		if field.field != nil && field.field.IsPresent() && !field.field.IsValid() {
+			validationErrors = append(validationErrors, createFileRowError(StopTimesFileName, st.LineNumber, createInvalidFieldString(field.fieldName)))
+		}
 	}
 
 	return validationErrors
@@ -90,44 +80,46 @@ func CreateStopTime(row []string, headers map[string]int, lineNumber int) *StopT
 		LineNumber: lineNumber,
 	}
 
-	for hName, hPos := range headers {
+	for hName := range headers {
+		v := getRowValueForHeaderName(row, headers, hName)
+
 		switch hName {
 		case "trip_id":
-			stopTime.TripId = NewID(getRowValue(row, hPos))
+			stopTime.TripId = NewID(v)
 		case "arrival_time":
-			stopTime.ArrivalTime = NewTime(getRowValue(row, hPos))
+			stopTime.ArrivalTime = NewTime(v)
 		case "departure_time":
-			stopTime.DepartureTime = NewTime(getRowValue(row, hPos))
+			stopTime.DepartureTime = NewTime(v)
 		case "stop_id":
-			stopTime.StopId = NewID(getRowValue(row, hPos))
+			stopTime.StopId = NewID(v)
 		case "location_group_id":
-			stopTime.LocationGroupId = NewOptionalID(getRowValue(row, hPos))
+			stopTime.LocationGroupId = NewID(v)
 		case "location_id":
-			stopTime.LocationId = NewOptionalID(getRowValue(row, hPos))
+			stopTime.LocationId = NewID(v)
 		case "stop_sequence":
-			stopTime.StopSequence = NewInteger(getRowValue(row, hPos))
+			stopTime.StopSequence = NewInteger(v)
 		case "stop_headsign":
-			stopTime.StopHeadSign = NewOptionalText(getRowValue(row, hPos))
+			stopTime.StopHeadSign = NewText(v)
 		case "start_pickup_drop_off_window":
-			stopTime.StartPickupDropOffWindow = NewOptionalTime(getRowValue(row, hPos))
+			stopTime.StartPickupDropOffWindow = NewTime(v)
 		case "end_pickup_drop_off_window":
-			stopTime.EndPickupDropOffWindow = NewOptionalTime(getRowValue(row, hPos))
+			stopTime.EndPickupDropOffWindow = NewTime(v)
 		case "pickup_type":
-			stopTime.PickupType = NewOptionalPickupType(getRowValue(row, hPos))
+			stopTime.PickupType = NewPickupType(v)
 		case "drop_off_type":
-			stopTime.DropOffType = NewOptionalDropOffType(getRowValue(row, hPos))
+			stopTime.DropOffType = NewDropOffType(v)
 		case "continuous_pickup":
-			stopTime.ContinuousPickup = NewContinuousPickupType(getRowValue(row, hPos))
+			stopTime.ContinuousPickup = NewContinuousPickupType(v)
 		case "continuous_drop_off":
-			stopTime.ContinuousDropOff = NewContinuousDropOffType(getRowValue(row, hPos))
+			stopTime.ContinuousDropOff = NewContinuousDropOffType(v)
 		case "shape_dist_traveled":
-			stopTime.ShapeDistTraveled = NewOptionalFloat(getRowValue(row, hPos))
+			stopTime.ShapeDistTraveled = NewFloat(v)
 		case "timepoint":
-			stopTime.Timepoint = NewOptionalTimePoint(getRowValue(row, hPos))
+			stopTime.Timepoint = NewTimePoint(v)
 		case "pickup_booking_rule_id":
-			stopTime.PickupBookingRuleId = NewOptionalID(getRowValue(row, hPos))
+			stopTime.PickupBookingRuleId = NewID(v)
 		case "drop_off_booking_rule_id":
-			stopTime.DropOffBookingRuleId = NewOptionalID(getRowValue(row, hPos))
+			stopTime.DropOffBookingRuleId = NewID(v)
 		}
 
 	}
@@ -209,12 +201,12 @@ func (pt PickupType) IsValid() bool {
 		val == StopTimePickupTypeMustPhoneAgency || val == StopTimePickupTypeMustCoordinateWithDriver
 }
 
-func NewOptionalPickupType(raw *string) *PickupType {
+func NewPickupType(raw *string) PickupType {
 	if raw == nil {
-		return &PickupType{
+		return PickupType{
 			Integer{base: base{raw: ""}}}
 	}
-	return &PickupType{Integer{base: base{raw: *raw, isPresent: true}}}
+	return PickupType{Integer{base: base{raw: *raw, isPresent: true}}}
 }
 
 const (
@@ -238,12 +230,12 @@ func (dot DropOffType) IsValid() bool {
 		val == DropOffTypeMustPhoneAgency || val == DropOffTypeRMustCoordinateWithDriver
 }
 
-func NewOptionalDropOffType(raw *string) *DropOffType {
+func NewDropOffType(raw *string) DropOffType {
 	if raw == nil {
-		return &DropOffType{
+		return DropOffType{
 			Integer{base: base{raw: ""}}}
 	}
-	return &DropOffType{Integer{base: base{raw: *raw, isPresent: true}}}
+	return DropOffType{Integer{base: base{raw: *raw, isPresent: true}}}
 }
 
 const (
@@ -264,10 +256,10 @@ func (dot TimePoint) IsValid() bool {
 	return val == TimePointApproximate || val == TimePointExact
 }
 
-func NewOptionalTimePoint(raw *string) *TimePoint {
+func NewTimePoint(raw *string) TimePoint {
 	if raw == nil {
-		return &TimePoint{
+		return TimePoint{
 			Integer{base: base{raw: ""}}}
 	}
-	return &TimePoint{Integer{base: base{raw: *raw, isPresent: true}}}
+	return TimePoint{Integer{base: base{raw: *raw, isPresent: true}}}
 }
