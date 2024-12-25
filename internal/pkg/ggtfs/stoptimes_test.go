@@ -54,13 +54,13 @@ func getStopTimeOKTestcases() map[string]ggtfsTestCase {
 		DepartureTime:     NewTime(stringPtr("02:00")),
 		StopId:            NewID(stringPtr("0001")),
 		StopSequence:      NewInteger(stringPtr("1")),
-		StopHeadSign:      NewOptionalText(stringPtr("Foo city")),
-		PickupType:        NewOptionalPickupType(stringPtr("1")),
-		DropOffType:       NewOptionalDropOffType(stringPtr("0")),
+		StopHeadSign:      NewText(stringPtr("Foo city")),
+		PickupType:        NewPickupType(stringPtr("1")),
+		DropOffType:       NewDropOffType(stringPtr("0")),
 		ContinuousPickup:  NewContinuousPickupType(stringPtr("2")),
 		ContinuousDropOff: NewContinuousDropOffType(stringPtr("3")),
-		ShapeDistTraveled: NewOptionalFloat(stringPtr("100")),
-		Timepoint:         NewOptionalTimePoint(stringPtr("1")),
+		ShapeDistTraveled: NewFloat(stringPtr("100")),
+		Timepoint:         NewTimePoint(stringPtr("1")),
 		LineNumber:        0,
 	}
 
