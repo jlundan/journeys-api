@@ -109,12 +109,12 @@ func getCalendarDateNOKTestcases() map[string]ggtfsTestCase {
 			{"1001", "20201011", "3"},
 		},
 		expectedErrors: []string{
-			"calendar_dates.txt:0: missing mandatory field: date",
-			"calendar_dates.txt:0: missing mandatory field: exception_type",
-			"calendar_dates.txt:0: missing mandatory field: service_id",
-			"calendar_dates.txt:1: invalid field: exception_type",
-			"calendar_dates.txt:2: invalid field: exception_type",
-			"calendar_dates.txt:3: invalid field: exception_type",
+			"calendar_dates.txt:0: invalid mandatory field: date",
+			"calendar_dates.txt:0: invalid mandatory field: exception_type",
+			"calendar_dates.txt:0: invalid mandatory field: service_id",
+			"calendar_dates.txt:1: invalid mandatory field: exception_type",
+			"calendar_dates.txt:2: invalid mandatory field: exception_type",
+			"calendar_dates.txt:3: invalid mandatory field: exception_type",
 		},
 	}
 
