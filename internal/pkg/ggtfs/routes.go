@@ -22,8 +22,9 @@ type Route struct {
 	LineNumber        int
 }
 
-func (r Route) Validate() []error {
+func (r Route) Validate() ([]error, []string) {
 	var validationErrors []error
+	var recommendations []string
 
 	requiredFields := []struct {
 		fieldName string
@@ -43,8 +44,6 @@ func (r Route) Validate() []error {
 		fieldName string
 	}{
 		{&r.Id, "agency_id"},
-		{&r.ShortName, "route_short_name"},
-		{&r.LongName, "route_long_name"},
 		{&r.Description, "route_desc"},
 		{&r.URL, "route_url"},
 		{&r.Color, "route_color"},
@@ -61,7 +60,19 @@ func (r Route) Validate() []error {
 		}
 	}
 
-	return validationErrors
+	if r.ShortName.IsEmpty() && !r.LongName.IsValid() {
+		validationErrors = append(validationErrors, createFileRowError(RoutesFileName, r.LineNumber, "route_short_name must be specified when route_long_name is empty or not present"))
+	}
+
+	if r.LongName.IsEmpty() && !r.ShortName.IsValid() {
+		validationErrors = append(validationErrors, createFileRowError(RoutesFileName, r.LineNumber, "route_long_name must be specified when route_short_name is empty or not present"))
+	}
+
+	if r.ShortName.Length() >= 12 {
+		recommendations = append(recommendations, createFileRowRecommendation(RoutesFileName, r.LineNumber, "route_short_name should be less than 12 characters"))
+	}
+
+	return validationErrors, recommendations
 }
 
 func CreateRoute(row []string, headers map[string]int, lineNumber int) *Route {
@@ -107,6 +118,7 @@ func CreateRoute(row []string, headers map[string]int, lineNumber int) *Route {
 
 func ValidateRoutes(routes []*Route, agencies []*Agency) ([]error, []string) {
 	var validationErrors []error
+	var validationRecommendations []string
 
 	usedIds := make(map[string]bool)
 	for _, route := range routes {
@@ -114,7 +126,11 @@ func ValidateRoutes(routes []*Route, agencies []*Agency) ([]error, []string) {
 			continue
 		}
 
-		vErr := route.Validate()
+		vErr, vRec := route.Validate()
+		if len(vRec) > 0 {
+			validationRecommendations = append(validationRecommendations, vRec...)
+		}
+
 		if len(vErr) > 0 {
 			validationErrors = append(validationErrors, vErr...)
 			continue
@@ -125,14 +141,8 @@ func ValidateRoutes(routes []*Route, agencies []*Agency) ([]error, []string) {
 		} else {
 			usedIds[route.Id.String()] = true
 		}
-	}
 
-	if agencies == nil {
-		return validationErrors, nil
-	}
-
-	for _, route := range routes {
-		if route == nil || !route.AgencyId.IsValid() {
+		if agencies == nil || !route.AgencyId.IsValid() {
 			continue
 		}
 
@@ -153,7 +163,7 @@ func ValidateRoutes(routes []*Route, agencies []*Agency) ([]error, []string) {
 		}
 	}
 
-	return validationErrors, nil
+	return validationErrors, validationRecommendations
 }
 
 const (
