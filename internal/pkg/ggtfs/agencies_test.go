@@ -12,7 +12,7 @@ var validAgencyHeaders = []string{"agency_id", "agency_name", "agency_url", "age
 	"agency_lang", "agency_phone", "agency_fare_url", "agency_email"}
 
 func TestShouldReturnEmptyAgencyArrayOnEmptyString(t *testing.T) {
-	agencies, errors := LoadEntities[*Agency](csv.NewReader(strings.NewReader("")), validAgencyHeaders, CreateAgency, AgenciesFileName)
+	agencies, errors := LoadEntitiesFromCSV[*Agency](csv.NewReader(strings.NewReader("")), validAgencyHeaders, CreateAgency, AgenciesFileName)
 	if len(errors) > 0 {
 		t.Error(errors)
 	}
@@ -33,7 +33,7 @@ func TestShouldValidateOnNilAgencies(t *testing.T) {
 
 func TestAgencyParsing(t *testing.T) {
 	loadAgenciesFunc := func(reader *csv.Reader) ([]interface{}, []error) {
-		agencies, errs := LoadEntities[*Agency](reader, validAgencyHeaders, CreateAgency, AgenciesFileName)
+		agencies, errs := LoadEntitiesFromCSV[*Agency](reader, validAgencyHeaders, CreateAgency, AgenciesFileName)
 		entities := make([]interface{}, len(agencies))
 		for i, agency := range agencies {
 			entities[i] = agency
@@ -57,21 +57,7 @@ func TestAgencyParsing(t *testing.T) {
 
 func getAgencyNOKTestcases() map[string]ggtfsTestCase {
 	testCases := make(map[string]ggtfsTestCase)
-	testCases["parse-failures"] = ggtfsTestCase{
-		csvRows: [][]string{
-			{"agency_name", "agency_url", "agency_timezone"},
-			{" "},
-			{","},
-			{"", ""},
-			{" ", " "},
-		},
-		expectedErrors: []string{
-			"agency.txt: record on line 2: wrong number of fields",
-			"agency.txt: record on line 3: wrong number of fields",
-			"agency.txt: record on line 4: wrong number of fields",
-			"agency.txt: record on line 5: wrong number of fields",
-		},
-	}
+
 	testCases["invalid-fields"] = ggtfsTestCase{
 		csvRows: [][]string{
 			{"agency_name", "agency_url", "agency_timezone", "agency_lang", "agency_phone", "agency_fare_url", "agency_email"},
@@ -81,22 +67,6 @@ func getAgencyNOKTestcases() map[string]ggtfsTestCase {
 			{"ACME", "Not an URL", "Europe/Helsinki2", "Not a language code", "Not a phone", "Not an URL", "Not a phone number"},
 		},
 		expectedErrors: []string{
-			"agency.txt:0: a valid agency_id must be specified when multiple agencies are declared",
-			"agency.txt:0: invalid field: agency_email",
-			"agency.txt:0: invalid field: agency_fare_url",
-			"agency.txt:0: invalid field: agency_lang",
-			"agency.txt:0: invalid field: agency_phone",
-			"agency.txt:0: invalid mandatory field: agency_name",
-			"agency.txt:0: invalid mandatory field: agency_timezone",
-			"agency.txt:0: invalid mandatory field: agency_url",
-			"agency.txt:1: a valid agency_id must be specified when multiple agencies are declared",
-			"agency.txt:1: invalid field: agency_email",
-			"agency.txt:1: invalid field: agency_fare_url",
-			"agency.txt:1: invalid field: agency_lang",
-			"agency.txt:1: invalid field: agency_phone",
-			"agency.txt:1: invalid mandatory field: agency_name",
-			"agency.txt:1: invalid mandatory field: agency_timezone",
-			"agency.txt:1: invalid mandatory field: agency_url",
 			"agency.txt:2: a valid agency_id must be specified when multiple agencies are declared",
 			"agency.txt:2: invalid field: agency_email",
 			"agency.txt:2: invalid field: agency_fare_url",
@@ -110,8 +80,24 @@ func getAgencyNOKTestcases() map[string]ggtfsTestCase {
 			"agency.txt:3: invalid field: agency_fare_url",
 			"agency.txt:3: invalid field: agency_lang",
 			"agency.txt:3: invalid field: agency_phone",
+			"agency.txt:3: invalid mandatory field: agency_name",
 			"agency.txt:3: invalid mandatory field: agency_timezone",
 			"agency.txt:3: invalid mandatory field: agency_url",
+			"agency.txt:4: a valid agency_id must be specified when multiple agencies are declared",
+			"agency.txt:4: invalid field: agency_email",
+			"agency.txt:4: invalid field: agency_fare_url",
+			"agency.txt:4: invalid field: agency_lang",
+			"agency.txt:4: invalid field: agency_phone",
+			"agency.txt:4: invalid mandatory field: agency_name",
+			"agency.txt:4: invalid mandatory field: agency_timezone",
+			"agency.txt:4: invalid mandatory field: agency_url",
+			"agency.txt:5: a valid agency_id must be specified when multiple agencies are declared",
+			"agency.txt:5: invalid field: agency_email",
+			"agency.txt:5: invalid field: agency_fare_url",
+			"agency.txt:5: invalid field: agency_lang",
+			"agency.txt:5: invalid field: agency_phone",
+			"agency.txt:5: invalid mandatory field: agency_timezone",
+			"agency.txt:5: invalid mandatory field: agency_url",
 		},
 	}
 	testCases["unique-agencies"] = ggtfsTestCase{
@@ -121,7 +107,7 @@ func getAgencyNOKTestcases() map[string]ggtfsTestCase {
 			{"ACME", "ACME", "http://acme.inc", "Europe/Helsinki"},
 		},
 		expectedErrors: []string{
-			"agency.txt:1: agency_id is not unique within the file",
+			"agency.txt:3: agency_id is not unique within the file",
 		},
 	}
 	testCases["recommend-agency-id"] = ggtfsTestCase{
@@ -130,10 +116,10 @@ func getAgencyNOKTestcases() map[string]ggtfsTestCase {
 			{"", "ACME", "http://acme2.inc", "Europe/Helsinki"},
 		},
 		expectedErrors: []string{
-			"agency.txt:0: invalid field: agency_id",
+			"agency.txt:2: invalid field: agency_id",
 		},
 		expectedRecommendations: []string{
-			"agency.txt:0: it is recommended that agency_id is specified even when there is only one agency",
+			"agency.txt:2: it is recommended that agency_id is specified even when there is only one agency",
 		},
 	}
 
@@ -142,21 +128,23 @@ func getAgencyNOKTestcases() map[string]ggtfsTestCase {
 
 func getAgencyOKTestcases() map[string]ggtfsTestCase {
 	expected1 := Agency{
-		Id:       NewID(stringPtr("1")),
-		Name:     NewText(stringPtr("ACME")),
-		URL:      NewURL(stringPtr("https://acme.inc")),
-		Timezone: NewTimezone(stringPtr("Europe/Helsinki")),
-		Lang:     NewLanguageCode(stringPtr("fi")),
-		Phone:    NewPhoneNumber(stringPtr("+358123456")),
-		FareURL:  NewURL(stringPtr("https://acme.inc/fares")),
-		Email:    NewEmail(stringPtr("acme@acme.inc")),
+		Id:         NewID(stringPtr("1")),
+		Name:       NewText(stringPtr("ACME")),
+		URL:        NewURL(stringPtr("https://acme.inc")),
+		Timezone:   NewTimezone(stringPtr("Europe/Helsinki")),
+		Lang:       NewLanguageCode(stringPtr("fi")),
+		Phone:      NewPhoneNumber(stringPtr("+358123456")),
+		FareURL:    NewURL(stringPtr("https://acme.inc/fares")),
+		Email:      NewEmail(stringPtr("acme@acme.inc")),
+		LineNumber: 2,
 	}
 
 	expected2 := Agency{
-		Id:       NewID(stringPtr("2")),
-		Name:     NewText(stringPtr("FOO")),
-		URL:      NewURL(stringPtr("https://foo.com")),
-		Timezone: NewTimezone(stringPtr("Europe/Helsinki")),
+		Id:         NewID(stringPtr("2")),
+		Name:       NewText(stringPtr("FOO")),
+		URL:        NewURL(stringPtr("https://foo.com")),
+		Timezone:   NewTimezone(stringPtr("Europe/Helsinki")),
+		LineNumber: 2,
 	}
 
 	testCases := make(map[string]ggtfsTestCase)

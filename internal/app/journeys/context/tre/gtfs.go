@@ -84,7 +84,7 @@ func NewGTFSContextForDirectory(gtfsPath string) (*GTFSContext, []error) {
 
 		switch file {
 		case ggtfs.AgenciesFileName:
-			context.Agencies, gtfsErrors = ggtfs.LoadEntities[*ggtfs.Agency](reader, validAgencyHeaders, ggtfs.CreateAgency, ggtfs.AgenciesFileName)
+			context.Agencies, gtfsErrors = ggtfs.LoadEntitiesFromCSV[*ggtfs.Agency](reader, validAgencyHeaders, ggtfs.CreateAgency, ggtfs.AgenciesFileName)
 		case ggtfs.RoutesFileName:
 			context.Routes, gtfsErrors = ggtfs.LoadEntitiesFromCSV[*ggtfs.Route](reader, validRouteHeaders, ggtfs.CreateRoute, ggtfs.RoutesFileName)
 		case ggtfs.StopsFileName:
