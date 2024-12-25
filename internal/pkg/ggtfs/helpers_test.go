@@ -176,6 +176,16 @@ func runGenericGTFSParseTest(t *testing.T, testName string, loadFunc LoadFunctio
 	}
 }
 
+func tableToString(rows [][]string) string {
+	var sb strings.Builder
+
+	for _, row := range rows {
+		sb.WriteString(strings.Join(row, ",") + "\n")
+	}
+
+	return sb.String()
+}
+
 func stringPtr(s string) *string {
 	return &s
 }

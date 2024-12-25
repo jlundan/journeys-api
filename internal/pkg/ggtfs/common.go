@@ -156,3 +156,11 @@ func getHeaderIndex(r *csv.Reader, validHeaderList []string) (map[string]int, []
 	}
 	return headerIndex, readErrors
 }
+
+func toSet[T comparable](slice []T) map[T]struct{} {
+	set := make(map[T]struct{}, len(slice))
+	for _, item := range slice {
+		set[item] = struct{}{}
+	}
+	return set
+}
