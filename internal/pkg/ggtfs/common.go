@@ -47,10 +47,6 @@ func createInvalidFieldString(fieldName string) string {
 	return fmt.Sprintf("invalid field: %s", fieldName)
 }
 
-func createMissingMandatoryFieldString(fieldName string) string {
-	return fmt.Sprintf("missing mandatory field: %s", fieldName)
-}
-
 func createInvalidRequiredFieldString(fieldName string) string {
 	return fmt.Sprintf("invalid mandatory field: %s", fieldName)
 }
@@ -158,22 +154,9 @@ func LoadEntitiesFromCSV[T GtfsEntity](csvReader *csv.Reader, validHeaders []str
 	return entities, errs
 }
 
-func validateFieldIsPresentAndValid(field ValidAndPresentField, fieldName string, lineNumber int, fileName string) []error {
-	var validationErrors []error
-
-	if !field.IsPresent() || field.IsEmpty() {
-		validationErrors = append(validationErrors, createFileRowError(fileName, lineNumber, createMissingMandatoryFieldString(fieldName)))
-	} else if !field.IsValid() {
-		validationErrors = append(validationErrors, createFileRowError(fileName, lineNumber, createInvalidFieldString(fieldName)))
-	}
-
-	return validationErrors
-}
-
 type ValidAndPresentField interface {
 	IsValid() bool
 	IsPresent() bool
-	IsEmpty() bool
 }
 
 func getRowValue(row []string, position int) *string {
