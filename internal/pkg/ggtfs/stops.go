@@ -6,26 +6,26 @@ import (
 )
 
 type StopExtensions struct {
-	MunicipalityId *ID // municipality_id (optional)
+	MunicipalityId ID // municipality_id (optional)
 }
 
 // Stop struct with fields as strings and optional fields as string pointers.
 type Stop struct {
-	Id                 ID                  // stop_id
-	Code               *Text               // stop_code (optional)
-	Name               *Text               // stop_name (optional)
-	TTSName            *Text               // tts_stop_name (optional)
-	Desc               *Text               // stop_desc (optional)
-	Lat                *Latitude           // stop_lat (optional)
-	Lon                *Longitude          // stop_lon (optional)
-	ZoneId             *ID                 // zone_id (optional)
-	Url                *URL                // stop_url (optional)
-	LocationType       *StopLocation       // location_type (optional)
-	ParentStation      *ID                 // parent_station (optional)
-	Timezone           *Timezone           // stop_timezone (optional)
-	WheelchairBoarding *WheelchairBoarding // wheelchair_boarding (optional)
-	PlatformCode       *Text               // platform_code (optional)
-	LevelId            *ID                 // level_id (optional)
+	Id                 ID                 // stop_id 			 (required)
+	Code               Text               // stop_code 			 (optional)
+	Name               Text               // stop_name 			 (conditionally required)
+	TTSName            Text               // tts_stop_name 		 (optional)
+	Desc               Text               // stop_desc, 		 (optional)
+	Lat                Latitude           // stop_lat 			 (conditionally required)
+	Lon                Longitude          // stop_lon 			 (conditionally required)
+	ZoneId             ID                 // zone_id 			 (optional)
+	Url                URL                // stop_url 			 (optional)
+	LocationType       StopLocation       // location_type 		 (optional)
+	ParentStation      ID                 // parent_station 	 (conditionally required)
+	Timezone           Timezone           // stop_timezone 		 (optional)
+	WheelchairBoarding WheelchairBoarding // wheelchair_boarding (optional)
+	PlatformCode       Text               // platform_code 		 (optional)
+	LevelId            ID                 // level_id 			 (optional)
 	Extensions         *StopExtensions
 	LineNumber         int
 }
@@ -48,44 +48,43 @@ func (s Stop) Validate() []error {
 		validationErrors = append(validationErrors, validateFieldIsPresentAndValid(f.field, f.fieldName, s.LineNumber, StopsFileName)...)
 	}
 
-	// Checking the underlying value of the field in ValidAndPresentField for nil would require reflection
-	// v := reflect.ValueOf(i)
-	// v.Kind() == reflect.Ptr && v.IsNil()
-	// which is slow, so we can't use the above mechanism to check optional fields, since they might be nil (pointer field's default value is nil)
-	// since CreateTrip might have not processed the field (if its header is missing from the csv).
+	optionalFields := []struct {
+		field     ValidAndPresentField
+		fieldName string
+	}{
+		{&s.Id, "stop_code"},
+		{&s.Name, "stop_name"},
+		{&s.TTSName, "tts_stop_name"},
+		{&s.Desc, "stop_desc"},
+		{&s.Lat, "stop_lat"},
+		{&s.Lon, "stop_lon"},
+		{&s.ZoneId, "zone_id"},
+		{&s.Url, "stop_url"},
+		{&s.LocationType, "location_type"},
+		{&s.ParentStation, "parent_station"},
+		{&s.Timezone, "stop_timezone"},
+		{&s.WheelchairBoarding, "wheelchair_boarding"},
+		{&s.LevelId, "level_id"},
+		{&s.PlatformCode, "platform_code"},
+	}
 
-	if s.Code != nil && !s.Code.IsValid() {
-		validationErrors = append(validationErrors, createFileRowError(StopsFileName, s.LineNumber, createInvalidFieldString("stop_code")))
+	for _, field := range optionalFields {
+		if field.field != nil && field.field.IsPresent() && !field.field.IsValid() {
+			validationErrors = append(validationErrors, createFileRowError(StopsFileName, s.LineNumber, createInvalidFieldString(field.fieldName)))
+		}
 	}
-	if s.TTSName != nil && !s.TTSName.IsValid() {
-		validationErrors = append(validationErrors, createFileRowError(StopsFileName, s.LineNumber, createInvalidFieldString("tts_stop_name")))
+
+	if s.LocationType.IsValid() && s.LocationType.Int() <= 3 && !s.Name.IsValid() {
+		validationErrors = append(validationErrors, createFileRowError(StopsFileName, s.LineNumber, "stop_name must be specified for location types 0, 1, and 2"))
 	}
-	if s.Desc != nil && !s.Desc.IsValid() {
-		validationErrors = append(validationErrors, createFileRowError(StopsFileName, s.LineNumber, createInvalidFieldString("stop_desc")))
+	if s.LocationType.IsValid() && s.LocationType.Int() <= 3 && !s.Lat.IsValid() {
+		validationErrors = append(validationErrors, createFileRowError(StopsFileName, s.LineNumber, "stop_lat must be specified for location types 0, 1, and 2"))
 	}
-	if s.ZoneId != nil && !s.ZoneId.IsValid() {
-		validationErrors = append(validationErrors, createFileRowError(StopsFileName, s.LineNumber, createInvalidFieldString("zone_id")))
+	if s.LocationType.IsValid() && s.LocationType.Int() <= 3 && !s.Lon.IsValid() {
+		validationErrors = append(validationErrors, createFileRowError(StopsFileName, s.LineNumber, "stop_lon must be specified for location types 0, 1, and 2"))
 	}
-	if s.Url != nil && !s.Url.IsValid() {
-		validationErrors = append(validationErrors, createFileRowError(StopsFileName, s.LineNumber, createInvalidFieldString("stop_url")))
-	}
-	if s.LocationType != nil && !s.LocationType.IsValid() {
-		validationErrors = append(validationErrors, createFileRowError(StopsFileName, s.LineNumber, createInvalidFieldString("location_type")))
-	}
-	if s.Timezone != nil && !s.Timezone.IsValid() {
-		validationErrors = append(validationErrors, createFileRowError(StopsFileName, s.LineNumber, createInvalidFieldString("stop_timezone")))
-	}
-	if s.WheelchairBoarding != nil && !s.WheelchairBoarding.IsValid() {
-		validationErrors = append(validationErrors, createFileRowError(StopsFileName, s.LineNumber, createInvalidFieldString("wheelchair_boarding")))
-	}
-	if s.LevelId != nil && !s.LevelId.IsValid() {
-		validationErrors = append(validationErrors, createFileRowError(StopsFileName, s.LineNumber, createInvalidFieldString("level_id")))
-	}
-	if s.PlatformCode != nil && !s.PlatformCode.IsValid() {
-		validationErrors = append(validationErrors, createFileRowError(StopsFileName, s.LineNumber, createInvalidFieldString("platform_code")))
-	}
-	if s.Extensions.MunicipalityId != nil && !s.Extensions.MunicipalityId.IsValid() {
-		validationErrors = append(validationErrors, createFileRowError(StopsFileName, s.LineNumber, createInvalidFieldString("municipality_id")))
+	if s.LocationType.IsValid() && s.LocationType.Int() >= 2 && s.LocationType.Int() <= 4 && !s.ParentStation.IsValid() {
+		validationErrors = append(validationErrors, createFileRowError(StopsFileName, s.LineNumber, "parent_station must be specified for location types 2, 3, and 4"))
 	}
 
 	return validationErrors
@@ -99,41 +98,42 @@ func CreateStop(row []string, headers map[string]int, lineNumber int) *Stop {
 		LineNumber: lineNumber,
 	}
 
-	for hName, hPos := range headers {
+	for hName := range headers {
+		v := getRowValueForHeaderName(row, headers, hName)
 		switch hName {
 		case "stop_id":
-			stop.Id = NewID(getRowValue(row, hPos))
+			stop.Id = NewID(v)
 		case "stop_code":
-			stop.Code = NewOptionalText(getRowValue(row, hPos))
+			stop.Code = NewText(v)
 		case "stop_name":
-			stop.Name = NewOptionalText(getRowValue(row, hPos))
+			stop.Name = NewText(v)
 		case "tts_stop_name":
-			stop.TTSName = NewOptionalText(getRowValue(row, hPos))
+			stop.TTSName = NewText(v)
 		case "stop_desc":
-			stop.Desc = NewOptionalText(getRowValue(row, hPos))
+			stop.Desc = NewText(v)
 		case "stop_lat":
-			stop.Lat = NewOptionalLatitude(getRowValue(row, hPos))
+			stop.Lat = NewLatitude(v)
 		case "stop_lon":
-			stop.Lon = NewOptionalLongitude(getRowValue(row, hPos))
+			stop.Lon = NewLongitude(v)
 		case "zone_id":
-			stop.ZoneId = NewOptionalID(getRowValue(row, hPos))
+			stop.ZoneId = NewID(v)
 		case "stop_url":
-			stop.Url = NewOptionalURL(getRowValue(row, hPos))
+			stop.Url = NewURL(v)
 		case "location_type":
-			stop.LocationType = NewOptionalStopLocation(getRowValue(row, hPos))
+			stop.LocationType = NewStopLocation(v)
 		case "parent_station":
-			stop.ParentStation = NewOptionalID(getRowValue(row, hPos))
+			stop.ParentStation = NewID(v)
 		case "stop_timezone":
-			stop.Timezone = NewOptionalTimezone(getRowValue(row, hPos))
+			stop.Timezone = NewTimezone(v)
 		case "wheelchair_boarding":
-			stop.WheelchairBoarding = NewOptionalWheelchairBoarding(getRowValue(row, hPos))
+			stop.WheelchairBoarding = NewWheelchairBoarding(v)
 		case "level_id":
-			stop.LevelId = NewOptionalID(getRowValue(row, hPos))
+			stop.LevelId = NewID(v)
 		case "platform_code":
-			stop.PlatformCode = NewOptionalText(getRowValue(row, hPos))
+			stop.PlatformCode = NewText(v)
 		case "municipality_id":
 			stop.Extensions = &StopExtensions{
-				MunicipalityId: NewOptionalID(getRowValue(row, hPos)),
+				MunicipalityId: NewID(v),
 			}
 		}
 	}
@@ -153,31 +153,19 @@ func ValidateStops(stops []*Stop) ([]error, []string) {
 		return validationErrors, recommendations
 	}
 
-	for _, stop := range stops {
-		// Additional required field checks for individual Stop.
-		if stop.Id.String() == "" {
-			validationErrors = append(validationErrors, createFileRowError(StopsFileName, stop.LineNumber, "stop_id must be specified"))
-		}
-		if stop.Name == nil && stop.LocationType != nil && stop.LocationType.Int() <= 3 {
-			validationErrors = append(validationErrors, createFileRowError(StopsFileName, stop.LineNumber, "stop_name must be specified for location types 0, 1, and 2"))
-		}
-		if stop.Lat == nil && stop.LocationType != nil && stop.LocationType.Int() <= 3 {
-			validationErrors = append(validationErrors, createFileRowError(StopsFileName, stop.LineNumber, "stop_lat must be specified for location types 0, 1, and 2"))
-		}
-		if stop.Lon == nil && stop.LocationType != nil && stop.LocationType.Int() <= 3 {
-			validationErrors = append(validationErrors, createFileRowError(StopsFileName, stop.LineNumber, "stop_lon must be specified for location types 0, 1, and 2"))
-		}
-		if stop.ParentStation == nil && stop.LocationType != nil && stop.LocationType.Int() >= 2 && stop.LocationType.Int() <= 4 {
-			validationErrors = append(validationErrors, createFileRowError(StopsFileName, stop.LineNumber, "parent_station must be specified for location types 2, 3, and 4"))
-		}
-	}
-
 	// Check for unique stop_id values.
 	usedIds := make(map[string]bool)
 	for _, stop := range stops {
 		if stop == nil {
 			continue
 		}
+
+		vErr := stop.Validate()
+		if len(vErr) > 0 {
+			validationErrors = append(validationErrors, vErr...)
+			continue
+		}
+
 		if usedIds[stop.Id.String()] {
 			validationErrors = append(validationErrors, createFileRowError(StopsFileName, stop.LineNumber, fmt.Sprintf("stop_id '%s' is not unique within the file", stop.Id.String())))
 		} else {
@@ -223,12 +211,12 @@ func (s StopLocation) IsValid() bool {
 		val == StopLocationTypeGenericNode || val == StopLocationTypeBoardingArea
 }
 
-func NewOptionalStopLocation(raw *string) *StopLocation {
+func NewStopLocation(raw *string) StopLocation {
 	if raw == nil {
-		return &StopLocation{
+		return StopLocation{
 			Integer{base: base{raw: ""}}}
 	}
-	return &StopLocation{Integer{base: base{raw: *raw, isPresent: true}}}
+	return StopLocation{Integer{base: base{raw: *raw, isPresent: true}}}
 }
 
 type WheelchairBoarding struct {
@@ -244,10 +232,10 @@ func (wcb WheelchairBoarding) IsValid() bool {
 	return val >= 0 && val <= 2
 }
 
-func NewOptionalWheelchairBoarding(raw *string) *WheelchairBoarding {
+func NewWheelchairBoarding(raw *string) WheelchairBoarding {
 	if raw == nil {
-		return &WheelchairBoarding{
+		return WheelchairBoarding{
 			Integer{base: base{raw: ""}}}
 	}
-	return &WheelchairBoarding{Integer{base: base{raw: *raw, isPresent: true}}}
+	return WheelchairBoarding{Integer{base: base{raw: *raw, isPresent: true}}}
 }

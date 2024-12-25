@@ -49,19 +49,19 @@ func TestStopParsing(t *testing.T) {
 func getStopOKTestcases() map[string]ggtfsTestCase {
 	expected1 := Stop{
 		Id:                 NewID(stringPtr("0001")),
-		Code:               NewOptionalText(stringPtr("0001")),
-		Name:               NewOptionalText(stringPtr("Place 0001")),
-		Desc:               NewOptionalText(stringPtr("Stop at place 0001")),
-		Lat:                NewOptionalLatitude(stringPtr("11.1111111")),
-		Lon:                NewOptionalLongitude(stringPtr("-11.1111111")),
-		ZoneId:             NewOptionalID(stringPtr("Z1")),
-		Url:                NewOptionalURL(stringPtr("https://acme.inc/stops/0001")),
-		LocationType:       NewOptionalStopLocation(stringPtr("0")),
-		ParentStation:      NewOptionalID(stringPtr("4")),
-		Timezone:           NewOptionalTimezone(stringPtr("Europe/Helsinki")),
-		WheelchairBoarding: NewOptionalWheelchairBoarding(stringPtr("0")),
-		PlatformCode:       NewOptionalText(stringPtr("0001")),
-		LevelId:            NewOptionalID(stringPtr("1")),
+		Code:               NewText(stringPtr("0001")),
+		Name:               NewText(stringPtr("Place 0001")),
+		Desc:               NewText(stringPtr("Stop at place 0001")),
+		Lat:                NewLatitude(stringPtr("11.1111111")),
+		Lon:                NewLongitude(stringPtr("-11.1111111")),
+		ZoneId:             NewID(stringPtr("Z1")),
+		Url:                NewURL(stringPtr("https://acme.inc/stops/0001")),
+		LocationType:       NewStopLocation(stringPtr("0")),
+		ParentStation:      NewID(stringPtr("4")),
+		Timezone:           NewTimezone(stringPtr("Europe/Helsinki")),
+		WheelchairBoarding: NewWheelchairBoarding(stringPtr("0")),
+		PlatformCode:       NewText(stringPtr("0001")),
+		LevelId:            NewID(stringPtr("1")),
 	}
 
 	testCases := make(map[string]ggtfsTestCase)
@@ -90,9 +90,9 @@ func getStopNOKTestcases() map[string]ggtfsTestCase {
 		},
 		expectedErrors: []string{
 			"stops.txt: record on line 2: wrong number of fields",
-			"stops.txt:1: stop_id must be specified",
-			"stops.txt:3: stop_id '0001' is not unique within the file",
-			//"stops.txt: record on line 2: wrong number of fields",
+			"stops.txt:1: invalid field: stop_code",
+			"stops.txt:1: missing mandatory field: stop_id",
+			"stops.txt:3: invalid field: stop_lat",
 			//"stops.txt:1: stop_id: empty value not allowed",
 			//"stops.txt:1: stop_id must be specified",
 			//"stops.txt:3: non-unique id: stop_id",
@@ -120,10 +120,12 @@ func getStopNOKTestcases() map[string]ggtfsTestCase {
 			{"0003", "foo", "11.11", "22.22", "0002", "4", "invalid"},
 		},
 		expectedErrors: []string{
-			//"stops.txt:0: location_type: invalid value",
-			//"stops.txt:1: wheelchair_boarding: invalid value",
-			//"stops.txt:2: location_type: strconv.ParseInt: parsing \"invalid\": invalid syntax",
-			//"stops.txt:3: wheelchair_boarding: strconv.ParseInt: parsing \"invalid\": invalid syntax",
+			"stops.txt:0: invalid field: location_type",
+			"stops.txt:0: invalid field: wheelchair_boarding",
+			"stops.txt:1: invalid field: wheelchair_boarding",
+			"stops.txt:2: invalid field: location_type",
+			"stops.txt:2: invalid field: wheelchair_boarding",
+			"stops.txt:3: invalid field: wheelchair_boarding",
 		},
 	}
 
