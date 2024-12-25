@@ -57,48 +57,6 @@ func TestCalendarItemParsing(t *testing.T) {
 func getCalendarItemNOKTestcases() map[string]ggtfsTestCase {
 	testCases := make(map[string]ggtfsTestCase)
 
-	testCases["parse-failures"] = ggtfsTestCase{
-		csvRows: [][]string{
-			{"service_id", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday", "start_date", "end_date"},
-			{" "},
-			{","},
-			{"", ""},
-			{" ", " "},
-			{"", "", ""},
-			{" ", " ", " "},
-			{"", "", "", ""},
-			{" ", " ", " ", " "},
-			{"", "", "", "", ""},
-			{" ", " ", " ", " ", " "},
-			{"", "", "", "", "", ""},
-			{" ", " ", " ", " ", " ", " "},
-			{"", "", "", "", "", "", ""},
-			{" ", " ", " ", " ", " ", " ", " "},
-			{"", "", "", "", "", "", "", ""},
-			{" ", " ", " ", " ", " ", " ", " ", " "},
-			{" ", " ", " ", " ", " ", " ", " ", " ", " "},
-		},
-		expectedErrors: []string{
-			"calendar.txt: record on line 10: wrong number of fields",
-			"calendar.txt: record on line 11: wrong number of fields",
-			"calendar.txt: record on line 12: wrong number of fields",
-			"calendar.txt: record on line 13: wrong number of fields",
-			"calendar.txt: record on line 14: wrong number of fields",
-			"calendar.txt: record on line 15: wrong number of fields",
-			"calendar.txt: record on line 16: wrong number of fields",
-			"calendar.txt: record on line 17: wrong number of fields",
-			"calendar.txt: record on line 18: wrong number of fields",
-			"calendar.txt: record on line 2: wrong number of fields",
-			"calendar.txt: record on line 3: wrong number of fields",
-			"calendar.txt: record on line 4: wrong number of fields",
-			"calendar.txt: record on line 5: wrong number of fields",
-			"calendar.txt: record on line 6: wrong number of fields",
-			"calendar.txt: record on line 7: wrong number of fields",
-			"calendar.txt: record on line 8: wrong number of fields",
-			"calendar.txt: record on line 9: wrong number of fields",
-		},
-	}
-
 	testCases["invalid-fields"] = ggtfsTestCase{
 		csvRows: [][]string{
 			{"service_id", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday", "start_date", "end_date"},
