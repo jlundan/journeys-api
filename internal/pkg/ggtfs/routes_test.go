@@ -227,7 +227,7 @@ func getRouteNOKTestcases() map[string]ggtfsTestCase {
 }
 
 func TestShouldReturnEmptyRouteArrayOnEmptyString(t *testing.T) {
-	routes, errors := LoadEntities[*Route](csv.NewReader(strings.NewReader("")), validRouteHeaders, CreateRoute, RoutesFileName)
+	routes, errors := LoadEntitiesFromCSV[*Route](csv.NewReader(strings.NewReader("")), validRouteHeaders, CreateRoute, RoutesFileName)
 	if len(errors) > 0 {
 		t.Error(errors)
 	}

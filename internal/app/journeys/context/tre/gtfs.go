@@ -88,17 +88,17 @@ func NewGTFSContextForDirectory(gtfsPath string) (*GTFSContext, []error) {
 		case ggtfs.RoutesFileName:
 			context.Routes, gtfsErrors = ggtfs.LoadEntitiesFromCSV[*ggtfs.Route](reader, validRouteHeaders, ggtfs.CreateRoute, ggtfs.RoutesFileName)
 		case ggtfs.StopsFileName:
-			context.Stops, gtfsErrors = ggtfs.LoadEntities[*ggtfs.Stop](reader, validStopHeaders, ggtfs.CreateStop, ggtfs.StopsFileName)
+			context.Stops, gtfsErrors = ggtfs.LoadEntitiesFromCSV[*ggtfs.Stop](reader, validStopHeaders, ggtfs.CreateStop, ggtfs.StopsFileName)
 		case ggtfs.TripsFileName:
-			context.Trips, gtfsErrors = ggtfs.LoadEntities[*ggtfs.Trip](reader, validTripHeaders, ggtfs.CreateTrip, ggtfs.TripsFileName)
+			context.Trips, gtfsErrors = ggtfs.LoadEntitiesFromCSV[*ggtfs.Trip](reader, validTripHeaders, ggtfs.CreateTrip, ggtfs.TripsFileName)
 		case ggtfs.StopTimesFileName:
-			context.StopTimes, gtfsErrors = ggtfs.LoadEntities[*ggtfs.StopTime](reader, validStopTimeHeaders, ggtfs.CreateStopTime, ggtfs.StopTimesFileName)
+			context.StopTimes, gtfsErrors = ggtfs.LoadEntitiesFromCSV[*ggtfs.StopTime](reader, validStopTimeHeaders, ggtfs.CreateStopTime, ggtfs.StopTimesFileName)
 		case ggtfs.CalendarFileName:
-			context.CalendarItems, gtfsErrors = ggtfs.LoadEntities[*ggtfs.CalendarItem](reader, validCalendarHeaders, ggtfs.CreateCalendarItem, ggtfs.CalendarFileName)
+			context.CalendarItems, gtfsErrors = ggtfs.LoadEntitiesFromCSV[*ggtfs.CalendarItem](reader, validCalendarHeaders, ggtfs.CreateCalendarItem, ggtfs.CalendarFileName)
 		case ggtfs.CalendarDatesFileName:
-			context.CalendarDates, gtfsErrors = ggtfs.LoadEntities[*ggtfs.CalendarDate](reader, validCalendarDateHeaders, ggtfs.CreateCalendarDate, ggtfs.CalendarDatesFileName)
+			context.CalendarDates, gtfsErrors = ggtfs.LoadEntitiesFromCSV[*ggtfs.CalendarDate](reader, validCalendarDateHeaders, ggtfs.CreateCalendarDate, ggtfs.CalendarDatesFileName)
 		case ggtfs.ShapesFileName:
-			context.Shapes, gtfsErrors = ggtfs.LoadEntities[*ggtfs.Shape](reader, validShapeHeaders, ggtfs.CreateShape, ggtfs.ShapesFileName)
+			context.Shapes, gtfsErrors = ggtfs.LoadEntitiesFromCSV[*ggtfs.Shape](reader, validShapeHeaders, ggtfs.CreateShape, ggtfs.ShapesFileName)
 		}
 
 		if len(gtfsErrors) > 0 {

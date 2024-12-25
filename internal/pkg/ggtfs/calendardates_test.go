@@ -13,7 +13,7 @@ import (
 var validCalendarDateHeaders = []string{"service_id", "date", "exception_type"}
 
 func TestShouldReturnEmptyCalendarDateArrayOnEmptyString(t *testing.T) {
-	agencies, errors := LoadEntities[*CalendarDate](csv.NewReader(strings.NewReader("")), validCalendarDateHeaders, CreateCalendarDate, CalendarDatesFileName)
+	agencies, errors := LoadEntitiesFromCSV[*CalendarDate](csv.NewReader(strings.NewReader("")), validCalendarDateHeaders, CreateCalendarDate, CalendarDatesFileName)
 	if len(errors) > 0 {
 		t.Error(errors)
 	}
@@ -24,7 +24,7 @@ func TestShouldReturnEmptyCalendarDateArrayOnEmptyString(t *testing.T) {
 
 func TestCalendarDateParsing(t *testing.T) {
 	loadCalendarDatesFunc := func(reader *csv.Reader) ([]interface{}, []error) {
-		calendarDates, errs := LoadEntities[*CalendarDate](reader, validCalendarDateHeaders, CreateCalendarDate, CalendarDatesFileName)
+		calendarDates, errs := LoadEntitiesFromCSV[*CalendarDate](reader, validCalendarDateHeaders, CreateCalendarDate, CalendarDatesFileName)
 		entities := make([]interface{}, len(calendarDates))
 		for i, calendarItem := range calendarDates {
 			entities[i] = calendarItem
@@ -67,6 +67,7 @@ func getCalendarDateOKTestcases() map[string]ggtfsTestCase {
 		ServiceId:     NewID(stringPtr("1")),
 		Date:          NewDate(stringPtr("20200101")),
 		ExceptionType: NewExceptionTypeEnum(stringPtr("1")),
+		LineNumber:    2,
 	}
 
 	testCases := make(map[string]ggtfsTestCase)
@@ -109,12 +110,12 @@ func getCalendarDateNOKTestcases() map[string]ggtfsTestCase {
 			{"1001", "20201011", "3"},
 		},
 		expectedErrors: []string{
-			"calendar_dates.txt:0: invalid mandatory field: date",
-			"calendar_dates.txt:0: invalid mandatory field: exception_type",
-			"calendar_dates.txt:0: invalid mandatory field: service_id",
-			"calendar_dates.txt:1: invalid mandatory field: exception_type",
+			"calendar_dates.txt:2: invalid mandatory field: date",
 			"calendar_dates.txt:2: invalid mandatory field: exception_type",
+			"calendar_dates.txt:2: invalid mandatory field: service_id",
 			"calendar_dates.txt:3: invalid mandatory field: exception_type",
+			"calendar_dates.txt:4: invalid mandatory field: exception_type",
+			"calendar_dates.txt:5: invalid mandatory field: exception_type",
 		},
 	}
 
@@ -125,7 +126,7 @@ func getCalendarDateNOKTestcases() map[string]ggtfsTestCase {
 			{"1001", "20201011", strconv.Itoa(ServiceRemovedForCalendarDate)},
 		},
 		expectedErrors: []string{
-			"calendar_dates.txt:1: referenced service_id '1001' not found in calendar.txt",
+			"calendar_dates.txt:3: referenced service_id '1001' not found in calendar.txt",
 		},
 		fixtures: map[string][]interface{}{
 			"calendarItems": {
@@ -140,7 +141,7 @@ func getCalendarDateNOKTestcases() map[string]ggtfsTestCase {
 					Sunday:     NewAvailableForWeekdayInfo(stringPtr(CalendarNotAvailableForWeekday)),
 					StartDate:  NewDate(stringPtr("20201011")),
 					EndDate:    NewDate(stringPtr("20201011")),
-					LineNumber: 0,
+					LineNumber: 2,
 				},
 			},
 		},

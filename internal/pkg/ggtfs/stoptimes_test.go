@@ -13,7 +13,7 @@ var validStopTimeHeaders = []string{"trip_id", "arrival_time", "departure_time",
 	"shape_dist_traveled", "timepoint"}
 
 func TestShouldReturnEmptyStopTimeArrayOnEmptyString(t *testing.T) {
-	stopTimes, errors := LoadEntities[*StopTime](csv.NewReader(strings.NewReader("")), validStopTimeHeaders, CreateStopTime, StopTimesFileName)
+	stopTimes, errors := LoadEntitiesFromCSV[*StopTime](csv.NewReader(strings.NewReader("")), validStopTimeHeaders, CreateStopTime, StopTimesFileName)
 	if len(errors) > 0 {
 		t.Error(errors)
 	}
@@ -24,7 +24,7 @@ func TestShouldReturnEmptyStopTimeArrayOnEmptyString(t *testing.T) {
 
 func TestStopTimeParsing(t *testing.T) {
 	loadStopTimesFunc := func(reader *csv.Reader) ([]interface{}, []error) {
-		stopTimes, errs := LoadEntities[*StopTime](reader, validStopTimeHeaders, CreateStopTime, StopTimesFileName)
+		stopTimes, errs := LoadEntitiesFromCSV[*StopTime](reader, validStopTimeHeaders, CreateStopTime, StopTimesFileName)
 		entities := make([]interface{}, len(stopTimes))
 		for i, stopTime := range stopTimes {
 			entities[i] = stopTime
@@ -61,7 +61,7 @@ func getStopTimeOKTestcases() map[string]ggtfsTestCase {
 		ContinuousDropOff: NewContinuousDropOffType(stringPtr("3")),
 		ShapeDistTraveled: NewFloat(stringPtr("100")),
 		Timepoint:         NewTimePoint(stringPtr("1")),
-		LineNumber:        0,
+		LineNumber:        2,
 	}
 
 	testCases := make(map[string]ggtfsTestCase)

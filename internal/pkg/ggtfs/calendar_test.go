@@ -13,7 +13,7 @@ var validCalendarHeaders = []string{
 }
 
 func TestShouldReturnEmptyCalendarItemArrayOnEmptyString(t *testing.T) {
-	agencies, errors := LoadEntities[*CalendarItem](csv.NewReader(strings.NewReader("")), validCalendarHeaders, CreateCalendarItem, CalendarFileName)
+	agencies, errors := LoadEntitiesFromCSV[*CalendarItem](csv.NewReader(strings.NewReader("")), validCalendarHeaders, CreateCalendarItem, CalendarFileName)
 	if len(errors) > 0 {
 		t.Error(errors)
 	}
@@ -32,7 +32,7 @@ func TestNewWeekdayEnumReturnsEmptyOnNil(t *testing.T) {
 
 func TestCalendarItemParsing(t *testing.T) {
 	loadCalendarItemsFunc := func(reader *csv.Reader) ([]interface{}, []error) {
-		calendarItems, errs := LoadEntities[*CalendarItem](reader, validCalendarHeaders, CreateCalendarItem, CalendarFileName)
+		calendarItems, errs := LoadEntitiesFromCSV[*CalendarItem](reader, validCalendarHeaders, CreateCalendarItem, CalendarFileName)
 		entities := make([]interface{}, len(calendarItems))
 		for i, calendarItem := range calendarItems {
 			entities[i] = calendarItem
@@ -106,25 +106,25 @@ func getCalendarItemNOKTestcases() map[string]ggtfsTestCase {
 			{"SERVICE0", "3", "not a day", "-1", "2", "2", "2", "2", "not a date", "20181313"},
 		},
 		expectedErrors: []string{
-			"calendar.txt:0: invalid mandatory field: end_date",
-			"calendar.txt:0: invalid mandatory field: friday",
-			"calendar.txt:0: invalid mandatory field: monday",
-			"calendar.txt:0: invalid mandatory field: saturday",
-			"calendar.txt:0: invalid mandatory field: service_id",
-			"calendar.txt:0: invalid mandatory field: start_date",
-			"calendar.txt:0: invalid mandatory field: sunday",
-			"calendar.txt:0: invalid mandatory field: thursday",
-			"calendar.txt:0: invalid mandatory field: tuesday",
-			"calendar.txt:0: invalid mandatory field: wednesday",
-			"calendar.txt:1: invalid mandatory field: end_date",
-			"calendar.txt:1: invalid mandatory field: friday",
-			"calendar.txt:1: invalid mandatory field: monday",
-			"calendar.txt:1: invalid mandatory field: saturday",
-			"calendar.txt:1: invalid mandatory field: start_date",
-			"calendar.txt:1: invalid mandatory field: sunday",
-			"calendar.txt:1: invalid mandatory field: thursday",
-			"calendar.txt:1: invalid mandatory field: tuesday",
-			"calendar.txt:1: invalid mandatory field: wednesday",
+			"calendar.txt:2: invalid mandatory field: end_date",
+			"calendar.txt:2: invalid mandatory field: friday",
+			"calendar.txt:2: invalid mandatory field: monday",
+			"calendar.txt:2: invalid mandatory field: saturday",
+			"calendar.txt:2: invalid mandatory field: service_id",
+			"calendar.txt:2: invalid mandatory field: start_date",
+			"calendar.txt:2: invalid mandatory field: sunday",
+			"calendar.txt:2: invalid mandatory field: thursday",
+			"calendar.txt:2: invalid mandatory field: tuesday",
+			"calendar.txt:2: invalid mandatory field: wednesday",
+			"calendar.txt:3: invalid mandatory field: end_date",
+			"calendar.txt:3: invalid mandatory field: friday",
+			"calendar.txt:3: invalid mandatory field: monday",
+			"calendar.txt:3: invalid mandatory field: saturday",
+			"calendar.txt:3: invalid mandatory field: start_date",
+			"calendar.txt:3: invalid mandatory field: sunday",
+			"calendar.txt:3: invalid mandatory field: thursday",
+			"calendar.txt:3: invalid mandatory field: tuesday",
+			"calendar.txt:3: invalid mandatory field: wednesday",
 		},
 	}
 
@@ -133,16 +133,17 @@ func getCalendarItemNOKTestcases() map[string]ggtfsTestCase {
 
 func getCalendarItemOKTestcases() map[string]ggtfsTestCase {
 	expected1 := CalendarItem{
-		ServiceId: NewID(stringPtr("111")),
-		Monday:    NewAvailableForWeekdayInfo(stringPtr("1")),
-		Tuesday:   NewAvailableForWeekdayInfo(stringPtr("1")),
-		Wednesday: NewAvailableForWeekdayInfo(stringPtr("1")),
-		Thursday:  NewAvailableForWeekdayInfo(stringPtr("1")),
-		Friday:    NewAvailableForWeekdayInfo(stringPtr("1")),
-		Saturday:  NewAvailableForWeekdayInfo(stringPtr("1")),
-		Sunday:    NewAvailableForWeekdayInfo(stringPtr("1")),
-		StartDate: NewDate(stringPtr("20200101")),
-		EndDate:   NewDate(stringPtr("20200102")),
+		ServiceId:  NewID(stringPtr("111")),
+		Monday:     NewAvailableForWeekdayInfo(stringPtr("1")),
+		Tuesday:    NewAvailableForWeekdayInfo(stringPtr("1")),
+		Wednesday:  NewAvailableForWeekdayInfo(stringPtr("1")),
+		Thursday:   NewAvailableForWeekdayInfo(stringPtr("1")),
+		Friday:     NewAvailableForWeekdayInfo(stringPtr("1")),
+		Saturday:   NewAvailableForWeekdayInfo(stringPtr("1")),
+		Sunday:     NewAvailableForWeekdayInfo(stringPtr("1")),
+		StartDate:  NewDate(stringPtr("20200101")),
+		EndDate:    NewDate(stringPtr("20200102")),
+		LineNumber: 2,
 	}
 
 	testCases := make(map[string]ggtfsTestCase)
