@@ -51,13 +51,13 @@ func getTripOKTestcases() map[string]ggtfsTestCase {
 		Id:                   NewID(stringPtr("1")),
 		RouteId:              NewID(stringPtr("2")),
 		ServiceId:            NewID(stringPtr("3")),
-		HeadSign:             NewOptionalText(stringPtr("Trip 1")),
-		ShortName:            NewOptionalText(stringPtr("trip1")),
-		DirectionId:          NewOptionalDirectionId(stringPtr("0")),
-		BlockId:              NewOptionalID(stringPtr("4")),
-		ShapeId:              NewOptionalID(stringPtr("5")),
-		WheelchairAccessible: NewOptionalWheelchairAccessible(stringPtr("1")),
-		BikesAllowed:         NewOptionalBikesAllowed(stringPtr("2")),
+		HeadSign:             NewText(stringPtr("Trip 1")),
+		ShortName:            NewText(stringPtr("trip1")),
+		DirectionId:          NewDirectionId(stringPtr("0")),
+		BlockId:              NewID(stringPtr("4")),
+		ShapeId:              NewID(stringPtr("5")),
+		WheelchairAccessible: NewWheelchairAccessible(stringPtr("1")),
+		BikesAllowed:         NewBikesAllowed(stringPtr("2")),
 	}
 
 	testCases := make(map[string]ggtfsTestCase)
@@ -98,8 +98,10 @@ func getTripNOKTestcases() map[string]ggtfsTestCase {
 			{"002", "002", "001", "0", "0", "0"},
 		},
 		expectedErrors: []string{
+			"trips.txt:0: invalid field: bikes_allowed",
 			"trips.txt:0: invalid field: direction_id",
 			"trips.txt:0: invalid field: wheelchair_accessible",
+			"trips.txt:1: invalid field: bikes_allowed",
 			"trips.txt:1: invalid field: direction_id",
 			"trips.txt:1: invalid field: wheelchair_accessible",
 
