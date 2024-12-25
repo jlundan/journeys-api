@@ -404,3 +404,35 @@ func NewTimezone(raw *string) Timezone {
 	}
 	return Timezone{base{raw: *raw, isPresent: true}}
 }
+
+type PositiveInteger struct {
+	Integer
+}
+
+func (pi PositiveInteger) IsValid() bool {
+	return pi.Integer.IsValid() && pi.Integer.Int() > 0
+}
+
+func NewPositiveInteger(raw *string) PositiveInteger {
+	if raw == nil {
+		return PositiveInteger{
+			Integer{base: base{raw: ""}}}
+	}
+	return PositiveInteger{Integer{base: base{raw: *raw, isPresent: true}}}
+}
+
+type PositiveFloat struct {
+	Float
+}
+
+func (pf PositiveFloat) IsValid() bool {
+	return pf.Float.IsValid() && pf.Float.Float64() > 0
+}
+
+func NewPositiveFloat(raw *string) PositiveFloat {
+	if raw == nil {
+		return PositiveFloat{
+			Float{base: base{raw: ""}}}
+	}
+	return PositiveFloat{Float{base: base{raw: *raw, isPresent: true}}}
+}
