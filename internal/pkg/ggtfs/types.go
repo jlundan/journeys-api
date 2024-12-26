@@ -8,15 +8,6 @@ import (
 	"strings"
 )
 
-// base is a struct that contains the raw value and a flag to indicate if the header for the field is present in the
-// parsed CSV file.
-// The loader method reads only the fields which have a header present in the file. This means that the loader
-// skips all fields which do not have a header. To make the processing more straightforward, the isPresent is
-// kept at its default state (false), which means that when the loader does not process a missing field, the GTFS
-// entity gets the field struct with default values, if it is mandatory field, which marks the field absent (isPresent is false).
-// (The optional fields will get a nil pointer, if the header for that field is missing in the CSV file, which means
-// that these structs are not created at all for them).
-
 type base struct {
 	raw       string
 	isPresent bool
@@ -50,12 +41,10 @@ func (base *base) IsPresent() bool {
 	return base.isPresent
 }
 
-// ID represents an internal ID, such as `route_id` or `trip_id`.
 type ID struct {
 	base
 }
 
-// IsValid checks if the ID is not empty.
 func (id *ID) IsValid() bool {
 	// FIXME: none of the isValid methods needs pointer receiver
 	if id == nil {
@@ -72,12 +61,10 @@ func NewID(raw *string) ID {
 	return ID{base{raw: *raw, isPresent: true}}
 }
 
-// Color represents a color encoded as a six-digit hexadecimal number.
 type Color struct {
 	base
 }
 
-// IsValid checks if the Color is a valid six-digit hexadecimal value.
 func (c *Color) IsValid() bool {
 	if c == nil {
 		return false
@@ -94,12 +81,10 @@ func NewColor(raw *string) Color {
 	return Color{base{raw: *raw, isPresent: true}}
 }
 
-// Email represents an email address.
 type Email struct {
 	base
 }
 
-// IsValid checks if the Email is in a valid email format.
 func (e *Email) IsValid() bool {
 	if e == nil {
 		return false
@@ -116,12 +101,10 @@ func NewEmail(raw *string) Email {
 	return Email{base{raw: *raw, isPresent: true}}
 }
 
-// Integer represents a number without floating point.
 type Integer struct {
 	base
 }
 
-// IsValid if the value is a valid Integer.
 func (i *Integer) IsValid() bool {
 	if i == nil {
 		return false
@@ -131,9 +114,6 @@ func (i *Integer) IsValid() bool {
 	return err == nil
 }
 
-// Int returns an integer value of the raw string received from the CSV file.
-// Use IsValid to verify that the conversion can be made. This method will return
-// zero for strings that cannot be parsed to int.
 func (i *Integer) Int() int {
 	val, _ := strconv.Atoi(i.raw)
 	return val
@@ -146,7 +126,6 @@ func NewInteger(raw *string) Integer {
 	return Integer{base{raw: *raw, isPresent: true}}
 }
 
-// Float represents a number with a floating point.
 type Float struct {
 	base
 }
@@ -158,7 +137,6 @@ func NewFloat(raw *string) Float {
 	return Float{base{raw: *raw, isPresent: true}}
 }
 
-// IsValid if the value is a valid Float.
 func (f *Float) IsValid() bool {
 	if f == nil {
 		return false
@@ -168,20 +146,15 @@ func (f *Float) IsValid() bool {
 	return err == nil
 }
 
-// Float64 returns a 64-bit float value of the raw string received from the CSV file.
-// Use IsValid to verify that the conversion can be made. This method will return
-// zero for strings that cannot be parsed to float.
 func (f *Float) Float64() float64 {
 	val, _ := strconv.ParseFloat(f.raw, 64)
 	return val
 }
 
-// URL represents a fully qualified URL.
 type URL struct {
 	base
 }
 
-// IsValid checks if the URL is well-formed.
 func (u *URL) IsValid() bool {
 	if u == nil {
 		return false
@@ -203,7 +176,6 @@ type Time struct {
 	base
 }
 
-// IsValid checks if the Time is in a valid format.
 func (t *Time) IsValid() bool {
 	if t == nil {
 		return false
@@ -235,12 +207,10 @@ func (cc *CurrencyCode) IsValid() bool {
 	return match
 }
 
-// CurrencyAmount represents a monetary amount.
 type CurrencyAmount struct {
 	base
 }
 
-// IsValid checks if the CurrencyAmount is a valid decimal number.
 func (ca *CurrencyAmount) IsValid() bool {
 	if ca == nil {
 		return false
@@ -250,7 +220,6 @@ func (ca *CurrencyAmount) IsValid() bool {
 	return err == nil
 }
 
-// Date represents a date in the format YYYYMMDD.
 type Date struct {
 	base
 }
@@ -272,7 +241,6 @@ func NewDate(raw *string) Date {
 	return Date{base{raw: *raw, isPresent: true}}
 }
 
-// LanguageCode represents an IETF BCP 47 language code.
 type LanguageCode struct {
 	base
 }
@@ -337,12 +305,10 @@ func (lon *Longitude) IsValid() bool {
 	return err == nil && value >= -180.0 && value <= 180.0
 }
 
-// PhoneNumber represents a phone number.
 type PhoneNumber struct {
 	base
 }
 
-// IsValid checks if the PhoneNumber has a reasonable length and contains only digits and certain symbols.
 func (pn *PhoneNumber) IsValid() bool {
 	if pn == nil {
 		return false
@@ -359,12 +325,10 @@ func NewPhoneNumber(raw *string) PhoneNumber {
 	return PhoneNumber{base{raw: *raw, isPresent: true}}
 }
 
-// Text represents a string of UTF-8 characters intended for display.
 type Text struct {
 	base
 }
 
-// IsValid checks if the Text is non-empty.
 func (t *Text) IsValid() bool {
 	if t == nil {
 		return false
