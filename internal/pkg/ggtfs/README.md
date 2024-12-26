@@ -43,7 +43,7 @@
       * TODO: VALIDATION: level_id: Foreign ID referencing levels.level_id (must exist)
       * TODO: VALIDATION: platform_code: Words like “platform” or "track" (or the feed’s language-specific equivalent) should not be included.
       * TODO: VALIDATION: stop_id: ID must be unique across all stops.stop_id, locations.geojson id, and location_groups.location_group_id values.
-    * tests: NOK
+    * tests: OK
 * stop_times
     * parsing: OK
     * validation: partial OK
@@ -74,7 +74,7 @@
       * TODO: VALIDATION: drop_off_type: If this field is empty, the stop_time inherits any continuous pickup behavior defined in routes.txt.
       * TODO: VALIDATION: continuous_drop_off: If this field is populated, it overrides any continuous drop-off behavior defined in routes.txt.
       * TODO: VALIDATION: continuous_drop_off: If this field is empty, the stop_time inherits any continuous drop-off behavior defined in routes.txt.
-    * tests: NOK
+    * tests: OK
 * trips
     * parsing: OK
     * validation: partial OK
@@ -82,4 +82,4 @@
       * TODO: VALIDATION: service_id: Foreign ID referencing calendar.service_id or calendar_dates.service_id. (calendar_dates service_id relation is not checked)
       * TODO: VALIDATION: shape_id: Foreign ID referencing shapes.shape_id (must refer to an existing shape)
       * TODO: VALIDATION: shape_id: Required if the trip has a continuous pickup or drop-off behavior defined either in routes.txt or in stop_times.txt. Otherwise, optional.
-    * tests: NOK
+    * tests: OK
