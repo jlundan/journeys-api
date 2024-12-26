@@ -5,14 +5,14 @@ import (
 )
 
 type Agency struct {
-	Id         ID           // agency_id, conditionally required
-	Name       Text         // agency_name, required
-	URL        URL          // agency_url, required
-	Timezone   Timezone     // agency_timezone, required
-	Lang       LanguageCode // agency_lang, optional
-	Phone      PhoneNumber  // agency_phone, optional
-	FareURL    URL          // agency_fare_url, optional
-	Email      Email        // agency_email, optional
+	Id         ID           // agency_id 		(conditionally required)
+	Name       Text         // agency_name 		(required)
+	URL        URL          // agency_url 		(required)
+	Timezone   Timezone     // agency_timezone 	(required)
+	Lang       LanguageCode // agency_lang 		(optional)
+	Phone      PhoneNumber  // agency_phone 	(optional)
+	FareURL    URL          // agency_fare_url 	(optional)
+	Email      Email        // agency_email 	(optional)
 	LineNumber int
 }
 
