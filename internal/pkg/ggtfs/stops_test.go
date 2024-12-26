@@ -81,52 +81,28 @@ func getStopOKTestcases() map[string]ggtfsTestCase {
 
 func getStopNOKTestcases() map[string]ggtfsTestCase {
 	testCases := make(map[string]ggtfsTestCase)
-	testCases["1"] = ggtfsTestCase{
+
+	testCases["invalid-fields-must-error-out"] = ggtfsTestCase{
 		csvRows: [][]string{
-			{"stop_id", "stop_name", "stop_lat", "stop_lon", "parent_station"},
-			{","},
-			{"", "foo", "11.11", "22.22", "0002"},
-			{"0001", "foo", "11.11", "22.22", "0002"},
-			{"0001", "foo", "invalid", "22.22", "0002"},
+			{"stop_id", "stop_code", "stop_name", "stop_desc", "stop_lat", "stop_lon", "zone_id",
+				"stop_url", "location_type", "parent_station", "stop_timezone", "wheelchair_boarding", "level_id", "platform_code", "municipality_id"},
+			{"", "", "", "", "", "", "", "", "", "", "", "", "", "", ""},
 		},
 		expectedErrors: []string{
-			"stops.txt: record on line 2: wrong number of fields",
-			"stops.txt:3: invalid field: stop_code",
-			"stops.txt:3: invalid mandatory field: stop_id",
-			"stops.txt:5: invalid field: stop_lat",
-			//"stops.txt:1: stop_id: empty value not allowed",
-			//"stops.txt:1: stop_id must be specified",
-			//"stops.txt:3: non-unique id: stop_id",
-			//"stops.txt:3: stop_lat: strconv.ParseFloat: parsing \"invalid\": invalid syntax",
-		},
-	}
-	testCases["2"] = ggtfsTestCase{
-		csvRows: [][]string{
-			{"stop_id", "location_type"},
-			{"0001", "2"},
-		},
-		expectedErrors: []string{
-			"stops.txt:2: parent_station must be specified for location types 2, 3, and 4",
-			"stops.txt:2: stop_lat must be specified for location types 0, 1, and 2",
-			"stops.txt:2: stop_lon must be specified for location types 0, 1, and 2",
-			"stops.txt:2: stop_name must be specified for location types 0, 1, and 2",
-		},
-	}
-	testCases["3"] = ggtfsTestCase{
-		csvRows: [][]string{
-			{"stop_id", "stop_name", "stop_lat", "stop_lon", "parent_station", "location_type", "wheelchair_boarding"},
-			{"0000", "foo", "11.11", "22.22", "0002", "10", "4"},
-			{"0001", "foo", "11.11", "22.22", "0002", "4", "10"},
-			{"0002", "foo", "11.11", "22.22", "0002", "invalid", "4"},
-			{"0003", "foo", "11.11", "22.22", "0002", "4", "invalid"},
-		},
-		expectedErrors: []string{
+			"stops.txt:2: invalid field: level_id",
 			"stops.txt:2: invalid field: location_type",
+			"stops.txt:2: invalid field: parent_station",
+			"stops.txt:2: invalid field: platform_code",
+			"stops.txt:2: invalid field: stop_code",
+			"stops.txt:2: invalid field: stop_desc",
+			"stops.txt:2: invalid field: stop_lat",
+			"stops.txt:2: invalid field: stop_lon",
+			"stops.txt:2: invalid field: stop_name",
+			"stops.txt:2: invalid field: stop_timezone",
+			"stops.txt:2: invalid field: stop_url",
 			"stops.txt:2: invalid field: wheelchair_boarding",
-			"stops.txt:3: invalid field: wheelchair_boarding",
-			"stops.txt:4: invalid field: location_type",
-			"stops.txt:4: invalid field: wheelchair_boarding",
-			"stops.txt:5: invalid field: wheelchair_boarding",
+			"stops.txt:2: invalid field: zone_id",
+			"stops.txt:2: invalid mandatory field: stop_id",
 		},
 	}
 

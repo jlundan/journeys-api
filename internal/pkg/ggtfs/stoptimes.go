@@ -172,6 +172,12 @@ func ValidateStopTimes(stopTimes []*StopTime, stops []*Stop) ([]error, []string)
 		if stopTimeItem == nil {
 			continue
 		}
+
+		vErr := stopTimeItem.Validate()
+		if len(vErr) > 0 {
+			validationErrors = append(validationErrors, vErr...)
+		}
+
 		stopFound := false
 		if stops != nil {
 			for _, stop := range stops {
