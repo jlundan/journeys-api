@@ -75,38 +75,23 @@ func getTripOKTestcases() map[string]ggtfsTestCase {
 
 func getTripNOKTestcases() map[string]ggtfsTestCase {
 	testCases := make(map[string]ggtfsTestCase)
-	testCases["1"] = ggtfsTestCase{
+	testCases["invalid-fields-must-error-out"] = ggtfsTestCase{
 		csvRows: [][]string{
-			{"route_id"},
-			{","},
-			{" "},
-			{"1"},
-		},
-		expectedErrors: []string{
-			"trips.txt: record on line 2: wrong number of fields",
-			"trips.txt:3: invalid mandatory field: route_id",
-			"trips.txt:3: invalid mandatory field: service_id",
-			"trips.txt:3: invalid mandatory field: trip_id",
-			"trips.txt:4: invalid mandatory field: service_id",
-			"trips.txt:4: invalid mandatory field: trip_id",
-		},
-	}
-	testCases["2"] = ggtfsTestCase{
-		csvRows: [][]string{
-			{"trip_id", "service_id", "route_id", "direction_id", "wheelchair_accessible", "bikes_allowed"},
-			{"001", "002", "001", "invalid", "invalid", "invalid"},
-			{"002", "002", "001", "5", "5", "5"},
-			{"002", "002", "001", "0", "0", "0"},
+			{"route_id", "service_id", "trip_id", "trip_headsign", "trip_short_name",
+				"direction_id", "block_id", "shape_id", "wheelchair_accessible", "bikes_allowed"},
+			{"", "", "", "", "", "", "", "", "", ""},
 		},
 		expectedErrors: []string{
 			"trips.txt:2: invalid field: bikes_allowed",
+			"trips.txt:2: invalid field: block_id",
 			"trips.txt:2: invalid field: direction_id",
+			"trips.txt:2: invalid field: shape_id",
+			"trips.txt:2: invalid field: trip_headsign",
+			"trips.txt:2: invalid field: trip_short_name",
 			"trips.txt:2: invalid field: wheelchair_accessible",
-			"trips.txt:3: invalid field: bikes_allowed",
-			"trips.txt:3: invalid field: direction_id",
-			"trips.txt:3: invalid field: wheelchair_accessible",
-
-			// TODO: "trips.txt:2: non-unique id: trip_id",
+			"trips.txt:2: invalid mandatory field: route_id",
+			"trips.txt:2: invalid mandatory field: service_id",
+			"trips.txt:2: invalid mandatory field: trip_id",
 		},
 	}
 
