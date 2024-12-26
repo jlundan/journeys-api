@@ -99,7 +99,6 @@ func (s Stop) Validate() []error {
 	return validationErrors
 }
 
-// CreateStop creates and validates a Stop instance from the CSV row data.
 func CreateStop(row []string, headers map[string]int, lineNumber int) *Stop {
 	var parseErrors []error
 
