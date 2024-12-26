@@ -58,7 +58,6 @@ func (t Trip) Validate() []error {
 	return validationErrors
 }
 
-// CreateTrip creates and validates a Trip instance from the CSV row data.
 func CreateTrip(row []string, headers map[string]int, lineNumber int) *Trip {
 	var parseErrors []error
 
@@ -99,7 +98,6 @@ func CreateTrip(row []string, headers map[string]int, lineNumber int) *Trip {
 	return &trip
 }
 
-// ValidateTrips performs additional validation for a list of Trip instances.
 func ValidateTrips(trips []*Trip, routes []*Route, calendarItems []*CalendarItem, shapes []*Shape) ([]error, []string) {
 	var validationErrors []error
 	var recommendations []string

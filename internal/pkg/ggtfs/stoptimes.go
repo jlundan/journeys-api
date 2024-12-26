@@ -92,7 +92,6 @@ func (st StopTime) Validate() []error {
 	return validationErrors
 }
 
-// CreateStopTime creates and validates a StopTime instance from the CSV row data.
 func CreateStopTime(row []string, headers map[string]int, lineNumber int) *StopTime {
 	var parseErrors []error
 
@@ -150,7 +149,6 @@ func CreateStopTime(row []string, headers map[string]int, lineNumber int) *StopT
 	return &stopTime
 }
 
-// ValidateStopTimes performs additional validation for a list of StopTime instances.
 func ValidateStopTimes(stopTimes []*StopTime, stops []*Stop) ([]error, []string) {
 	var validationErrors []error
 	var recommendations []string
