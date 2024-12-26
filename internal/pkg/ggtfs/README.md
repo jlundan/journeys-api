@@ -46,7 +46,34 @@
     * tests: NOK
 * stop_times
     * parsing: OK
-    * validation: NOK
+    * validation: partial OK
+      * TODO: VALIDATION: stop_id: Required if stop_times.location_group_id AND stop_times.location_id are NOT defined.
+      * TODO: VALIDATION: stop_id: Forbidden if stop_times.location_group_id or stop_times.location_id are defined.
+      * TODO: VALIDATION: departure_time: Required for timepoint=1. Forbidden when start_pickup_drop_off_window or end_pickup_drop_off_window are defined. Otherwise optional.
+      * TODO: VALIDATION: arrival_time: Required for the first and last stop in a trip (defined by stop_times.stop_sequence). Required for timepoint=1. Forbidden when start_pickup_drop_off_window or end_pickup_drop_off_window are defined. Otherwise optional.
+      * TODO: VALIDATION: location_group_id: Forbidden if stop_times.stop_id or stop_times.location_id are defined
+      * TODO: VALIDATION: location_id: Forbidden if stop_times.stop_id or stop_times.location_group_id are defined.
+      * TODO: VALIDATION: stop_sequence: The values must increase along the trip but do not need to be consecutive.
+      * TODO: VALIDATION: stop_sequence: Travel within the same location group or GeoJSON location requires two records in stop_times.txt with the same location_group_id or location_id.
+      * TODO: VALIDATION: start_pickup_drop_off_window: Required if stop_times.location_group_id or stop_times.location_id is defined.  Required if end_pickup_drop_off_window is defined. Forbidden if arrival_time or departure_time is defined. Optional otherwise.
+      * TODO: VALIDATION: pickup_type: pickup_type=0 forbidden if start_pickup_drop_off_window or end_pickup_drop_off_window are defined. pickup_type=3 forbidden if start_pickup_drop_off_window or end_pickup_drop_off_window are defined. Otherwise optional.
+      * TODO: VALIDATION: drop_off_type: drop_off_type=0 forbidden if start_pickup_drop_off_window or end_pickup_drop_off_window are defined. Otherwise optional.
+      * TODO: VALIDATION: drop_off_type: Forbidden if start_pickup_drop_off_window or end_pickup_drop_off_window are defined. Otherwise optional.
+      * TODO: VALIDATION: continuous_drop_off: Forbidden if start_pickup_drop_off_window or end_pickup_drop_off_window are defined. Otherwise optional.
+      * TODO: VALIDATION: Values used for shape_dist_traveled must increase along with stop_sequence; they must not be used to show reverse travel along a route.
+      * TODO: VALIDATION: recommended for routes that have looping or inlining (the vehicle crosses or travels over the same portion of alignment in one trip). See shape_dist_traveled at https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#shapestxt
+      * TODO: VALIDATION: pickup_booking_rule_id: Foreign ID referencing booking_rules.booking_rule_id (should reference a valid booking rule).
+      * TODO: VALIDATION: drop_off_booking_rule_id: Foreign ID referencing booking_rules.booking_rule_id (should reference a valid booking rule).
+      * TODO: VALIDATION: trip_id: Foreign ID referencing trips.trip_id (should reference a valid trip).
+      * TODO: VALIDATION: stop_id: Referenced locations must be stops/platforms, i.e. their stops.location_type value must be 0 or empty.
+      * TODO: VALIDATION: location_group_id: Foreign ID referencing location_groups.location_group_id (should reference a valid location group).
+      * TODO: VALIDATION: location_id: Foreign ID referencing id from locations.geojson (should reference a valid location).
+      * TODO: VALIDATION: stop_headsign: This field overrides the default trips.trip_headsign when the headsign changes between stops. If the headsign is displayed for an entire trip, trips.trip_headsign should be used instead.
+      * TODO: VALIDATION: stop_headsign: A stop_headsign value specified for one stop_time does not apply to subsequent stop_times in the same trip. If you want to override the trip_headsign for multiple stop_times in the same trip, the stop_headsign value must be repeated in each stop_time row.
+      * TODO: VALIDATION: drop_off_type: If this field is populated, it overrides any continuous pickup behavior defined in routes.txt.
+      * TODO: VALIDATION: drop_off_type: If this field is empty, the stop_time inherits any continuous pickup behavior defined in routes.txt.
+      * TODO: VALIDATION: continuous_drop_off: If this field is populated, it overrides any continuous drop-off behavior defined in routes.txt.
+      * TODO: VALIDATION: continuous_drop_off: If this field is empty, the stop_time inherits any continuous drop-off behavior defined in routes.txt.
     * tests: NOK
 * trips
     * parsing: OK
