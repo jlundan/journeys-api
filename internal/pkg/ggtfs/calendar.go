@@ -91,6 +91,7 @@ func ValidateCalendarItems(calendarItems []*CalendarItem) ([]error, []string) {
 	return validationErrors, nil
 }
 
+//goland:noinspection GoUnusedConst
 const (
 	CalendarAvailableForWeekday    string = "1"
 	CalendarNotAvailableForWeekday string = "0"
