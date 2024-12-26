@@ -5,12 +5,12 @@ import (
 )
 
 type Shape struct {
-	Id           ID              // shape_id, required
-	PtLat        Latitude        // shape_pt_lat, required
-	PtLon        Longitude       // shape_pt_lon, required
-	PtSequence   PositiveInteger // shape_pt_sequence, required
-	DistTraveled PositiveFloat   // shape_dist_traveled, optional
-	LineNumber   int             // Line number in the CSV file for error reporting
+	Id           ID              // shape_id 			(required)
+	PtLat        Latitude        // shape_pt_lat 		(required)
+	PtLon        Longitude       // shape_pt_lon 		(required)
+	PtSequence   PositiveInteger // shape_pt_sequence 	(required)
+	DistTraveled PositiveFloat   // shape_dist_traveled (optional)
+	LineNumber   int
 }
 
 func (s Shape) Validate() []error {
