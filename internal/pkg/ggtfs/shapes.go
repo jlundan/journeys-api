@@ -47,7 +47,6 @@ func (s Shape) Validate() []error {
 	return validationErrors
 }
 
-// CreateShape creates and validates a Shape instance from the CSV row data.
 func CreateShape(row []string, headers map[string]int, lineNumber int) *Shape {
 
 	shape := Shape{
@@ -74,7 +73,6 @@ func CreateShape(row []string, headers map[string]int, lineNumber int) *Shape {
 	return &shape
 }
 
-// ValidateShapes performs additional validation for a list of Shape instances.
 func ValidateShapes(shapes []*Shape) ([]error, []string) {
 	var validationErrors []error
 

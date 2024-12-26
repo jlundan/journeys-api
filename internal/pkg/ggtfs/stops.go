@@ -153,7 +153,6 @@ func CreateStop(row []string, headers map[string]int, lineNumber int) *Stop {
 	return &stop
 }
 
-// ValidateStops performs additional validation for a list of Stop instances.
 func ValidateStops(stops []*Stop) ([]error, []string) {
 	var validationErrors []error
 	var recommendations []string
