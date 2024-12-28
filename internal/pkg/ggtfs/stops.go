@@ -83,19 +83,6 @@ func (s Stop) Validate() []error {
 		validationErrors = append(validationErrors, createFileRowError(StopsFileName, s.LineNumber, "parent_station must be specified for location types 2, 3, and 4"))
 	}
 
-	// TODO: VALIDATION: stop_desc: Should not be a duplicate of stop_name
-	// TODO: VALIDATION: zone_id: If this record represents a station or station entrance, the zone_id is ignored
-	// TODO: VALIDATION: parent_station: Required for locations which are entrances (location_type=2), generic nodes (location_type=3) or boarding areas (location_type=4).
-	// TODO: VALIDATION: parent_station: Optional for stops/platforms (location_type=0)
-	// TODO: VALIDATION: parent_station: Forbidden for stations (location_type=1) (this field must be empty)
-	// TODO: VALIDATION: parent_station: Stop/platform (location_type=0): the parent_station field contains the ID of a station.
-	// TODO: VALIDATION: parent_station: Entrance/exit (location_type=2) or generic node (location_type=3): the parent_station field contains the ID of a station (location_type=1)
-	// TODO: VALIDATION: parent_station: Boarding Area (location_type=4): the parent_station field contains ID of a platform
-	// TODO: VALIDATION: stop_timezone: If the location has a parent station, it inherits the parent station’s timezone instead of applying its own.
-	// TODO: VALIDATION: stop_timezone: Stations and parentless stops with empty stop_timezone inherit the timezone specified by agency.agency_timezone.
-	// TODO: VALIDATION: level_id: Foreign ID referencing levels.level_id (must exist)
-	// TODO: VALIDATION: platform_code: Words like “platform” or "track" (or the feed’s language-specific equivalent) should not be included.
-
 	return validationErrors
 }
 
@@ -179,9 +166,6 @@ func ValidateStops(stops []*Stop) ([]error, []string) {
 			usedIds[stop.Id.String()] = true
 		}
 	}
-
-	// TODO: VALIDATION: stop_id: ID must be unique across all stops.stop_id, locations.geojson id, and location_groups.location_group_id values.
-	// TODO: VALIDATION: stop_url: This should be different from the agency.agency_url and the routes.route_url field values.
 
 	return validationErrors, recommendations
 }
