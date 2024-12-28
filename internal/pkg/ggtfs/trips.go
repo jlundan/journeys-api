@@ -164,11 +164,6 @@ func ValidateTrips(trips []*Trip, routes []*Route, calendarItems []*CalendarItem
 		}
 	}
 
-	// TODO: VALIDATION: route_id: Foreign ID referencing routes.route_id (must refer to an existing route)
-	// TODO: VALIDATION: service_id: Foreign ID referencing calendar.service_id or calendar_dates.service_id. (calendar_dates service_id relation is not checked)
-	// TODO: VALIDATION: shape_id: Foreign ID referencing shapes.shape_id (must refer to an existing shape)
-	// TODO: VALIDATION: shape_id: Required if the trip has a continuous pickup or drop-off behavior defined either in routes.txt or in stop_times.txt. Otherwise, optional.
-
 	return validationErrors, recommendations
 }
 
