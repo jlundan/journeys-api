@@ -176,12 +176,14 @@ type Time struct {
 	base
 }
 
+// IsValid checks if the Time is in the valid HH:MM:SS or H:MM:SS format. The hour is between 0 and 47, since the trips on the service day might run
+// through the night. For example, 25:00:00 represents 1:00:00 AM the next day.
 func (t *Time) IsValid() bool {
 	if t == nil {
 		return false
 	}
 
-	match, _ := regexp.MatchString(`^(0[0-9]|1[0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])$|^([0-9]|1[0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])$`, t.raw)
+	match, _ := regexp.MatchString(`^(0[0-9]|1[0-9]|2[0-9]|3[0-9]|4[0-7]):([0-5][0-9]):([0-5][0-9])$|^([0-9]|1[0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])$`, t.raw)
 	return match
 }
 

@@ -128,6 +128,7 @@ func getStopTimeNOKTestcases() map[string]ggtfsTestCase {
 				"stop_headsign", "pickup_type", "drop_off_type", "continuous_pickup", "continuous_drop_off",
 				"shape_dist_traveled", "timepoint"},
 			{"", "", "", "", "", "", "", "", "", "", "", ""},
+			{"ID1", "00:01:00", "50:00:00", "STOP1", "1", "STOP 1", "1", "1", "1", "1", "100", "1"},
 		},
 		expectedErrors: []string{
 			"stop_times.txt: trip () has less than two defined stop times",
@@ -142,6 +143,7 @@ func getStopTimeNOKTestcases() map[string]ggtfsTestCase {
 			"stop_times.txt:2: invalid field: timepoint",
 			"stop_times.txt:2: invalid mandatory field: stop_sequence",
 			"stop_times.txt:2: invalid mandatory field: trip_id",
+			"stop_times.txt:3: invalid field: departure_time",
 		},
 	}
 
