@@ -58,8 +58,8 @@
       * TODO: VALIDATION: (stop_times) drop_off_type: drop_off_type=0 forbidden if start_pickup_drop_off_window or end_pickup_drop_off_window are defined. Otherwise optional.
       * TODO: VALIDATION: (stop_times) drop_off_type: Forbidden if start_pickup_drop_off_window or end_pickup_drop_off_window are defined. Otherwise optional.
       * TODO: VALIDATION: (stop_times) continuous_drop_off: Forbidden if start_pickup_drop_off_window or end_pickup_drop_off_window are defined. Otherwise optional.
-      * TODO: VALIDATION: (stop_times) Values used for shape_dist_traveled must increase along with stop_sequence; they must not be used to show reverse travel along a route.
-      * TODO: VALIDATION: (stop_times) recommended for routes that have looping or inlining (the vehicle crosses or travels over the same portion of alignment in one trip). See shape_dist_traveled at https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#shapestxt
+      * TODO: VALIDATION: (stop_times) shape_dist_traveled: Values used for shape_dist_traveled must increase along with stop_sequence; they must not be used to show reverse travel along a route.
+      * TODO: VALIDATION: (stop_times) shape_dist_traveled: recommended for routes that have looping or inlining (the vehicle crosses or travels over the same portion of alignment in one trip). See shape_dist_traveled at https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#shapestxt
       * TODO: VALIDATION: (stop_times) pickup_booking_rule_id: Foreign ID referencing booking_rules.booking_rule_id (should reference a valid booking rule).
       * TODO: VALIDATION: (stop_times) drop_off_booking_rule_id: Foreign ID referencing booking_rules.booking_rule_id (should reference a valid booking rule).
       * TODO: VALIDATION: (stop_times) trip_id: Foreign ID referencing trips.trip_id (should reference a valid trip).
