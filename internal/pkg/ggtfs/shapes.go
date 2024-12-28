@@ -102,8 +102,5 @@ func ValidateShapes(shapes []*Shape) ([]error, []string) {
 		}
 	}
 
-	// TODO: VALIDATION: shape_pt_sequence: Sequence in which the shape points connect to form the shape. Values must increase along the trip but do not need to be consecutive.
-	// Implement this if there is a way to check the contrast between two colors
-
 	return validationErrors, []string{}
 }
