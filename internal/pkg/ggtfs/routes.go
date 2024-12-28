@@ -78,12 +78,6 @@ func (r Route) Validate() ([]error, []string) {
 		recommendations = append(recommendations, createFileRowRecommendation(RoutesFileName, r.LineNumber, "route_desc should not be the same as route_short_name or route_long_name"))
 	}
 
-	// TODO: VALIDATION: route_color: The color difference between route_color and route_text_color should provide sufficient contrast when viewed on a black and white screen.
-	// Implement this if there is a way to check the contrast between two colors
-
-	// TODO: VALIDATION: route_text_color: The color difference between route_color and route_text_color should provide sufficient contrast when viewed on a black and white screen.
-	// Implement this if there is a way to check the contrast between two colors
-
 	return validationErrors, recommendations
 }
 
@@ -124,12 +118,6 @@ func CreateRoute(row []string, headers map[string]int, lineNumber int) *Route {
 			route.NetworkId = NewID(v)
 		}
 	}
-
-	// TODO: IMPLEMENTATION: route_color: Route color designation that matches public facing material. Defaults to white (FFFFFF) when omitted or left empty.
-	// Not implemented currently
-
-	// TODO: IMPLEMENTATION: route_text_color: Legible color to use for text drawn against a background of route_color. Defaults to black (000000) when omitted or left empty.
-	// Not implemented currently
 
 	return &route
 }
@@ -204,12 +192,6 @@ func ValidateRoutes(routes []*Route, agencies []*Agency) ([]error, []string) {
 			validationErrors = append(validationErrors, createFileRowError(RoutesFileName, route.LineNumber, fmt.Sprintf("referenced agency_id '%s' not found in %s", route.AgencyId.String(), AgenciesFileName)))
 		}
 	}
-
-	// TODO: VALIDATION: route_url: URL of a web page about the particular route. Should be different from the agency.agency_url value.
-	// Implement this when the route entity has a method to show the agency it is connected to
-
-	// TODO: VALIDATION: network_id: Forbidden it the route_networks.txt file is present.
-	// Implement this when we have support for route_networks.txt
 
 	return validationErrors, validationRecommendations
 }
