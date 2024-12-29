@@ -16,33 +16,18 @@ type Shape struct {
 func (s Shape) Validate() []error {
 	var validationErrors []error
 
-	requiredFields := []struct {
-		fieldName string
-		field     ValidAndPresentField
-	}{
-		{"shape_id", &s.Id},
-		{"shape_pt_lat", &s.PtLat},
-		{"shape_pt_lon", &s.PtLon},
-		{"shape_pt_sequence", &s.PtSequence},
+	requiredFields := map[string]FieldTobeValidated{
+		"shape_id":          &s.Id,
+		"shape_pt_lat":      &s.PtLat,
+		"shape_pt_lon":      &s.PtLon,
+		"shape_pt_sequence": &s.PtSequence,
 	}
-	for _, f := range requiredFields {
-		if !f.field.IsValid() {
-			validationErrors = append(validationErrors, createFileRowError(ShapesFileName, s.LineNumber, createInvalidRequiredFieldString(f.fieldName)))
-		}
-	}
+	validateRequiredFields(requiredFields, &validationErrors, s.LineNumber, ShapesFileName)
 
-	optionalFields := []struct {
-		field     ValidAndPresentField
-		fieldName string
-	}{
-		{&s.DistTraveled, "shape_dist_traveled"},
+	optionalFields := map[string]FieldTobeValidated{
+		"shape_dist_traveled": &s.DistTraveled,
 	}
-
-	for _, field := range optionalFields {
-		if field.field != nil && field.field.IsPresent() && !field.field.IsValid() {
-			validationErrors = append(validationErrors, createFileRowError(ShapesFileName, s.LineNumber, createInvalidFieldString(field.fieldName)))
-		}
-	}
+	validateOptionalFields(optionalFields, &validationErrors, s.LineNumber, ShapesFileName)
 
 	return validationErrors
 }

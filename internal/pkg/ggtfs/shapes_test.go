@@ -102,9 +102,9 @@ func getShapeNOKTestcases() map[string]ggtfsTestCase {
 			{"3", "11.1", "11.1", "1", "100"},
 		},
 		expectedErrors: []string{
-			"shapes.txt:2: invalid field: shape_dist_traveled",
-			"shapes.txt:3: invalid field: shape_dist_traveled",
+			"shapes.txt: shape (1) has less than two shape points",
 			"shapes.txt: shape (3) has less than two shape points",
+			"shapes.txt:3: invalid field: shape_dist_traveled",
 		},
 	}
 
