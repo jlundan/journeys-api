@@ -19,36 +19,21 @@ type Agency struct {
 func (a Agency) Validate() []error {
 	var validationErrors []error
 
-	requiredFields := []struct {
-		fieldName string
-		field     ValidAndPresentField
-	}{
-		{"agency_name", &a.Name},
-		{"agency_url", &a.URL},
-		{"agency_timezone", &a.Timezone},
+	requiredFields := map[string]FieldTobeValidated{
+		"agency_name":     &a.Name,
+		"agency_url":      &a.URL,
+		"agency_timezone": &a.Timezone,
 	}
-	for _, f := range requiredFields {
-		if !f.field.IsValid() {
-			validationErrors = append(validationErrors, createFileRowError(AgenciesFileName, a.LineNumber, createInvalidRequiredFieldString(f.fieldName)))
-		}
-	}
+	validateRequiredFields(requiredFields, &validationErrors, a.LineNumber, AgenciesFileName)
 
-	optionalFields := []struct {
-		field     ValidAndPresentField
-		fieldName string
-	}{
-		{&a.Id, "agency_id"},
-		{&a.Lang, "agency_lang"},
-		{&a.Phone, "agency_phone"},
-		{&a.FareURL, "agency_fare_url"},
-		{&a.Email, "agency_email"},
+	optionalFields := map[string]FieldTobeValidated{
+		"agency_id":       &a.Id,
+		"agency_lang":     &a.Lang,
+		"agency_phone":    &a.Phone,
+		"agency_fare_url": &a.FareURL,
+		"agency_email":    &a.Email,
 	}
-
-	for _, field := range optionalFields {
-		if field.field != nil && field.field.IsPresent() && !field.field.IsValid() {
-			validationErrors = append(validationErrors, createFileRowError(AgenciesFileName, a.LineNumber, createInvalidFieldString(field.fieldName)))
-		}
-	}
+	validateOptionalFields(optionalFields, &validationErrors, a.LineNumber, AgenciesFileName)
 
 	return validationErrors
 }
