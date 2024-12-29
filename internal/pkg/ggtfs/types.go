@@ -330,3 +330,9 @@ func NewPositiveFloat(raw *string) PositiveFloat {
 	}
 	return PositiveFloat{Float{base: base{raw: *raw, isPresent: true}}}
 }
+
+type GtfsEntity interface {
+	*Shape | *Stop | *Agency | *CalendarItem | *CalendarDate | *Route | *StopTime | *Trip | any
+}
+
+type entityCreator[T GtfsEntity] func(row []string, headers map[string]int, lineNumber int) T
