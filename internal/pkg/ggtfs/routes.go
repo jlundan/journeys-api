@@ -26,41 +26,22 @@ func (r Route) Validate() ([]error, []string) {
 	var validationErrors []error
 	var recommendations []string
 
-	requiredFields := []struct {
-		fieldName string
-		field     ValidAndPresentField
-	}{
-		{"route_id", &r.Id},
-		{"route_type", &r.Type},
+	requiredFields := map[string]FieldTobeValidated{
+		"route_id":   &r.Id,
+		"route_type": &r.Type,
 	}
-	for _, f := range requiredFields {
-		if !f.field.IsValid() {
-			validationErrors = append(validationErrors, createFileRowError(RoutesFileName, r.LineNumber, createInvalidRequiredFieldString(f.fieldName)))
-		}
-	}
+	validateRequiredFields(requiredFields, &validationErrors, r.LineNumber, RoutesFileName)
 
-	optionalFields := []struct {
-		field     ValidAndPresentField
-		fieldName string
-	}{
-		// agency_id is required only if there are multiple agencies in agencies.txt, recommended if there is only one. This is handled in ValidateAgencies func.
-		// route_short_name is required if route_long_name is empty or not present. This is handled below.
-		// route_long_name is required if route_short_name is empty or not present. This is handled below.
-		{&r.Desc, "route_desc"},
-		{&r.URL, "route_url"},
-		{&r.Color, "route_color"},
-		{&r.TextColor, "route_text_color"},
-		{&r.SortOrder, "route_sort_order"},
-		{&r.ContinuousPickup, "continuous_pickup"},
-		{&r.ContinuousDropOff, "continuous_drop_off"},
-		// network id is forbidden if the route_networks.txt file is present. This is handled in ValidateRoutes func.
+	optionalFields := map[string]FieldTobeValidated{
+		"route_desc":          &r.Desc,
+		"route_url":           &r.URL,
+		"route_color":         &r.Color,
+		"route_text_color":    &r.TextColor,
+		"route_sort_order":    &r.SortOrder,
+		"continuous_pickup":   &r.ContinuousPickup,
+		"continuous_drop_off": &r.ContinuousDropOff,
 	}
-
-	for _, field := range optionalFields {
-		if field.field != nil && field.field.IsPresent() && !field.field.IsValid() {
-			validationErrors = append(validationErrors, createFileRowError(RoutesFileName, r.LineNumber, createInvalidFieldString(field.fieldName)))
-		}
-	}
+	validateOptionalFields(optionalFields, &validationErrors, r.LineNumber, RoutesFileName)
 
 	if r.ShortName.IsEmpty() && !r.LongName.IsValid() {
 		validationErrors = append(validationErrors, createFileRowError(RoutesFileName, r.LineNumber, "route_short_name must be specified when route_long_name is empty or not present"))

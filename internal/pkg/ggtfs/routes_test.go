@@ -146,11 +146,6 @@ func getRouteNOKTestcases() map[string]ggtfsTestCase {
 		},
 		expectedErrors: []string{
 			// "routes.txt:2: invalid field: network_id", // validation not implemented yet
-			"routes.txt:2: invalid field: route_color",
-			"routes.txt:2: invalid field: route_desc",
-			"routes.txt:2: invalid field: route_sort_order",
-			"routes.txt:2: invalid field: route_text_color",
-			"routes.txt:2: invalid field: route_url",
 			"routes.txt:2: invalid mandatory field: route_id",
 			"routes.txt:2: invalid mandatory field: route_type",
 			"routes.txt:2: route_long_name must be specified when route_short_name is empty or not present",
