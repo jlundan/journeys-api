@@ -22,38 +22,23 @@ type Trip struct {
 func (t Trip) Validate() []error {
 	var validationErrors []error
 
-	requiredFields := []struct {
-		fieldName string
-		field     ValidAndPresentField
-	}{
-		{"route_id", &t.RouteId},
-		{"service_id", &t.ServiceId},
-		{"trip_id", &t.Id},
+	requiredFields := map[string]FieldTobeValidated{
+		"route_id":   &t.RouteId,
+		"service_id": &t.ServiceId,
+		"trip_id":    &t.Id,
 	}
-	for _, f := range requiredFields {
-		if !f.field.IsValid() {
-			validationErrors = append(validationErrors, createFileRowError(TripsFileName, t.LineNumber, createInvalidRequiredFieldString(f.fieldName)))
-		}
-	}
+	validateRequiredFields(requiredFields, &validationErrors, t.LineNumber, TripsFileName)
 
-	optionalFields := []struct {
-		field     ValidAndPresentField
-		fieldName string
-	}{
-		{&t.HeadSign, "trip_headsign"},
-		{&t.ShortName, "trip_short_name"},
-		{&t.DirectionId, "direction_id"},
-		{&t.BlockId, "block_id"},
-		{&t.ShapeId, "shape_id"},
-		{&t.WheelchairAccessible, "wheelchair_accessible"},
-		{&t.BikesAllowed, "bikes_allowed"},
+	optionalFields := map[string]FieldTobeValidated{
+		"trip_headsign":         &t.HeadSign,
+		"trip_short_name":       &t.ShortName,
+		"direction_id":          &t.DirectionId,
+		"block_id":              &t.BlockId,
+		"shape_id":              &t.ShapeId,
+		"wheelchair_accessible": &t.WheelchairAccessible,
+		"bikes_allowed":         &t.BikesAllowed,
 	}
-
-	for _, field := range optionalFields {
-		if field.field != nil && field.field.IsPresent() && !field.field.IsValid() {
-			validationErrors = append(validationErrors, createFileRowError(TripsFileName, t.LineNumber, createInvalidFieldString(field.fieldName)))
-		}
-	}
+	validateOptionalFields(optionalFields, &validationErrors, t.LineNumber, TripsFileName)
 
 	return validationErrors
 }
