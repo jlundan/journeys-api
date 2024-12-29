@@ -95,11 +95,6 @@ func LoadEntitiesFromCSV[T GtfsEntity](csvReader *csv.Reader, validHeaders []str
 	return entities, errs
 }
 
-type ValidAndPresentField interface {
-	IsValid() bool
-	IsPresent() bool
-}
-
 type FieldTobeValidated interface {
 	IsValid() bool
 	IsPresent() bool
