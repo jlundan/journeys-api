@@ -82,13 +82,6 @@ func getTripNOKTestcases() map[string]ggtfsTestCase {
 			{"", "", "", "", "", "", "", "", "", ""},
 		},
 		expectedErrors: []string{
-			"trips.txt:2: invalid field: bikes_allowed",
-			"trips.txt:2: invalid field: block_id",
-			"trips.txt:2: invalid field: direction_id",
-			"trips.txt:2: invalid field: shape_id",
-			"trips.txt:2: invalid field: trip_headsign",
-			"trips.txt:2: invalid field: trip_short_name",
-			"trips.txt:2: invalid field: wheelchair_accessible",
 			"trips.txt:2: invalid mandatory field: route_id",
 			"trips.txt:2: invalid mandatory field: service_id",
 			"trips.txt:2: invalid mandatory field: trip_id",
