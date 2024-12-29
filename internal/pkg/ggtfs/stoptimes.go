@@ -30,46 +30,31 @@ type StopTime struct {
 func (st StopTime) Validate() []error {
 	var validationErrors []error
 
-	requiredFields := []struct {
-		fieldName string
-		field     ValidAndPresentField
-	}{
-		{"trip_id", &st.TripId},
-		{"stop_sequence", &st.StopSequence},
+	requiredFields := map[string]FieldTobeValidated{
+		"trip_id":       &st.TripId,
+		"stop_sequence": &st.StopSequence,
 	}
-	for _, f := range requiredFields {
-		if !f.field.IsValid() {
-			validationErrors = append(validationErrors, createFileRowError(StopTimesFileName, st.LineNumber, createInvalidRequiredFieldString(f.fieldName)))
-		}
-	}
+	validateRequiredFields(requiredFields, &validationErrors, st.LineNumber, StopTimesFileName)
 
-	optionalFields := []struct {
-		field     ValidAndPresentField
-		fieldName string
-	}{
-		{&st.ArrivalTime, "arrival_time"},
-		{&st.DepartureTime, "departure_time"},
-		{&st.StopId, "stop_id"},
-		{&st.LocationGroupId, "location_group_id"},
-		{&st.LocationId, "location_id"},
-		{&st.StopHeadSign, "stop_headsign"},
-		{&st.StartPickupDropOffWindow, "start_pickup_drop_off_window"},
-		{&st.EndPickupDropOffWindow, "end_pickup_drop_off_window"},
-		{&st.PickupType, "pickup_type"},
-		{&st.DropOffType, "drop_off_type"},
-		{&st.ContinuousPickup, "continuous_pickup"},
-		{&st.ContinuousDropOff, "continuous_drop_off"},
-		{&st.ShapeDistTraveled, "shape_dist_traveled"},
-		{&st.Timepoint, "timepoint"},
-		{&st.PickupBookingRuleId, "pickup_booking_rule_id"},
-		{&st.DropOffBookingRuleId, "drop_off_booking_rule_id"},
+	optionalFields := map[string]FieldTobeValidated{
+		"arrival_time":                 &st.ArrivalTime,
+		"departure_time":               &st.DepartureTime,
+		"stop_id":                      &st.StopId,
+		"location_group_id":            &st.LocationGroupId,
+		"location_id":                  &st.LocationId,
+		"stop_headsign":                &st.StopHeadSign,
+		"start_pickup_drop_off_window": &st.StartPickupDropOffWindow,
+		"end_pickup_drop_off_window":   &st.EndPickupDropOffWindow,
+		"pickup_type":                  &st.PickupType,
+		"drop_off_type":                &st.DropOffType,
+		"continuous_pickup":            &st.ContinuousPickup,
+		"continuous_drop_off":          &st.ContinuousDropOff,
+		"shape_dist_traveled":          &st.ShapeDistTraveled,
+		"timepoint":                    &st.Timepoint,
+		"pickup_booking_rule_id":       &st.PickupBookingRuleId,
+		"drop_off_booking_rule_id":     &st.DropOffBookingRuleId,
 	}
-
-	for _, field := range optionalFields {
-		if field.field != nil && field.field.IsPresent() && !field.field.IsValid() {
-			validationErrors = append(validationErrors, createFileRowError(StopTimesFileName, st.LineNumber, createInvalidFieldString(field.fieldName)))
-		}
-	}
+	validateOptionalFields(optionalFields, &validationErrors, st.LineNumber, StopTimesFileName)
 
 	return validationErrors
 }
@@ -139,15 +124,6 @@ func ValidateStopTimes(stopTimes []*StopTime, stops []*Stop) ([]error, []string)
 		return validationErrors, recommendations
 	}
 
-	// Group stop times by trip_id to ensure each trip has at least two stops.
-	tripIdToStopCount := make(map[string]int)
-	for _, stopTimeItem := range stopTimes {
-		if stopTimeItem == nil {
-			continue
-		}
-		tripIdToStopCount[stopTimeItem.TripId.String()] = 0
-	}
-
 	for _, stopTimeItem := range stopTimes {
 		if stopTimeItem == nil {
 			continue
@@ -171,15 +147,7 @@ func ValidateStopTimes(stopTimes []*StopTime, stops []*Stop) ([]error, []string)
 			}
 		}
 		if !stopFound {
-			validationErrors = append(validationErrors, createFileError(StopTimesFileName, fmt.Sprintf("trip (%v) references to an unknown stop_id (%s)", stopTimeItem.TripId.String(), stopTimeItem.StopId.String())))
-		} else {
-			tripIdToStopCount[stopTimeItem.TripId.String()]++
-		}
-	}
-
-	for tripId, stopCount := range tripIdToStopCount {
-		if stopCount < 2 {
-			validationErrors = append(validationErrors, createFileError(StopTimesFileName, fmt.Sprintf("trip (%v) has less than two defined stop times", tripId)))
+			validationErrors = append(validationErrors, createFileRowError(StopTimesFileName, stopTimeItem.LineNumber, fmt.Sprintf("stop_id (%v) references to an unknown stop", stopTimeItem.StopId.String())))
 		}
 	}
 

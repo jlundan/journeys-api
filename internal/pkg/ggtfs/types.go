@@ -13,31 +13,19 @@ type base struct {
 	isPresent bool
 }
 
-func (base *base) String() string {
+func (base base) String() string {
 	return base.raw
 }
 
-func (base *base) IsEmpty() bool {
-	if base == nil {
-		return true
-	}
-
+func (base base) IsEmpty() bool {
 	return strings.TrimSpace(base.raw) == ""
 }
 
-func (base *base) Length() int {
-	if base == nil {
-		return 0
-	}
-
+func (base base) Length() int {
 	return len(base.raw)
 }
 
-func (base *base) IsPresent() bool {
-	if base == nil {
-		return false
-	}
-
+func (base base) IsPresent() bool {
 	return base.isPresent
 }
 
@@ -45,12 +33,7 @@ type ID struct {
 	base
 }
 
-func (id *ID) IsValid() bool {
-	// FIXME: none of the isValid methods needs pointer receiver
-	if id == nil {
-		return false
-	}
-
+func (id ID) IsValid() bool {
 	return !id.IsEmpty() && id.IsPresent()
 }
 
@@ -65,11 +48,7 @@ type Color struct {
 	base
 }
 
-func (c *Color) IsValid() bool {
-	if c == nil {
-		return false
-	}
-
+func (c Color) IsValid() bool {
 	match, _ := regexp.MatchString(`^[0-9A-Fa-f]{6}$`, c.raw)
 	return match
 }
@@ -85,11 +64,7 @@ type Email struct {
 	base
 }
 
-func (e *Email) IsValid() bool {
-	if e == nil {
-		return false
-	}
-
+func (e Email) IsValid() bool {
 	_, err := mail.ParseAddress(e.raw)
 	return err == nil
 }
@@ -105,16 +80,12 @@ type Integer struct {
 	base
 }
 
-func (i *Integer) IsValid() bool {
-	if i == nil {
-		return false
-	}
-
+func (i Integer) IsValid() bool {
 	_, err := strconv.Atoi(i.raw)
 	return err == nil
 }
 
-func (i *Integer) Int() int {
+func (i Integer) Int() int {
 	val, _ := strconv.Atoi(i.raw)
 	return val
 }
@@ -137,16 +108,12 @@ func NewFloat(raw *string) Float {
 	return Float{base{raw: *raw, isPresent: true}}
 }
 
-func (f *Float) IsValid() bool {
-	if f == nil {
-		return false
-	}
-
+func (f Float) IsValid() bool {
 	_, err := strconv.ParseFloat(f.raw, 64)
 	return err == nil
 }
 
-func (f *Float) Float64() float64 {
+func (f Float) Float64() float64 {
 	val, _ := strconv.ParseFloat(f.raw, 64)
 	return val
 }
@@ -155,11 +122,7 @@ type URL struct {
 	base
 }
 
-func (u *URL) IsValid() bool {
-	if u == nil {
-		return false
-	}
-
+func (u URL) IsValid() bool {
 	parsedURL, err := url.ParseRequestURI(u.raw)
 	return err == nil && (parsedURL.Scheme == "http" || parsedURL.Scheme == "https")
 }
@@ -178,11 +141,7 @@ type Time struct {
 
 // IsValid checks if the Time is in the valid HH:MM:SS or H:MM:SS format. The hour is between 0 and 47, since the trips on the service day might run
 // through the night. For example, 25:00:00 represents 1:00:00 AM the next day.
-func (t *Time) IsValid() bool {
-	if t == nil {
-		return false
-	}
-
+func (t Time) IsValid() bool {
 	match, _ := regexp.MatchString(`^(0[0-9]|1[0-9]|2[0-9]|3[0-9]|4[0-7]):([0-5][0-9]):([0-5][0-9])$|^([0-9]|1[0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])$`, t.raw)
 	return match
 }
@@ -200,11 +159,7 @@ type CurrencyCode struct {
 }
 
 // IsValid checks if the CurrencyCode is a three-letter code.
-func (cc *CurrencyCode) IsValid() bool {
-	if cc == nil {
-		return false
-	}
-
+func (cc CurrencyCode) IsValid() bool {
 	match, _ := regexp.MatchString(`^[A-Z]{3}$`, cc.raw)
 	return match
 }
@@ -213,11 +168,7 @@ type CurrencyAmount struct {
 	base
 }
 
-func (ca *CurrencyAmount) IsValid() bool {
-	if ca == nil {
-		return false
-	}
-
+func (ca CurrencyAmount) IsValid() bool {
 	_, err := strconv.ParseFloat(ca.raw, 64)
 	return err == nil
 }
@@ -227,11 +178,7 @@ type Date struct {
 }
 
 // IsValid checks if the Date is in the valid YYYYMMDD format.
-func (d *Date) IsValid() bool {
-	if d == nil {
-		return false
-	}
-
+func (d Date) IsValid() bool {
 	match, _ := regexp.MatchString(`^(19|20)\d{2}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])$`, d.raw)
 	return match
 }
@@ -248,10 +195,7 @@ type LanguageCode struct {
 }
 
 // IsValid checks if the LanguageCode is a valid IETF BCP 47 code.
-func (lc *LanguageCode) IsValid() bool {
-	if lc == nil {
-		return false
-	}
+func (lc LanguageCode) IsValid() bool {
 	// Basic validation for language codes: e.g., "en", "en-US"
 	match, _ := regexp.MatchString(`^[a-zA-Z]{2,3}(-[a-zA-Z]{2,3})?$`, lc.raw)
 	return match
@@ -277,10 +221,7 @@ func NewLatitude(raw *string) Latitude {
 }
 
 // IsValid checks if the Latitude is a valid decimal value between -90 and 90.
-func (lat *Latitude) IsValid() bool {
-	if lat == nil {
-		return false
-	}
+func (lat Latitude) IsValid() bool {
 	value, err := strconv.ParseFloat(lat.raw, 64)
 	return err == nil && value >= -90.0 && value <= 90.0
 }
@@ -298,11 +239,7 @@ func NewLongitude(raw *string) Longitude {
 }
 
 // IsValid checks if the Longitude is a valid decimal value between -180 and 180.
-func (lon *Longitude) IsValid() bool {
-	if lon == nil {
-		return false
-	}
-
+func (lon Longitude) IsValid() bool {
 	value, err := strconv.ParseFloat(lon.raw, 64)
 	return err == nil && value >= -180.0 && value <= 180.0
 }
@@ -311,10 +248,7 @@ type PhoneNumber struct {
 	base
 }
 
-func (pn *PhoneNumber) IsValid() bool {
-	if pn == nil {
-		return false
-	}
+func (pn PhoneNumber) IsValid() bool {
 	// Check for minimum length, only contains digits, and common phone number symbols
 	match, _ := regexp.MatchString(`^[\d\s\-+()]{5,}$`, pn.raw)
 	return match
@@ -331,10 +265,7 @@ type Text struct {
 	base
 }
 
-func (t *Text) IsValid() bool {
-	if t == nil {
-		return false
-	}
+func (t Text) IsValid() bool {
 	return !t.IsEmpty()
 }
 
@@ -351,10 +282,7 @@ type Timezone struct {
 }
 
 // IsValid checks if the Timezone is in a valid format (e.g., "America/New_York").
-func (tz *Timezone) IsValid() bool {
-	if tz == nil {
-		return false
-	}
+func (tz Timezone) IsValid() bool {
 	// Basic regex to validate Continent/City or Continent/City_Name format.
 	// It checks if we have at least a structure like Continent/City.
 	match, _ := regexp.MatchString(`^[A-Za-z]+/[A-Za-z_]+$|^[A-Za-z]+/[A-Za-z]+$`, tz.raw)
