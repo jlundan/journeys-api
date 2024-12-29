@@ -17,14 +17,15 @@ func CreateCalendarDate(row []string, headers map[string]int, lineNumber int) *C
 		LineNumber: lineNumber,
 	}
 
-	for hName, hPos := range headers {
+	for hName := range headers {
+		v := getRowValueForHeaderName(row, headers, hName)
 		switch hName {
 		case "service_id":
-			calendarDate.ServiceId = NewID(getRowValue(row, hPos))
+			calendarDate.ServiceId = NewID(v)
 		case "date":
-			calendarDate.Date = NewDate(getRowValue(row, hPos))
+			calendarDate.Date = NewDate(v)
 		case "exception_type":
-			calendarDate.ExceptionType = NewExceptionTypeEnum(getRowValue(row, hPos))
+			calendarDate.ExceptionType = NewExceptionTypeEnum(v)
 		}
 	}
 
