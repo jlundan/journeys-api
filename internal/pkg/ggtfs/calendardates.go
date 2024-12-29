@@ -15,20 +15,12 @@ type CalendarDate struct {
 func (cd CalendarDate) Validate() []error {
 	var validationErrors []error
 
-	requiredFields := []struct {
-		fieldName string
-		field     ValidAndPresentField
-	}{
-		{"service_id", &cd.ServiceId},
-		{"date", &cd.Date},
-		{"exception_type", &cd.ExceptionType},
+	requiredFields := map[string]FieldTobeValidated{
+		"service_id":     &cd.ServiceId,
+		"date":           &cd.Date,
+		"exception_type": &cd.ExceptionType,
 	}
-
-	for _, f := range requiredFields {
-		if !f.field.IsValid() {
-			validationErrors = append(validationErrors, createFileRowError(CalendarDatesFileName, cd.LineNumber, createInvalidRequiredFieldString(f.fieldName)))
-		}
-	}
+	validateRequiredFields(requiredFields, &validationErrors, cd.LineNumber, CalendarDatesFileName)
 
 	return validationErrors
 }
