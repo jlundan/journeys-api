@@ -16,28 +16,6 @@ type Agency struct {
 	LineNumber int
 }
 
-func (a Agency) Validate() []error {
-	var validationErrors []error
-
-	requiredFields := map[string]FieldTobeValidated{
-		"agency_name":     &a.Name,
-		"agency_url":      &a.URL,
-		"agency_timezone": &a.Timezone,
-	}
-	validateRequiredFields(requiredFields, &validationErrors, a.LineNumber, AgenciesFileName)
-
-	optionalFields := map[string]FieldTobeValidated{
-		"agency_id":       &a.Id,
-		"agency_lang":     &a.Lang,
-		"agency_phone":    &a.Phone,
-		"agency_fare_url": &a.FareURL,
-		"agency_email":    &a.Email,
-	}
-	validateOptionalFields(optionalFields, &validationErrors, a.LineNumber, AgenciesFileName)
-
-	return validationErrors
-}
-
 func CreateAgency(row []string, headers map[string]int, lineNumber int) *Agency {
 	agency := Agency{
 		LineNumber: lineNumber,
@@ -69,6 +47,28 @@ func CreateAgency(row []string, headers map[string]int, lineNumber int) *Agency 
 	return &agency
 }
 
+func ValidateAgency(a Agency) []error {
+	var validationErrors []error
+
+	requiredFields := map[string]FieldTobeValidated{
+		"agency_name":     &a.Name,
+		"agency_url":      &a.URL,
+		"agency_timezone": &a.Timezone,
+	}
+	validateRequiredFields(requiredFields, &validationErrors, a.LineNumber, AgenciesFileName)
+
+	optionalFields := map[string]FieldTobeValidated{
+		"agency_id":       &a.Id,
+		"agency_lang":     &a.Lang,
+		"agency_phone":    &a.Phone,
+		"agency_fare_url": &a.FareURL,
+		"agency_email":    &a.Email,
+	}
+	validateOptionalFields(optionalFields, &validationErrors, a.LineNumber, AgenciesFileName)
+
+	return validationErrors
+}
+
 func ValidateAgencies(agencies []*Agency) ([]error, []string) {
 	var validationErrors []error
 	var recommendations []string
@@ -80,13 +80,13 @@ func ValidateAgencies(agencies []*Agency) ([]error, []string) {
 	}
 
 	if aLength == 1 && !agencies[0].Id.IsValid() {
-		validationErrors = append(validationErrors, agencies[0].Validate()...)
+		validationErrors = append(validationErrors, ValidateAgency(*agencies[0])...)
 		recommendations = append(recommendations, createFileRowRecommendation(AgenciesFileName, agencies[0].LineNumber, "it is recommended that agency_id is specified even when there is only one agency"))
 		return validationErrors, recommendations
 	}
 
 	if aLength == 1 {
-		validationErrors = append(validationErrors, agencies[0].Validate()...)
+		validationErrors = append(validationErrors, ValidateAgency(*agencies[0])...)
 		return validationErrors, recommendations
 	}
 
@@ -96,7 +96,7 @@ func ValidateAgencies(agencies []*Agency) ([]error, []string) {
 			continue
 		}
 
-		validationErrors = append(validationErrors, a.Validate()...)
+		validationErrors = append(validationErrors, ValidateAgency(*a)...)
 
 		if !a.Id.IsValid() {
 			validationErrors = append(validationErrors, createFileRowError(AgenciesFileName, a.LineNumber, "a valid agency_id must be specified when multiple agencies are declared"))

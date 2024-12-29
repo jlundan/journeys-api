@@ -12,19 +12,6 @@ type CalendarDate struct {
 	LineNumber    int
 }
 
-func (cd CalendarDate) Validate() []error {
-	var validationErrors []error
-
-	requiredFields := map[string]FieldTobeValidated{
-		"service_id":     &cd.ServiceId,
-		"date":           &cd.Date,
-		"exception_type": &cd.ExceptionType,
-	}
-	validateRequiredFields(requiredFields, &validationErrors, cd.LineNumber, CalendarDatesFileName)
-
-	return validationErrors
-}
-
 func CreateCalendarDate(row []string, headers map[string]int, lineNumber int) *CalendarDate {
 	calendarDate := &CalendarDate{
 		LineNumber: lineNumber,
@@ -44,11 +31,24 @@ func CreateCalendarDate(row []string, headers map[string]int, lineNumber int) *C
 	return calendarDate
 }
 
+func ValidateCalendarDate(cd CalendarDate) []error {
+	var validationErrors []error
+
+	requiredFields := map[string]FieldTobeValidated{
+		"service_id":     &cd.ServiceId,
+		"date":           &cd.Date,
+		"exception_type": &cd.ExceptionType,
+	}
+	validateRequiredFields(requiredFields, &validationErrors, cd.LineNumber, CalendarDatesFileName)
+
+	return validationErrors
+}
+
 func ValidateCalendarDates(calendarDates []*CalendarDate, calendarItems []*CalendarItem) ([]error, []string) {
 	var validationErrors []error
 
 	for _, calendarDate := range calendarDates {
-		validationErrors = append(validationErrors, calendarDate.Validate()...)
+		validationErrors = append(validationErrors, ValidateCalendarDate(*calendarDate)...)
 	}
 
 	if calendarItems != nil {

@@ -19,30 +19,6 @@ type Trip struct {
 	LineNumber           int
 }
 
-func (t Trip) Validate() []error {
-	var validationErrors []error
-
-	requiredFields := map[string]FieldTobeValidated{
-		"route_id":   &t.RouteId,
-		"service_id": &t.ServiceId,
-		"trip_id":    &t.Id,
-	}
-	validateRequiredFields(requiredFields, &validationErrors, t.LineNumber, TripsFileName)
-
-	optionalFields := map[string]FieldTobeValidated{
-		"trip_headsign":         &t.HeadSign,
-		"trip_short_name":       &t.ShortName,
-		"direction_id":          &t.DirectionId,
-		"block_id":              &t.BlockId,
-		"shape_id":              &t.ShapeId,
-		"wheelchair_accessible": &t.WheelchairAccessible,
-		"bikes_allowed":         &t.BikesAllowed,
-	}
-	validateOptionalFields(optionalFields, &validationErrors, t.LineNumber, TripsFileName)
-
-	return validationErrors
-}
-
 func CreateTrip(row []string, headers map[string]int, lineNumber int) *Trip {
 	var parseErrors []error
 
@@ -83,6 +59,30 @@ func CreateTrip(row []string, headers map[string]int, lineNumber int) *Trip {
 	return &trip
 }
 
+func ValidateTrip(t Trip) []error {
+	var validationErrors []error
+
+	requiredFields := map[string]FieldTobeValidated{
+		"route_id":   &t.RouteId,
+		"service_id": &t.ServiceId,
+		"trip_id":    &t.Id,
+	}
+	validateRequiredFields(requiredFields, &validationErrors, t.LineNumber, TripsFileName)
+
+	optionalFields := map[string]FieldTobeValidated{
+		"trip_headsign":         &t.HeadSign,
+		"trip_short_name":       &t.ShortName,
+		"direction_id":          &t.DirectionId,
+		"block_id":              &t.BlockId,
+		"shape_id":              &t.ShapeId,
+		"wheelchair_accessible": &t.WheelchairAccessible,
+		"bikes_allowed":         &t.BikesAllowed,
+	}
+	validateOptionalFields(optionalFields, &validationErrors, t.LineNumber, TripsFileName)
+
+	return validationErrors
+}
+
 func ValidateTrips(trips []*Trip, routes []*Route, calendarItems []*CalendarItem, shapes []*Shape) ([]error, []string) {
 	var validationErrors []error
 	var recommendations []string
@@ -96,7 +96,7 @@ func ValidateTrips(trips []*Trip, routes []*Route, calendarItems []*CalendarItem
 			continue
 		}
 
-		validationErrors = append(validationErrors, trip.Validate()...)
+		validationErrors = append(validationErrors, ValidateTrip(*trip)...)
 
 		if routes != nil {
 			routeFound := false

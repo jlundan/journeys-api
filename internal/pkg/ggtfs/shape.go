@@ -13,25 +13,6 @@ type Shape struct {
 	LineNumber   int
 }
 
-func (s Shape) Validate() []error {
-	var validationErrors []error
-
-	requiredFields := map[string]FieldTobeValidated{
-		"shape_id":          &s.Id,
-		"shape_pt_lat":      &s.PtLat,
-		"shape_pt_lon":      &s.PtLon,
-		"shape_pt_sequence": &s.PtSequence,
-	}
-	validateRequiredFields(requiredFields, &validationErrors, s.LineNumber, ShapesFileName)
-
-	optionalFields := map[string]FieldTobeValidated{
-		"shape_dist_traveled": &s.DistTraveled,
-	}
-	validateOptionalFields(optionalFields, &validationErrors, s.LineNumber, ShapesFileName)
-
-	return validationErrors
-}
-
 func CreateShape(row []string, headers map[string]int, lineNumber int) *Shape {
 
 	shape := Shape{
@@ -58,6 +39,25 @@ func CreateShape(row []string, headers map[string]int, lineNumber int) *Shape {
 	return &shape
 }
 
+func ValidateShape(s Shape) []error {
+	var validationErrors []error
+
+	requiredFields := map[string]FieldTobeValidated{
+		"shape_id":          &s.Id,
+		"shape_pt_lat":      &s.PtLat,
+		"shape_pt_lon":      &s.PtLon,
+		"shape_pt_sequence": &s.PtSequence,
+	}
+	validateRequiredFields(requiredFields, &validationErrors, s.LineNumber, ShapesFileName)
+
+	optionalFields := map[string]FieldTobeValidated{
+		"shape_dist_traveled": &s.DistTraveled,
+	}
+	validateOptionalFields(optionalFields, &validationErrors, s.LineNumber, ShapesFileName)
+
+	return validationErrors
+}
+
 func ValidateShapes(shapes []*Shape) ([]error, []string) {
 	var validationErrors []error
 
@@ -71,7 +71,7 @@ func ValidateShapes(shapes []*Shape) ([]error, []string) {
 			continue
 		}
 
-		vErr := shapeItem.Validate()
+		vErr := ValidateShape(*shapeItem)
 		if len(vErr) > 0 {
 			validationErrors = append(validationErrors, vErr...)
 			continue
