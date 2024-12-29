@@ -21,32 +21,23 @@ type CalendarItem struct {
 func (c CalendarItem) Validate() []error {
 	var validationErrors []error
 
-	requiredFields := []struct {
-		fieldName string
-		field     ValidAndPresentField
-	}{
-		{"service_id", &c.ServiceId},
-		{"monday", &c.Monday},
-		{"tuesday", &c.Tuesday},
-		{"wednesday", &c.Wednesday},
-		{"thursday", &c.Thursday},
-		{"friday", &c.Friday},
-		{"saturday", &c.Saturday},
-		{"sunday", &c.Sunday},
-		{"start_date", &c.StartDate},
-		{"end_date", &c.EndDate},
+	requiredFields := map[string]FieldTobeValidated{
+		"service_id": &c.ServiceId,
+		"monday":     &c.Monday,
+		"tuesday":    &c.Tuesday,
+		"wednesday":  &c.Wednesday,
+		"thursday":   &c.Thursday,
+		"friday":     &c.Friday,
+		"saturday":   &c.Saturday,
+		"sunday":     &c.Sunday,
+		"start_date": &c.StartDate,
+		"end_date":   &c.EndDate,
 	}
-
-	for _, f := range requiredFields {
-		if !f.field.IsValid() {
-			validationErrors = append(validationErrors, createFileRowError(CalendarFileName, c.LineNumber, createInvalidRequiredFieldString(f.fieldName)))
-		}
-	}
+	validateRequiredFields(requiredFields, &validationErrors, c.LineNumber, CalendarFileName)
 
 	return validationErrors
 }
 
-// CreateCalendarItem creates a CalendarItem from a CSV row, using the provided headers.
 func CreateCalendarItem(row []string, headers map[string]int, lineNumber int) *CalendarItem {
 	calendarItem := &CalendarItem{
 		LineNumber: lineNumber,
