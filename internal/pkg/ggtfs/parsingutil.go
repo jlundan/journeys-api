@@ -45,14 +45,6 @@ func LoadEntitiesFromCSV[T GtfsEntity](csvReader *csv.Reader, validHeaders []str
 	return entities, errs
 }
 
-func getRowValue(row []string, position int) *string {
-	if position < 0 || position >= len(row) {
-		return nil
-	}
-
-	return &row[position]
-}
-
 func getRowValueForHeaderName(row []string, headers map[string]int, headerName string) *string {
 	pos, ok := headers[headerName]
 
