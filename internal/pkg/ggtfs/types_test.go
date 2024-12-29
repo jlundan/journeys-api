@@ -93,7 +93,7 @@ func TestTime_IsValid(t *testing.T) {
 		{"Valid Time HH:MM:SS", "14:30:00", true},
 		{"Valid Time H:MM:SS", "2:30:00", true},
 		{"Invalid Time format", "14:30", false},
-		{"Invalid Time with out of bounds value", "25:30:00", false},
+		{"Valid Time on a service that runs through the night", "25:30:00", true},
 		{"Empty Time", "", false},
 	}
 
