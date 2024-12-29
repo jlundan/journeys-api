@@ -22,46 +22,6 @@ type Route struct {
 	LineNumber        int
 }
 
-func (r Route) Validate() ([]error, []string) {
-	var validationErrors []error
-	var recommendations []string
-
-	requiredFields := map[string]FieldTobeValidated{
-		"route_id":   &r.Id,
-		"route_type": &r.Type,
-	}
-	validateRequiredFields(requiredFields, &validationErrors, r.LineNumber, RoutesFileName)
-
-	optionalFields := map[string]FieldTobeValidated{
-		"route_desc":          &r.Desc,
-		"route_url":           &r.URL,
-		"route_color":         &r.Color,
-		"route_text_color":    &r.TextColor,
-		"route_sort_order":    &r.SortOrder,
-		"continuous_pickup":   &r.ContinuousPickup,
-		"continuous_drop_off": &r.ContinuousDropOff,
-	}
-	validateOptionalFields(optionalFields, &validationErrors, r.LineNumber, RoutesFileName)
-
-	if r.ShortName.IsEmpty() && !r.LongName.IsValid() {
-		validationErrors = append(validationErrors, createFileRowError(RoutesFileName, r.LineNumber, "route_short_name must be specified when route_long_name is empty or not present"))
-	}
-
-	if r.LongName.IsEmpty() && !r.ShortName.IsValid() {
-		validationErrors = append(validationErrors, createFileRowError(RoutesFileName, r.LineNumber, "route_long_name must be specified when route_short_name is empty or not present"))
-	}
-
-	if r.ShortName.Length() >= 12 {
-		recommendations = append(recommendations, createFileRowRecommendation(RoutesFileName, r.LineNumber, "route_short_name should be less than 12 characters"))
-	}
-
-	if r.Desc.IsValid() && (r.Desc == r.ShortName || r.Desc == r.LongName) {
-		recommendations = append(recommendations, createFileRowRecommendation(RoutesFileName, r.LineNumber, "route_desc should not be the same as route_short_name or route_long_name"))
-	}
-
-	return validationErrors, recommendations
-}
-
 func CreateRoute(row []string, headers map[string]int, lineNumber int) *Route {
 	route := Route{
 		LineNumber: lineNumber,
@@ -103,6 +63,46 @@ func CreateRoute(row []string, headers map[string]int, lineNumber int) *Route {
 	return &route
 }
 
+func ValidateRoute(r Route) ([]error, []string) {
+	var validationErrors []error
+	var recommendations []string
+
+	requiredFields := map[string]FieldTobeValidated{
+		"route_id":   &r.Id,
+		"route_type": &r.Type,
+	}
+	validateRequiredFields(requiredFields, &validationErrors, r.LineNumber, RoutesFileName)
+
+	optionalFields := map[string]FieldTobeValidated{
+		"route_desc":          &r.Desc,
+		"route_url":           &r.URL,
+		"route_color":         &r.Color,
+		"route_text_color":    &r.TextColor,
+		"route_sort_order":    &r.SortOrder,
+		"continuous_pickup":   &r.ContinuousPickup,
+		"continuous_drop_off": &r.ContinuousDropOff,
+	}
+	validateOptionalFields(optionalFields, &validationErrors, r.LineNumber, RoutesFileName)
+
+	if r.ShortName.IsEmpty() && !r.LongName.IsValid() {
+		validationErrors = append(validationErrors, createFileRowError(RoutesFileName, r.LineNumber, "route_short_name must be specified when route_long_name is empty or not present"))
+	}
+
+	if r.LongName.IsEmpty() && !r.ShortName.IsValid() {
+		validationErrors = append(validationErrors, createFileRowError(RoutesFileName, r.LineNumber, "route_long_name must be specified when route_short_name is empty or not present"))
+	}
+
+	if r.ShortName.Length() >= 12 {
+		recommendations = append(recommendations, createFileRowRecommendation(RoutesFileName, r.LineNumber, "route_short_name should be less than 12 characters"))
+	}
+
+	if r.Desc.IsValid() && (r.Desc == r.ShortName || r.Desc == r.LongName) {
+		recommendations = append(recommendations, createFileRowRecommendation(RoutesFileName, r.LineNumber, "route_desc should not be the same as route_short_name or route_long_name"))
+	}
+
+	return validationErrors, recommendations
+}
+
 func ValidateRoutes(routes []*Route, agencies []*Agency) ([]error, []string) {
 	var validationErrors []error
 	var validationRecommendations []string
@@ -130,7 +130,7 @@ func ValidateRoutes(routes []*Route, agencies []*Agency) ([]error, []string) {
 		}
 
 		// basic validation for route
-		vErr, vRec := route.Validate()
+		vErr, vRec := ValidateRoute(*route)
 		if len(vRec) > 0 {
 			validationRecommendations = append(validationRecommendations, vRec...)
 		}

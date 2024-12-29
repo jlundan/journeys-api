@@ -18,26 +18,6 @@ type CalendarItem struct {
 	LineNumber int
 }
 
-func (c CalendarItem) Validate() []error {
-	var validationErrors []error
-
-	requiredFields := map[string]FieldTobeValidated{
-		"service_id": &c.ServiceId,
-		"monday":     &c.Monday,
-		"tuesday":    &c.Tuesday,
-		"wednesday":  &c.Wednesday,
-		"thursday":   &c.Thursday,
-		"friday":     &c.Friday,
-		"saturday":   &c.Saturday,
-		"sunday":     &c.Sunday,
-		"start_date": &c.StartDate,
-		"end_date":   &c.EndDate,
-	}
-	validateRequiredFields(requiredFields, &validationErrors, c.LineNumber, CalendarFileName)
-
-	return validationErrors
-}
-
 func CreateCalendarItem(row []string, headers map[string]int, lineNumber int) *CalendarItem {
 	calendarItem := &CalendarItem{
 		LineNumber: lineNumber,
@@ -72,11 +52,31 @@ func CreateCalendarItem(row []string, headers map[string]int, lineNumber int) *C
 	return calendarItem
 }
 
+func ValidateCalendarItem(c CalendarItem) []error {
+	var validationErrors []error
+
+	requiredFields := map[string]FieldTobeValidated{
+		"service_id": &c.ServiceId,
+		"monday":     &c.Monday,
+		"tuesday":    &c.Tuesday,
+		"wednesday":  &c.Wednesday,
+		"thursday":   &c.Thursday,
+		"friday":     &c.Friday,
+		"saturday":   &c.Saturday,
+		"sunday":     &c.Sunday,
+		"start_date": &c.StartDate,
+		"end_date":   &c.EndDate,
+	}
+	validateRequiredFields(requiredFields, &validationErrors, c.LineNumber, CalendarFileName)
+
+	return validationErrors
+}
+
 func ValidateCalendarItems(calendarItems []*CalendarItem) ([]error, []string) {
 	var validationErrors []error
 
 	for _, calendarItem := range calendarItems {
-		validationErrors = append(validationErrors, calendarItem.Validate()...)
+		validationErrors = append(validationErrors, ValidateCalendarItem(*calendarItem)...)
 	}
 
 	return validationErrors, nil

@@ -29,48 +29,6 @@ type Stop struct {
 	LineNumber         int
 }
 
-func (s Stop) Validate() []error {
-	var validationErrors []error
-
-	requiredFields := map[string]FieldTobeValidated{
-		"stop_id": &s.Id,
-	}
-	validateRequiredFields(requiredFields, &validationErrors, s.LineNumber, StopsFileName)
-
-	optionalFields := map[string]FieldTobeValidated{
-		"stop_code":           &s.Id,
-		"stop_name":           &s.Name,
-		"tts_stop_name":       &s.TTSName,
-		"stop_desc":           &s.Desc,
-		"stop_lat":            &s.Lat,
-		"stop_lon":            &s.Lon,
-		"zone_id":             &s.ZoneId,
-		"stop_url":            &s.Url,
-		"location_type":       &s.LocationType,
-		"parent_station":      &s.ParentStation,
-		"stop_timezone":       &s.Timezone,
-		"wheelchair_boarding": &s.WheelchairBoarding,
-		"level_id":            &s.LevelId,
-		"platform_code":       &s.PlatformCode,
-	}
-	validateOptionalFields(optionalFields, &validationErrors, s.LineNumber, StopsFileName)
-
-	if s.LocationType.IsValid() && s.LocationType.Int() <= 3 && !s.Name.IsValid() {
-		validationErrors = append(validationErrors, createFileRowError(StopsFileName, s.LineNumber, "stop_name must be specified for location types 0, 1, and 2"))
-	}
-	if s.LocationType.IsValid() && s.LocationType.Int() <= 3 && !s.Lat.IsValid() {
-		validationErrors = append(validationErrors, createFileRowError(StopsFileName, s.LineNumber, "stop_lat must be specified for location types 0, 1, and 2"))
-	}
-	if s.LocationType.IsValid() && s.LocationType.Int() <= 3 && !s.Lon.IsValid() {
-		validationErrors = append(validationErrors, createFileRowError(StopsFileName, s.LineNumber, "stop_lon must be specified for location types 0, 1, and 2"))
-	}
-	if s.LocationType.IsValid() && s.LocationType.Int() >= 2 && s.LocationType.Int() <= 4 && !s.ParentStation.IsValid() {
-		validationErrors = append(validationErrors, createFileRowError(StopsFileName, s.LineNumber, "parent_station must be specified for location types 2, 3, and 4"))
-	}
-
-	return validationErrors
-}
-
 func CreateStop(row []string, headers map[string]int, lineNumber int) *Stop {
 	var parseErrors []error
 
@@ -124,6 +82,48 @@ func CreateStop(row []string, headers map[string]int, lineNumber int) *Stop {
 	return &stop
 }
 
+func ValidateStop(s Stop) []error {
+	var validationErrors []error
+
+	requiredFields := map[string]FieldTobeValidated{
+		"stop_id": &s.Id,
+	}
+	validateRequiredFields(requiredFields, &validationErrors, s.LineNumber, StopsFileName)
+
+	optionalFields := map[string]FieldTobeValidated{
+		"stop_code":           &s.Id,
+		"stop_name":           &s.Name,
+		"tts_stop_name":       &s.TTSName,
+		"stop_desc":           &s.Desc,
+		"stop_lat":            &s.Lat,
+		"stop_lon":            &s.Lon,
+		"zone_id":             &s.ZoneId,
+		"stop_url":            &s.Url,
+		"location_type":       &s.LocationType,
+		"parent_station":      &s.ParentStation,
+		"stop_timezone":       &s.Timezone,
+		"wheelchair_boarding": &s.WheelchairBoarding,
+		"level_id":            &s.LevelId,
+		"platform_code":       &s.PlatformCode,
+	}
+	validateOptionalFields(optionalFields, &validationErrors, s.LineNumber, StopsFileName)
+
+	if s.LocationType.IsValid() && s.LocationType.Int() <= 3 && !s.Name.IsValid() {
+		validationErrors = append(validationErrors, createFileRowError(StopsFileName, s.LineNumber, "stop_name must be specified for location types 0, 1, and 2"))
+	}
+	if s.LocationType.IsValid() && s.LocationType.Int() <= 3 && !s.Lat.IsValid() {
+		validationErrors = append(validationErrors, createFileRowError(StopsFileName, s.LineNumber, "stop_lat must be specified for location types 0, 1, and 2"))
+	}
+	if s.LocationType.IsValid() && s.LocationType.Int() <= 3 && !s.Lon.IsValid() {
+		validationErrors = append(validationErrors, createFileRowError(StopsFileName, s.LineNumber, "stop_lon must be specified for location types 0, 1, and 2"))
+	}
+	if s.LocationType.IsValid() && s.LocationType.Int() >= 2 && s.LocationType.Int() <= 4 && !s.ParentStation.IsValid() {
+		validationErrors = append(validationErrors, createFileRowError(StopsFileName, s.LineNumber, "parent_station must be specified for location types 2, 3, and 4"))
+	}
+
+	return validationErrors
+}
+
 func ValidateStops(stops []*Stop) ([]error, []string) {
 	var validationErrors []error
 	var recommendations []string
@@ -139,7 +139,7 @@ func ValidateStops(stops []*Stop) ([]error, []string) {
 			continue
 		}
 
-		vErr := stop.Validate()
+		vErr := ValidateStop(*stop)
 		if len(vErr) > 0 {
 			validationErrors = append(validationErrors, vErr...)
 			continue

@@ -27,38 +27,6 @@ type StopTime struct {
 	LineNumber               int
 }
 
-func (st StopTime) Validate() []error {
-	var validationErrors []error
-
-	requiredFields := map[string]FieldTobeValidated{
-		"trip_id":       &st.TripId,
-		"stop_sequence": &st.StopSequence,
-	}
-	validateRequiredFields(requiredFields, &validationErrors, st.LineNumber, StopTimesFileName)
-
-	optionalFields := map[string]FieldTobeValidated{
-		"arrival_time":                 &st.ArrivalTime,
-		"departure_time":               &st.DepartureTime,
-		"stop_id":                      &st.StopId,
-		"location_group_id":            &st.LocationGroupId,
-		"location_id":                  &st.LocationId,
-		"stop_headsign":                &st.StopHeadSign,
-		"start_pickup_drop_off_window": &st.StartPickupDropOffWindow,
-		"end_pickup_drop_off_window":   &st.EndPickupDropOffWindow,
-		"pickup_type":                  &st.PickupType,
-		"drop_off_type":                &st.DropOffType,
-		"continuous_pickup":            &st.ContinuousPickup,
-		"continuous_drop_off":          &st.ContinuousDropOff,
-		"shape_dist_traveled":          &st.ShapeDistTraveled,
-		"timepoint":                    &st.Timepoint,
-		"pickup_booking_rule_id":       &st.PickupBookingRuleId,
-		"drop_off_booking_rule_id":     &st.DropOffBookingRuleId,
-	}
-	validateOptionalFields(optionalFields, &validationErrors, st.LineNumber, StopTimesFileName)
-
-	return validationErrors
-}
-
 func CreateStopTime(row []string, headers map[string]int, lineNumber int) *StopTime {
 	var parseErrors []error
 
@@ -116,6 +84,38 @@ func CreateStopTime(row []string, headers map[string]int, lineNumber int) *StopT
 	return &stopTime
 }
 
+func ValidateStopTime(st StopTime) []error {
+	var validationErrors []error
+
+	requiredFields := map[string]FieldTobeValidated{
+		"trip_id":       &st.TripId,
+		"stop_sequence": &st.StopSequence,
+	}
+	validateRequiredFields(requiredFields, &validationErrors, st.LineNumber, StopTimesFileName)
+
+	optionalFields := map[string]FieldTobeValidated{
+		"arrival_time":                 &st.ArrivalTime,
+		"departure_time":               &st.DepartureTime,
+		"stop_id":                      &st.StopId,
+		"location_group_id":            &st.LocationGroupId,
+		"location_id":                  &st.LocationId,
+		"stop_headsign":                &st.StopHeadSign,
+		"start_pickup_drop_off_window": &st.StartPickupDropOffWindow,
+		"end_pickup_drop_off_window":   &st.EndPickupDropOffWindow,
+		"pickup_type":                  &st.PickupType,
+		"drop_off_type":                &st.DropOffType,
+		"continuous_pickup":            &st.ContinuousPickup,
+		"continuous_drop_off":          &st.ContinuousDropOff,
+		"shape_dist_traveled":          &st.ShapeDistTraveled,
+		"timepoint":                    &st.Timepoint,
+		"pickup_booking_rule_id":       &st.PickupBookingRuleId,
+		"drop_off_booking_rule_id":     &st.DropOffBookingRuleId,
+	}
+	validateOptionalFields(optionalFields, &validationErrors, st.LineNumber, StopTimesFileName)
+
+	return validationErrors
+}
+
 func ValidateStopTimes(stopTimes []*StopTime, stops []*Stop) ([]error, []string) {
 	var validationErrors []error
 	var recommendations []string
@@ -129,7 +129,7 @@ func ValidateStopTimes(stopTimes []*StopTime, stops []*Stop) ([]error, []string)
 			continue
 		}
 
-		vErr := stopTimeItem.Validate()
+		vErr := ValidateStopTime(*stopTimeItem)
 		if len(vErr) > 0 {
 			validationErrors = append(validationErrors, vErr...)
 		}
