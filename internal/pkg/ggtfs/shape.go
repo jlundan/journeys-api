@@ -77,7 +77,7 @@ func ValidateShapes(shapes []*Shape) ([]error, []string) {
 			continue
 		}
 
-		shapeIdToPointCount[shapeItem.Id.String()]++
+		shapeIdToPointCount[shapeItem.Id.Raw()]++
 	}
 
 	// Check that each shape has at least two points.

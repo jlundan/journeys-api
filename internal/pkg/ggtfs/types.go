@@ -13,7 +13,7 @@ type base struct {
 	isPresent bool
 }
 
-func (base base) String() string {
+func (base base) Raw() string {
 	return base.raw
 }
 

@@ -35,12 +35,12 @@ func buildLines(g GTFSContext) Lines {
 		}
 
 		l := model.Line{
-			Name:        sn.String(),
-			Description: ln.String(),
+			Name:        sn.Raw(),
+			Description: ln.Raw(),
 		}
 
 		all = append(all, &l)
-		byId[sn.String()] = &l
+		byId[sn.Raw()] = &l
 	}
 
 	sort.Slice(all, func(x, y int) bool {

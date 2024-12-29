@@ -145,10 +145,10 @@ func ValidateStops(stops []*Stop) ([]error, []string) {
 			continue
 		}
 
-		if usedIds[stop.Id.String()] {
-			validationErrors = append(validationErrors, createFileRowError(StopsFileName, stop.LineNumber, fmt.Sprintf("stop_id '%s' is not unique within the file", stop.Id.String())))
+		if usedIds[stop.Id.Raw()] {
+			validationErrors = append(validationErrors, createFileRowError(StopsFileName, stop.LineNumber, fmt.Sprintf("stop_id '%s' is not unique within the file", stop.Id.Raw())))
 		} else {
-			usedIds[stop.Id.String()] = true
+			usedIds[stop.Id.Raw()] = true
 		}
 	}
 

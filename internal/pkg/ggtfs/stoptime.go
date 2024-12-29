@@ -140,14 +140,14 @@ func ValidateStopTimes(stopTimes []*StopTime, stops []*Stop) ([]error, []string)
 				if stop == nil {
 					continue
 				}
-				if stopTimeItem.StopId.String() == stop.Id.String() {
+				if stopTimeItem.StopId.Raw() == stop.Id.Raw() {
 					stopFound = true
 					break
 				}
 			}
 		}
 		if !stopFound {
-			validationErrors = append(validationErrors, createFileRowError(StopTimesFileName, stopTimeItem.LineNumber, fmt.Sprintf("stop_id (%v) references to an unknown stop", stopTimeItem.StopId.String())))
+			validationErrors = append(validationErrors, createFileRowError(StopTimesFileName, stopTimeItem.LineNumber, fmt.Sprintf("stop_id (%v) references to an unknown stop", stopTimeItem.StopId.Raw())))
 		}
 	}
 

@@ -116,9 +116,9 @@ func ValidateRoutes(routes []*Route, agencies []*Agency) ([]error, []string) {
 				continue
 			}
 
-			if !existingAgencyIds[agency.Id.String()] {
+			if !existingAgencyIds[agency.Id.Raw()] {
 				numAgencies++
-				existingAgencyIds[agency.Id.String()] = true
+				existingAgencyIds[agency.Id.Raw()] = true
 			}
 		}
 	}
@@ -146,10 +146,10 @@ func ValidateRoutes(routes []*Route, agencies []*Agency) ([]error, []string) {
 		}
 
 		// route_id must be unique within the routes.txt file
-		if usedIds[route.Id.String()] {
-			validationErrors = append(validationErrors, createFileRowError(RoutesFileName, route.LineNumber, fmt.Sprintf("route_id '%s' is not unique within the file", route.Id.String())))
+		if usedIds[route.Id.Raw()] {
+			validationErrors = append(validationErrors, createFileRowError(RoutesFileName, route.LineNumber, fmt.Sprintf("route_id '%s' is not unique within the file", route.Id.Raw())))
 		} else {
-			usedIds[route.Id.String()] = true
+			usedIds[route.Id.Raw()] = true
 		}
 
 		if agencies == nil || !route.AgencyId.IsValid() {
@@ -163,14 +163,14 @@ func ValidateRoutes(routes []*Route, agencies []*Agency) ([]error, []string) {
 				continue
 			}
 
-			if route.AgencyId.String() == agency.Id.String() {
+			if route.AgencyId.Raw() == agency.Id.Raw() {
 				matchingAgencyFound = true
 				break
 			}
 		}
 
 		if !matchingAgencyFound {
-			validationErrors = append(validationErrors, createFileRowError(RoutesFileName, route.LineNumber, fmt.Sprintf("referenced agency_id '%s' not found in %s", route.AgencyId.String(), AgenciesFileName)))
+			validationErrors = append(validationErrors, createFileRowError(RoutesFileName, route.LineNumber, fmt.Sprintf("referenced agency_id '%s' not found in %s", route.AgencyId.Raw(), AgenciesFileName)))
 		}
 	}
 

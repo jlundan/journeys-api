@@ -63,7 +63,7 @@ func buildJourneys(g GTFSContext, lines Lines, routes Routes, stopPoints StopPoi
 	var tripIdToStopTimes = make(map[string][]*ggtfs.StopTime)
 
 	for _, st := range g.StopTimes {
-		tripIdToStopTimes[st.TripId.String()] = append(tripIdToStopTimes[st.TripId.String()], st)
+		tripIdToStopTimes[st.TripId.Raw()] = append(tripIdToStopTimes[st.TripId.Raw()], st)
 	}
 
 	usedHashes := make([]string, 0)
@@ -98,15 +98,15 @@ func buildJourneys(g GTFSContext, lines Lines, routes Routes, stopPoints StopPoi
 		}
 
 		for _, stopTime := range stArr {
-			sp, err := stopPoints.GetOne(stopTime.StopId.String())
+			sp, err := stopPoints.GetOne(stopTime.StopId.Raw())
 			if err != nil {
 				fmt.Println(fmt.Sprintf("Unknown stop point in trip, ignoring it. trip_id:%v, stop_id:%v", tripId, stopTime.TripId))
 				continue
 			}
 
 			tripIdToJourneyCalls[tripId] = append(tripIdToJourneyCalls[tripId], &model.JourneyCall{
-				DepartureTime: stopTime.DepartureTime.String(),
-				ArrivalTime:   stopTime.ArrivalTime.String(),
+				DepartureTime: stopTime.DepartureTime.Raw(),
+				ArrivalTime:   stopTime.ArrivalTime.Raw(),
 				StopPoint:     sp,
 			})
 
@@ -128,13 +128,13 @@ func buildJourneys(g GTFSContext, lines Lines, routes Routes, stopPoints StopPoi
 	calendarDateMap := buildCalendarDatesMap(g)
 
 	for _, trip := range g.Trips {
-		jp, ok := tripIdToJourneyPattern[trip.Id.String()]
+		jp, ok := tripIdToJourneyPattern[trip.Id.Raw()]
 		if !ok {
 			fmt.Println(fmt.Sprintf("Journey with no journey pattern detected, ignoring it: %v", trip.Id))
 			continue
 		}
 
-		line, err := lines.GetOne(trip.RouteId.String())
+		line, err := lines.GetOne(trip.RouteId.Raw())
 		if err != nil {
 			fmt.Println(fmt.Sprintf("Journey with no line detected, ignoring it: %v", trip.Id))
 			continue
@@ -144,24 +144,24 @@ func buildJourneys(g GTFSContext, lines Lines, routes Routes, stopPoints StopPoi
 			fmt.Println(fmt.Sprintf("Journey with no route detected, ignoring it: %v", trip.Id))
 			continue
 		}
-		route, err := routes.GetOne(trip.ShapeId.String())
+		route, err := routes.GetOne(trip.ShapeId.Raw())
 		if err != nil {
 			fmt.Println(fmt.Sprintf("Journey with no route detected, ignoring it: %v", trip.Id))
 			continue
 		}
 
-		cMapItem, ok := calendarMap[trip.ServiceId.String()]
+		cMapItem, ok := calendarMap[trip.ServiceId.Raw()]
 		if !ok {
 			fmt.Println(fmt.Sprintf("Journey with no service detected, ignoring it: %v", trip.Id))
 			continue
 		}
 
-		cdMapItem, ok := calendarDateMap[trip.ServiceId.String()]
+		cdMapItem, ok := calendarDateMap[trip.ServiceId.Raw()]
 		if !ok {
 			cdMapItem = make([]*model.DayTypeException, 0)
 		}
 
-		calls := tripIdToJourneyCalls[trip.Id.String()]
+		calls := tripIdToJourneyCalls[trip.Id.Raw()]
 
 		dtParts := strings.Split(calls[0].DepartureTime, ":")
 		dt := strings.Join(dtParts[:2], "")
@@ -172,12 +172,12 @@ func buildJourneys(g GTFSContext, lines Lines, routes Routes, stopPoints StopPoi
 		activityId := fmt.Sprintf("%v_%v_%v_%v", line.Name, dt, lastCall.StopPoint.ShortName, firstCall.StopPoint.ShortName)
 
 		journey := model.Journey{
-			Id:                   trip.Id.String(),
-			HeadSign:             trip.HeadSign.String(),
-			Direction:            trip.DirectionId.String(),
-			WheelchairAccessible: trip.WheelchairAccessible.String() == "1",
+			Id:                   trip.Id.Raw(),
+			HeadSign:             trip.HeadSign.Raw(),
+			Direction:            trip.DirectionId.Raw(),
+			WheelchairAccessible: trip.WheelchairAccessible.Raw() == "1",
 			GtfsInfo: &model.JourneyGtfsInfo{
-				TripId: trip.Id.String(),
+				TripId: trip.Id.Raw(),
 			},
 			DayTypes:          cMapItem.dayTypes,
 			DayTypeExceptions: cdMapItem,
@@ -207,7 +207,7 @@ func buildJourneys(g GTFSContext, lines Lines, routes Routes, stopPoints StopPoi
 
 		byActivityId[activityId] = &journey
 		all = append(all, &journey)
-		byId[trip.Id.String()] = &journey
+		byId[trip.Id.Raw()] = &journey
 	}
 
 	sort.Slice(all, func(x, y int) bool {
@@ -250,33 +250,33 @@ func buildCalendarMap(g GTFSContext) map[string]calendarFileRow {
 	result := make(map[string]calendarFileRow)
 	for _, calendarItem := range g.CalendarItems {
 		days := make([]string, 0)
-		if calendarItem.Monday.String() == "1" {
+		if calendarItem.Monday.Raw() == "1" {
 			days = append(days, "monday")
 		}
-		if calendarItem.Tuesday.String() == "1" {
+		if calendarItem.Tuesday.Raw() == "1" {
 			days = append(days, "tuesday")
 		}
-		if calendarItem.Wednesday.String() == "1" {
+		if calendarItem.Wednesday.Raw() == "1" {
 			days = append(days, "wednesday")
 		}
-		if calendarItem.Thursday.String() == "1" {
+		if calendarItem.Thursday.Raw() == "1" {
 			days = append(days, "thursday")
 		}
-		if calendarItem.Friday.String() == "1" {
+		if calendarItem.Friday.Raw() == "1" {
 			days = append(days, "friday")
 		}
-		if calendarItem.Saturday.String() == "1" {
+		if calendarItem.Saturday.Raw() == "1" {
 			days = append(days, "saturday")
 		}
-		if calendarItem.Sunday.String() == "1" {
+		if calendarItem.Sunday.Raw() == "1" {
 			days = append(days, "sunday")
 		}
 
 		serviceId := calendarItem.ServiceId
-		result[serviceId.String()] = calendarFileRow{
-			serviceId: serviceId.String(),
-			startDate: calendarItem.StartDate.String(),
-			endDate:   calendarItem.EndDate.String(),
+		result[serviceId.Raw()] = calendarFileRow{
+			serviceId: serviceId.Raw(),
+			startDate: calendarItem.StartDate.Raw(),
+			endDate:   calendarItem.EndDate.Raw(),
 			dayTypes:  days,
 		}
 	}
@@ -290,18 +290,18 @@ func buildCalendarDatesMap(g GTFSContext) map[string][]*model.DayTypeException {
 	for _, calendarDate := range g.CalendarDates {
 		var date string
 
-		parsedTime, err := time.Parse("20060102", calendarDate.Date.String())
+		parsedTime, err := time.Parse("20060102", calendarDate.Date.Raw())
 		if err != nil {
 			fmt.Println("Error parsing date:", err)
-			date = calendarDate.Date.String()
+			date = calendarDate.Date.Raw()
 		} else {
 			date = parsedTime.Format("2006-01-02")
 		}
 
-		result[calendarDate.ServiceId.String()] = append(result[calendarDate.ServiceId.String()], &model.DayTypeException{
+		result[calendarDate.ServiceId.Raw()] = append(result[calendarDate.ServiceId.Raw()], &model.DayTypeException{
 			From: date,
 			To:   date,
-			Runs: calendarDate.ExceptionType.String() == "1",
+			Runs: calendarDate.ExceptionType.Raw() == "1",
 		})
 	}
 
@@ -311,7 +311,7 @@ func buildCalendarDatesMap(g GTFSContext) map[string][]*model.DayTypeException {
 func stopPointIdsToMd5(arr []*ggtfs.StopTime) string {
 	bucket := md5.New()
 	for _, v := range arr {
-		bucket.Write([]byte(v.StopId.String()))
+		bucket.Write([]byte(v.StopId.Raw()))
 	}
 
 	return hex.EncodeToString(bucket.Sum(nil))
