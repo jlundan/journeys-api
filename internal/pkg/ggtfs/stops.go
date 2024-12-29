@@ -32,43 +32,28 @@ type Stop struct {
 func (s Stop) Validate() []error {
 	var validationErrors []error
 
-	requiredFields := []struct {
-		fieldName string
-		field     ValidAndPresentField
-	}{
-		{"stop_id", &s.Id},
+	requiredFields := map[string]FieldTobeValidated{
+		"stop_id": &s.Id,
 	}
-	for _, f := range requiredFields {
-		if !f.field.IsValid() {
-			validationErrors = append(validationErrors, createFileRowError(StopsFileName, s.LineNumber, createInvalidRequiredFieldString(f.fieldName)))
-		}
-	}
+	validateRequiredFields(requiredFields, &validationErrors, s.LineNumber, StopsFileName)
 
-	optionalFields := []struct {
-		field     ValidAndPresentField
-		fieldName string
-	}{
-		{&s.Id, "stop_code"},
-		{&s.Name, "stop_name"},
-		{&s.TTSName, "tts_stop_name"},
-		{&s.Desc, "stop_desc"},
-		{&s.Lat, "stop_lat"},
-		{&s.Lon, "stop_lon"},
-		{&s.ZoneId, "zone_id"},
-		{&s.Url, "stop_url"},
-		{&s.LocationType, "location_type"},
-		{&s.ParentStation, "parent_station"},
-		{&s.Timezone, "stop_timezone"},
-		{&s.WheelchairBoarding, "wheelchair_boarding"},
-		{&s.LevelId, "level_id"},
-		{&s.PlatformCode, "platform_code"},
+	optionalFields := map[string]FieldTobeValidated{
+		"stop_code":           &s.Id,
+		"stop_name":           &s.Name,
+		"tts_stop_name":       &s.TTSName,
+		"stop_desc":           &s.Desc,
+		"stop_lat":            &s.Lat,
+		"stop_lon":            &s.Lon,
+		"zone_id":             &s.ZoneId,
+		"stop_url":            &s.Url,
+		"location_type":       &s.LocationType,
+		"parent_station":      &s.ParentStation,
+		"stop_timezone":       &s.Timezone,
+		"wheelchair_boarding": &s.WheelchairBoarding,
+		"level_id":            &s.LevelId,
+		"platform_code":       &s.PlatformCode,
 	}
-
-	for _, field := range optionalFields {
-		if field.field != nil && field.field.IsPresent() && !field.field.IsValid() {
-			validationErrors = append(validationErrors, createFileRowError(StopsFileName, s.LineNumber, createInvalidFieldString(field.fieldName)))
-		}
-	}
+	validateOptionalFields(optionalFields, &validationErrors, s.LineNumber, StopsFileName)
 
 	if s.LocationType.IsValid() && s.LocationType.Int() <= 3 && !s.Name.IsValid() {
 		validationErrors = append(validationErrors, createFileRowError(StopsFileName, s.LineNumber, "stop_name must be specified for location types 0, 1, and 2"))
