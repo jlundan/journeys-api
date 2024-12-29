@@ -63,7 +63,7 @@ func validateCalendarDateReferences(calendarDates []*CalendarDate, calendarItems
 	serviceIDMap := make(map[string]struct{})
 	for _, item := range calendarItems {
 		if item != nil && !item.ServiceId.IsEmpty() {
-			serviceIDMap[item.ServiceId.String()] = struct{}{}
+			serviceIDMap[item.ServiceId.Raw()] = struct{}{}
 		}
 	}
 
@@ -71,10 +71,10 @@ func validateCalendarDateReferences(calendarDates []*CalendarDate, calendarItems
 		if calendarDate == nil || calendarDate.ServiceId.IsEmpty() {
 			continue
 		}
-		if _, found := serviceIDMap[calendarDate.ServiceId.String()]; !found {
+		if _, found := serviceIDMap[calendarDate.ServiceId.Raw()]; !found {
 			*validationErrors = append(*validationErrors,
 				createFileRowError(CalendarDatesFileName, calendarDate.LineNumber,
-					fmt.Sprintf("referenced service_id '%s' not found in %s", calendarDate.ServiceId.String(), CalendarFileName)))
+					fmt.Sprintf("referenced service_id '%s' not found in %s", calendarDate.ServiceId.Raw(), CalendarFileName)))
 		}
 	}
 }

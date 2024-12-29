@@ -103,10 +103,10 @@ func ValidateAgencies(agencies []*Agency) ([]error, []string) {
 			continue
 		}
 
-		if usedIds[a.Id.String()] {
+		if usedIds[a.Id.Raw()] {
 			validationErrors = append(validationErrors, createFileRowError(AgenciesFileName, a.LineNumber, fmt.Sprintf("agency_id is not unique within the file")))
 		} else {
-			usedIds[a.Id.String()] = true
+			usedIds[a.Id.Raw()] = true
 		}
 	}
 

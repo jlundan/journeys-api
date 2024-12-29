@@ -29,19 +29,19 @@ func buildRoutes(g GTFSContext) Routes {
 
 	var shapeIdToCoords = make(map[string][][]float64)
 	for _, shape := range g.Shapes {
-		if _, ok := shapeIdToCoords[shape.Id.String()]; !ok {
-			shapeIdToCoords[shape.Id.String()] = make([][]float64, 0)
+		if _, ok := shapeIdToCoords[shape.Id.Raw()]; !ok {
+			shapeIdToCoords[shape.Id.Raw()] = make([][]float64, 0)
 		}
-		lat, err := strconv.ParseFloat(shape.PtLat.String(), 64)
+		lat, err := strconv.ParseFloat(shape.PtLat.Raw(), 64)
 		if err != nil {
 			fmt.Println(fmt.Sprintf("Error parsing shape.PtLat: %v, line: %v", shape.PtLat, shape.LineNumber))
 		}
-		lon, err := strconv.ParseFloat(shape.PtLon.String(), 64)
+		lon, err := strconv.ParseFloat(shape.PtLon.Raw(), 64)
 		if err != nil {
 			fmt.Println(fmt.Sprintf("Error parsing shape.PtLon: %v, line: %v", shape.PtLon, shape.LineNumber))
 		}
 
-		shapeIdToCoords[shape.Id.String()] = append(shapeIdToCoords[shape.Id.String()], []float64{lat, lon})
+		shapeIdToCoords[shape.Id.Raw()] = append(shapeIdToCoords[shape.Id.Raw()], []float64{lat, lon})
 	}
 
 	for shapeId, coords := range shapeIdToCoords {

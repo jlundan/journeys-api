@@ -104,7 +104,7 @@ func ValidateTrips(trips []*Trip, routes []*Route, calendarItems []*CalendarItem
 				if route == nil {
 					continue
 				}
-				if trip.RouteId.String() == route.Id.String() {
+				if trip.RouteId.Raw() == route.Id.Raw() {
 					routeFound = true
 					break
 				}
@@ -120,7 +120,7 @@ func ValidateTrips(trips []*Trip, routes []*Route, calendarItems []*CalendarItem
 				if calendarItem == nil {
 					continue
 				}
-				if trip.ServiceId.String() == calendarItem.ServiceId.String() {
+				if trip.ServiceId.Raw() == calendarItem.ServiceId.Raw() {
 					serviceFound = true
 					break
 				}
@@ -137,7 +137,7 @@ func ValidateTrips(trips []*Trip, routes []*Route, calendarItems []*CalendarItem
 					if shape == nil {
 						continue
 					}
-					if trip.ShapeId.String() == shape.Id.String() {
+					if trip.ShapeId.Raw() == shape.Id.Raw() {
 						shapeFound = true
 						break
 					}
