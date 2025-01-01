@@ -4,7 +4,7 @@ import (
 	"github.com/jlundan/journeys-api/internal/pkg/ggtfs/types"
 )
 
-type CsvAgency struct {
+type RawCsvAgency struct {
 	Id         *string // agency_id 		(conditionally required)
 	Name       *string // agency_name 		(required)
 	URL        *string // agency_url 		(required)
@@ -16,8 +16,8 @@ type CsvAgency struct {
 	LineNumber int
 }
 
-func CreateCsvAgency(row []string, headers map[string]int, lineNumber int) *CsvAgency {
-	agency := CsvAgency{
+func CreateRawCsvAgency(row []string, headers map[string]int, lineNumber int) *RawCsvAgency {
+	agency := RawCsvAgency{
 		LineNumber: lineNumber,
 	}
 
@@ -47,44 +47,44 @@ func CreateCsvAgency(row []string, headers map[string]int, lineNumber int) *CsvA
 	return &agency
 }
 
-type ValidatableCsvAgency struct {
-	CsvAgency
+type CsvAgency struct {
+	RawCsvAgency
 }
 
-func (a ValidatableCsvAgency) GetID() types.ID {
+func (a CsvAgency) GetID() types.ID {
 	return types.NewID(a.Id)
 }
 
-func (a ValidatableCsvAgency) GetName() types.Text {
+func (a CsvAgency) GetName() types.Text {
 	return types.NewText(a.Name)
 }
 
-func (a ValidatableCsvAgency) GetURL() types.URL {
+func (a CsvAgency) GetURL() types.URL {
 	return types.NewURL(a.URL)
 }
 
-func (a ValidatableCsvAgency) GetTimezone() types.Timezone {
+func (a CsvAgency) GetTimezone() types.Timezone {
 	return types.NewTimezone(a.Timezone)
 }
 
-func (a ValidatableCsvAgency) GetLang() types.LanguageCode {
+func (a CsvAgency) GetLang() types.LanguageCode {
 	return types.NewLanguageCode(a.Lang)
 }
 
-func (a ValidatableCsvAgency) GetPhone() types.PhoneNumber {
+func (a CsvAgency) GetPhone() types.PhoneNumber {
 	return types.NewPhoneNumber(a.Phone)
 }
 
-func (a ValidatableCsvAgency) GetFareURL() types.URL {
+func (a CsvAgency) GetFareURL() types.URL {
 	return types.NewURL(a.FareURL)
 }
 
-func (a ValidatableCsvAgency) GetEmail() types.Email {
+func (a CsvAgency) GetEmail() types.Email {
 	return types.NewEmail(a.Email)
 }
 
-func CreateValidatableCsvAgency(row []string, headers map[string]int, lineNumber int) *ValidatableCsvAgency {
-	return &ValidatableCsvAgency{*CreateCsvAgency(row, headers, lineNumber)}
+func CreateCsvAgency(row []string, headers map[string]int, lineNumber int) *CsvAgency {
+	return &CsvAgency{*CreateRawCsvAgency(row, headers, lineNumber)}
 }
 
 func getRowValueForHeaderName(row []string, headers map[string]int, headerName string) *string {
