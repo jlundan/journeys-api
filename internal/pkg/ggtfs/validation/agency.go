@@ -23,9 +23,9 @@ func ValidateAgency(a Agency) []Result {
 		field     validatedField
 		required  bool
 	}{
-		{"agency_name", a.GetName(), true},         // required
-		{"agency_url", a.GetURL(), true},           // required
-		{"agency_timezone", a.GetTimezone(), true}, // required
+		{"agency_name", a.GetName(), true},
+		{"agency_url", a.GetURL(), true},
+		{"agency_timezone", a.GetTimezone(), true},
 		{"agency_id", a.GetID(), false},
 		{"agency_lang", a.GetLang(), false},
 		{"agency_phone", a.GetPhone(), false},
