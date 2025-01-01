@@ -1,4 +1,4 @@
-package ggtfs
+package csventities
 
 import (
 	"github.com/jlundan/journeys-api/internal/pkg/ggtfs/types"
@@ -85,18 +85,4 @@ func (a CsvAgency) GetEmail() types.Email {
 
 func CreateCsvAgency(row []string, headers map[string]int, lineNumber int) *CsvAgency {
 	return &CsvAgency{*CreateRawCsvAgency(row, headers, lineNumber)}
-}
-
-func getRowValueForHeaderName(row []string, headers map[string]int, headerName string) *string {
-	pos, ok := headers[headerName]
-
-	if !ok {
-		pos = -1
-	}
-
-	if pos < 0 || pos >= len(row) {
-		return nil
-	}
-
-	return &row[pos]
 }
