@@ -6,6 +6,7 @@ import (
 	"encoding/csv"
 	"github.com/dimchansky/utfbom"
 	"github.com/jlundan/journeys-api/internal/pkg/ggtfs"
+	"github.com/jlundan/journeys-api/internal/pkg/ggtfs/csventities"
 	"io"
 	"os"
 	"path"
@@ -13,7 +14,7 @@ import (
 )
 
 type GTFSContext struct {
-	Agencies      []*ggtfs.Agency
+	Agencies      []*csventities.CsvAgency
 	Routes        []*ggtfs.Route
 	Stops         []*ggtfs.Stop
 	Trips         []*ggtfs.Trip
@@ -27,25 +28,25 @@ func Validate(ctx *GTFSContext) ([]error, []string) {
 	var warnings []error
 	var recommendations []string
 
-	tripWarnings, tripRecommendations := ggtfs.ValidateTrips(ctx.Trips, ctx.Routes, ctx.CalendarItems, ctx.Shapes)
-	warnings = append(warnings, tripWarnings...)
-	recommendations = append(recommendations, tripRecommendations...)
-
-	shapeWarnings, shapeRecommendations := ggtfs.ValidateShapes(ctx.Shapes)
-	warnings = append(warnings, shapeWarnings...)
-	recommendations = append(recommendations, shapeRecommendations...)
-
-	calendarDateWarnings, calendarDateRecommendations := ggtfs.ValidateCalendarDates(ctx.CalendarDates, ctx.CalendarItems)
-	warnings = append(warnings, calendarDateWarnings...)
-	recommendations = append(recommendations, calendarDateRecommendations...)
-
-	routeWarnings, routeRecommendations := ggtfs.ValidateRoutes(ctx.Routes, ctx.Agencies)
-	warnings = append(warnings, routeWarnings...)
-	recommendations = append(recommendations, routeRecommendations...)
-
-	stopTimeWarnings, stopTimeRecommendations := ggtfs.ValidateStopTimes(ctx.StopTimes, ctx.Stops)
-	warnings = append(warnings, stopTimeWarnings...)
-	recommendations = append(recommendations, stopTimeRecommendations...)
+	//tripWarnings, tripRecommendations := ggtfs.ValidateTrips(ctx.Trips, ctx.Routes, ctx.CalendarItems, ctx.Shapes)
+	//warnings = append(warnings, tripWarnings...)
+	//recommendations = append(recommendations, tripRecommendations...)
+	//
+	//shapeWarnings, shapeRecommendations := ggtfs.ValidateShapes(ctx.Shapes)
+	//warnings = append(warnings, shapeWarnings...)
+	//recommendations = append(recommendations, shapeRecommendations...)
+	//
+	//calendarDateWarnings, calendarDateRecommendations := ggtfs.ValidateCalendarDates(ctx.CalendarDates, ctx.CalendarItems)
+	//warnings = append(warnings, calendarDateWarnings...)
+	//recommendations = append(recommendations, calendarDateRecommendations...)
+	//
+	//routeWarnings, routeRecommendations := ggtfs.ValidateRoutes(ctx.Routes, ctx.Agencies)
+	//warnings = append(warnings, routeWarnings...)
+	//recommendations = append(recommendations, routeRecommendations...)
+	//
+	//stopTimeWarnings, stopTimeRecommendations := ggtfs.ValidateStopTimes(ctx.StopTimes, ctx.Stops)
+	//warnings = append(warnings, stopTimeWarnings...)
+	//recommendations = append(recommendations, stopTimeRecommendations...)
 
 	return warnings, recommendations
 }
@@ -58,8 +59,8 @@ func NewGTFSContextForDirectory(gtfsPath string) (*GTFSContext, []error) {
 	var validShapeHeaders = []string{"shape_id", "shape_pt_lat", "shape_pt_lon", "shape_pt_sequence", "shape_dist_traveled"}
 	var validStopHeaders = []string{"stop_id", "stop_code", "stop_name", "stop_desc", "stop_lat", "stop_lon", "zone_id",
 		"stop_url", "location_type", "parent_station", "stop_timezone", "wheelchair_boarding", "level_id", "platform_code", "municipality_id"}
-	var validAgencyHeaders = []string{"agency_id", "agency_name", "agency_url", "agency_timezone",
-		"agency_lang", "agency_phone", "agency_fare_url", "agency_email"}
+	//var validAgencyHeaders = []string{"agency_id", "agency_name", "agency_url", "agency_timezone",
+	//	"agency_lang", "agency_phone", "agency_fare_url", "agency_email"}
 	var validCalendarHeaders = []string{
 		"service_id", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday", "start_date", "end_date",
 	}
@@ -84,7 +85,7 @@ func NewGTFSContextForDirectory(gtfsPath string) (*GTFSContext, []error) {
 
 		switch file {
 		case ggtfs.AgenciesFileName:
-			context.Agencies, gtfsErrors = ggtfs.LoadEntitiesFromCSV[*ggtfs.Agency](reader, validAgencyHeaders, ggtfs.CreateAgency, ggtfs.AgenciesFileName)
+			context.Agencies, gtfsErrors = csventities.LoadAgencies(csventities.NewReader(reader))
 		case ggtfs.RoutesFileName:
 			context.Routes, gtfsErrors = ggtfs.LoadEntitiesFromCSV[*ggtfs.Route](reader, validRouteHeaders, ggtfs.CreateRoute, ggtfs.RoutesFileName)
 		case ggtfs.StopsFileName:
