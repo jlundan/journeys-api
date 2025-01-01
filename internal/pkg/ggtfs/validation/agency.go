@@ -18,29 +18,23 @@ type Agency interface {
 func ValidateAgency(a Agency) []Result {
 	var validationResults []Result
 
-	fields := map[string]validatedField{
-		"agency_name":     a.GetName(),     // agency_name 		(required)
-		"agency_url":      a.GetURL(),      // agency_url 		(required)
-		"agency_timezone": a.GetTimezone(), // agency_timezone 	(required)
-		"agency_id":       a.GetID(),
-		"agency_lang":     a.GetLang(),
-		"agency_phone":    a.GetPhone(),
-		"agency_fare_url": a.GetURL(),
-		"agency_email":    a.GetEmail(),
+	fields := []struct {
+		fieldName string
+		field     validatedField
+	}{
+		{"agency_name", a.GetName()},         // required
+		{"agency_url", a.GetURL()},           // required
+		{"agency_timezone", a.GetTimezone()}, // required
+		{"agency_id", a.GetID()},
+		{"agency_lang", a.GetLang()},
+		{"agency_phone", a.GetPhone()},
+		{"agency_fare_url", a.GetURL()},
+		{"agency_email", a.GetEmail()},
 	}
 
-	for fieldName, field := range fields {
-		validationResults = append(validationResults, validateField("agency", fieldName, field)...)
+	for _, field := range fields {
+		validationResults = append(validationResults, validateField("agency", field.fieldName, field.field)...)
 	}
 
 	return validationResults
 }
-
-//validationResults = append(validationResults, validateField("agency", "agency_name", a.GetName())...)
-//validationResults = append(validationResults, validateField("agency", "agency_url", a.GetURL())...)
-//validationResults = append(validationResults, validateField("agency", "agency_timezone", a.GetTimezone())...)
-//validationResults = append(validationResults, validateField("agency", "agency_id", a.GetID())...)
-//validationResults = append(validationResults, validateField("agency", "agency_lang", a.GetLang())...)
-//validationResults = append(validationResults, validateField("agency", "agency_phone", a.GetPhone())...)
-//validationResults = append(validationResults, validateField("agency", "agency_fare_url", a.GetURL())...)
-//validationResults = append(validationResults, validateField("agency", "agency_email", a.GetEmail())...)
