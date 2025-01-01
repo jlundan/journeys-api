@@ -1,7 +1,6 @@
 package validation
 
 import (
-	"fmt"
 	"github.com/jlundan/journeys-api/internal/pkg/ggtfs/types"
 	"unicode/utf8"
 )
@@ -20,28 +19,14 @@ type validatedField interface {
 	Raw() string
 }
 
-func isMandatoryField(entity string, fieldName string) bool {
-	switch fmt.Sprintf("%s_%s", entity, fieldName) {
-	case "agency_agency_name":
-		return true
-	case "agency_agency_url":
-		return true
-	case "agency_agency_timezone":
-		return true
-	default:
-		return false
-	}
-}
-
-func validateField(entity string, fieldName string, field validatedField) []Result {
-	isMandatory := isMandatoryField(entity, fieldName)
+func validateField(fieldName string, field validatedField, isRequired bool) []Result {
 	hasValue := field.IsPresent() && !field.IsEmpty()
 
-	if !isMandatory && !hasValue {
+	if !isRequired && !hasValue {
 		return []Result{}
 	}
 
-	if isMandatory && !hasValue {
+	if isRequired && !hasValue {
 		return []Result{MissingRequiredFieldResult{FieldName: fieldName}}
 	}
 

@@ -21,19 +21,20 @@ func ValidateAgency(a Agency) []Result {
 	fields := []struct {
 		fieldName string
 		field     validatedField
+		required  bool
 	}{
-		{"agency_name", a.GetName()},         // required
-		{"agency_url", a.GetURL()},           // required
-		{"agency_timezone", a.GetTimezone()}, // required
-		{"agency_id", a.GetID()},
-		{"agency_lang", a.GetLang()},
-		{"agency_phone", a.GetPhone()},
-		{"agency_fare_url", a.GetURL()},
-		{"agency_email", a.GetEmail()},
+		{"agency_name", a.GetName(), true},         // required
+		{"agency_url", a.GetURL(), true},           // required
+		{"agency_timezone", a.GetTimezone(), true}, // required
+		{"agency_id", a.GetID(), false},
+		{"agency_lang", a.GetLang(), false},
+		{"agency_phone", a.GetPhone(), false},
+		{"agency_fare_url", a.GetURL(), false},
+		{"agency_email", a.GetEmail(), false},
 	}
 
 	for _, field := range fields {
-		validationResults = append(validationResults, validateField("agency", field.fieldName, field.field)...)
+		validationResults = append(validationResults, validateField(field.fieldName, field.field, field.required)...)
 	}
 
 	return validationResults
