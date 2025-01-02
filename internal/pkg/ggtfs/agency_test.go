@@ -12,11 +12,11 @@ func TestValidateAgency(t *testing.T) {
 		agencies        []*Agency
 		expectedResults []Result
 	}{
-		"nil-agency-array": {
+		"nil-agency-slice": {
 			agencies:        nil,
 			expectedResults: []Result{},
 		},
-		"nil-agency-array-items": {
+		"nil-agency-slice-items": {
 			agencies:        []*Agency{nil},
 			expectedResults: []Result{},
 		},
