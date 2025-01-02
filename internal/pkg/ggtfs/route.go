@@ -112,13 +112,13 @@ func ValidateRoutes(routes []*Route, agencies []*Agency) ([]error, []string) {
 	if agencies != nil {
 		existingAgencyIds := make(map[string]bool)
 		for _, agency := range agencies {
-			if agency == nil || !agency.Id.IsValid() {
+			if agency == nil || StringIsNilOrEmpty(agency.Id) {
 				continue
 			}
 
-			if !existingAgencyIds[agency.Id.Raw()] {
+			if !existingAgencyIds[*agency.Id] {
 				numAgencies++
-				existingAgencyIds[agency.Id.Raw()] = true
+				existingAgencyIds[*agency.Id] = true
 			}
 		}
 	}
@@ -163,7 +163,7 @@ func ValidateRoutes(routes []*Route, agencies []*Agency) ([]error, []string) {
 				continue
 			}
 
-			if route.AgencyId.Raw() == agency.Id.Raw() {
+			if route.AgencyId.Raw() == *agency.Id {
 				matchingAgencyFound = true
 				break
 			}

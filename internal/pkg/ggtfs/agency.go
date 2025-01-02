@@ -1,18 +1,18 @@
 package ggtfs
 
 import (
-	"fmt"
+	"strings"
 )
 
 type Agency struct {
-	Id         ID           // agency_id 		(conditionally required)
-	Name       Text         // agency_name 		(required)
-	URL        URL          // agency_url 		(required)
-	Timezone   Timezone     // agency_timezone 	(required)
-	Lang       LanguageCode // agency_lang 		(optional)
-	Phone      PhoneNumber  // agency_phone 	(optional)
-	FareURL    URL          // agency_fare_url 	(optional)
-	Email      Email        // agency_email 	(optional)
+	Id         *string // agency_id 		(conditionally required)
+	Name       *string // agency_name 		(required)
+	URL        *string // agency_url 		(required)
+	Timezone   *string // agency_timezone 	(required)
+	Lang       *string // agency_lang 		(optional)
+	Phone      *string // agency_phone 		(optional)
+	FareURL    *string // agency_fare_url 	(optional)
+	Email      *string // agency_email 		(optional)
 	LineNumber int
 }
 
@@ -26,89 +26,105 @@ func CreateAgency(row []string, headers map[string]int, lineNumber int) *Agency 
 
 		switch hName {
 		case "agency_id":
-			agency.Id = NewID(v)
+			agency.Id = v
 		case "agency_name":
-			agency.Name = NewText(v)
+			agency.Name = v
 		case "agency_url":
-			agency.URL = NewURL(v)
+			agency.URL = v
 		case "agency_timezone":
-			agency.Timezone = NewTimezone(v)
+			agency.Timezone = v
 		case "agency_lang":
-			agency.Lang = NewLanguageCode(v)
+			agency.Lang = v
 		case "agency_phone":
-			agency.Phone = NewPhoneNumber(v)
+			agency.Phone = v
 		case "agency_fare_url":
-			agency.FareURL = NewURL(v)
+			agency.FareURL = v
 		case "agency_email":
-			agency.Email = NewEmail(v)
+			agency.Email = v
 		}
 	}
 
 	return &agency
 }
 
-func ValidateAgency(a Agency) []error {
-	var validationErrors []error
+func ValidateAgency(a Agency) []Result {
+	var validationResults []Result
 
-	requiredFields := map[string]FieldTobeValidated{
-		"agency_name":     &a.Name,
-		"agency_url":      &a.URL,
-		"agency_timezone": &a.Timezone,
+	fields := []struct {
+		fieldName  string
+		fieldValue *string
+		required   bool
+	}{
+		{"agency_name", a.Name, true},
+		{"agency_url", a.URL, true},
+		{"agency_timezone", a.Timezone, true},
+		{"agency_id", a.Id, false},
+		{"agency_lang", a.Lang, false},
+		{"agency_phone", a.Phone, false},
+		{"agency_fare_url", a.URL, false},
+		{"agency_email", a.Email, false},
 	}
-	validateRequiredFields(requiredFields, &validationErrors, a.LineNumber, AgenciesFileName)
 
-	optionalFields := map[string]FieldTobeValidated{
-		"agency_id":       &a.Id,
-		"agency_lang":     &a.Lang,
-		"agency_phone":    &a.Phone,
-		"agency_fare_url": &a.FareURL,
-		"agency_email":    &a.Email,
+	for _, field := range fields {
+		validationResults = append(validationResults, validateField(field.fieldName, field.fieldValue, field.required, "agency.txt", a.LineNumber)...)
 	}
-	validateOptionalFields(optionalFields, &validationErrors, a.LineNumber, AgenciesFileName)
 
-	return validationErrors
+	return validationResults
 }
 
-func ValidateAgencies(agencies []*Agency) ([]error, []string) {
-	var validationErrors []error
-	var recommendations []string
+func StringIsNilOrEmpty(id *string) bool {
+	return id == nil || strings.TrimSpace(*id) == ""
+}
 
-	aLength := len(agencies)
+func ValidateAgencies(agencies []*Agency) []Result {
+	var results []Result
 
-	if aLength == 0 || (aLength == 1 && agencies[0] == nil) {
-		return validationErrors, recommendations
+	var filteredAgencies []*Agency
+
+	for _, a := range agencies {
+		if a != nil {
+			filteredAgencies = append(filteredAgencies, a)
+		}
 	}
 
-	if aLength == 1 && !agencies[0].Id.IsValid() {
-		validationErrors = append(validationErrors, ValidateAgency(*agencies[0])...)
-		recommendations = append(recommendations, createFileRowRecommendation(AgenciesFileName, agencies[0].LineNumber, "it is recommended that agency_id is specified even when there is only one agency"))
-		return validationErrors, recommendations
+	aLength := len(filteredAgencies)
+
+	if aLength == 0 {
+		return []Result{}
+	}
+
+	if aLength == 1 && StringIsNilOrEmpty(filteredAgencies[0].Id) {
+		return []Result{SingleAgencyRecommendedResult{
+			FileName: "agency.txt",
+		}}
 	}
 
 	if aLength == 1 {
-		validationErrors = append(validationErrors, ValidateAgency(*agencies[0])...)
-		return validationErrors, recommendations
+		return ValidateAgency(*filteredAgencies[0])
 	}
 
 	usedIds := make(map[string]bool)
-	for _, a := range agencies {
-		if a == nil {
+	for _, a := range filteredAgencies {
+		results = append(results, ValidateAgency(*a)...)
+
+		if StringIsNilOrEmpty(a.Id) {
+			results = append(results, ValidAgencyIdRequiredWhenMultipleAgenciesResult{
+				FileName: "agency.txt",
+				Line:     a.LineNumber,
+			})
 			continue
 		}
 
-		validationErrors = append(validationErrors, ValidateAgency(*a)...)
-
-		if !a.Id.IsValid() {
-			validationErrors = append(validationErrors, createFileRowError(AgenciesFileName, a.LineNumber, "a valid agency_id must be specified when multiple agencies are declared"))
-			continue
-		}
-
-		if usedIds[a.Id.Raw()] {
-			validationErrors = append(validationErrors, createFileRowError(AgenciesFileName, a.LineNumber, fmt.Sprintf("agency_id is not unique within the file")))
+		if usedIds[*a.Id] {
+			results = append(results, FieldIsNotUniqueResult{
+				FileName:  "agency.txt",
+				FieldName: "agency_id",
+				Line:      a.LineNumber,
+			})
 		} else {
-			usedIds[a.Id.Raw()] = true
+			usedIds[*a.Id] = true
 		}
 	}
 
-	return validationErrors, recommendations
+	return results
 }
