@@ -42,17 +42,11 @@ func TestValidateAgency(t *testing.T) {
 		},
 		"valid-id-when-multiple-agencies": {
 			agencies: []*Agency{
-				{LineNumber: 0},
-				{LineNumber: 1},
+				{Name: stringPtr("acme"), URL: stringPtr("http://acme.inc"), Timezone: stringPtr("Europe/Helsinki"), LineNumber: 0},
+				{Name: stringPtr("acme"), URL: stringPtr("http://acme.inc"), Timezone: stringPtr("Europe/Helsinki"), LineNumber: 1},
 			},
 			expectedResults: []Result{
-				MissingRequiredFieldResult{FileName: "agency.txt", FieldName: "agency_name"},
-				MissingRequiredFieldResult{FileName: "agency.txt", FieldName: "agency_url"},
-				MissingRequiredFieldResult{FileName: "agency.txt", FieldName: "agency_timezone"},
 				ValidAgencyIdRequiredWhenMultipleAgenciesResult{FileName: "agency.txt", Line: 0},
-				MissingRequiredFieldResult{FileName: "agency.txt", FieldName: "agency_name", Line: 1},
-				MissingRequiredFieldResult{FileName: "agency.txt", FieldName: "agency_url", Line: 1},
-				MissingRequiredFieldResult{FileName: "agency.txt", FieldName: "agency_timezone", Line: 1},
 				ValidAgencyIdRequiredWhenMultipleAgenciesResult{FileName: "agency.txt", Line: 1},
 			},
 		},
