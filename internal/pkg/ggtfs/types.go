@@ -336,3 +336,26 @@ type GtfsEntity interface {
 }
 
 type entityCreator[T GtfsEntity] func(row []string, headers map[string]int, lineNumber int) T
+
+type FieldType string
+
+const (
+	FieldTypeColor          FieldType = "Color"
+	FieldTypeCurrencyCode   FieldType = "CurrencyCode"
+	FieldTypeCurrencyAmount FieldType = "CurrencyAmount"
+	FieldTypeDate           FieldType = "Date"
+	FieldTypeEmail          FieldType = "Email"
+	FieldTypeID             FieldType = "ID"
+	FieldTypeLanguageCode   FieldType = "LanguageCode"
+	FieldTypeLatitude       FieldType = "Latitude"
+	FieldTypeLongitude      FieldType = "Longitude"
+	FieldTypeFloat          FieldType = "Float"
+	FieldTypeInteger        FieldType = "Integer"
+	FieldTypePhoneNumber    FieldType = "PhoneNumber"
+	FieldTypeTime           FieldType = "Time"
+	FieldTypeText           FieldType = "Text"
+	FieldTypeTimezone       FieldType = "Timezone"
+	FieldTypeURL            FieldType = "URL"
+
+	FileNameAgency = "agency.txt"
+)

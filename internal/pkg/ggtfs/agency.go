@@ -47,19 +47,19 @@ func ValidateAgency(a Agency) []Result {
 	var validationResults []Result
 
 	fields := []struct {
+		fieldType FieldType
 		name      string
-		fieldType string
 		value     *string
 		required  bool
 	}{
-		{"ID", "agency_id", a.Id, false},
-		{"Text", "agency_name", a.Name, true},
-		{"URL", "agency_url", a.URL, true},
-		{"TimeZone", "agency_timezone", a.Timezone, true},
-		{"LanguageCode", "agency_lang", a.Lang, false},
-		{"PhoneNumber", "agency_phone", a.Phone, false},
-		{"URL", "agency_fare_url", a.URL, false},
-		{"Email", "agency_email", a.Email, false},
+		{FieldTypeID, "agency_id", a.Id, false},
+		{FieldTypeText, "agency_name", a.Name, true},
+		{FieldTypeURL, "agency_url", a.URL, true},
+		{FieldTypeTimezone, "agency_timezone", a.Timezone, true},
+		{FieldTypeLanguageCode, "agency_lang", a.Lang, false},
+		{FieldTypePhoneNumber, "agency_phone", a.Phone, false},
+		{FieldTypeURL, "agency_fare_url", a.URL, false},
+		{FieldTypeEmail, "agency_email", a.Email, false},
 	}
 
 	for _, field := range fields {
@@ -88,7 +88,7 @@ func ValidateAgencies(agencies []*Agency) []Result {
 
 	if aLength == 1 && StringIsNilOrEmpty(filteredAgencies[0].Id) {
 		return []Result{SingleAgencyRecommendedResult{
-			FileName: "agency.txt",
+			FileName: FileNameAgency,
 		}}
 	}
 
@@ -102,7 +102,7 @@ func ValidateAgencies(agencies []*Agency) []Result {
 
 		if StringIsNilOrEmpty(a.Id) {
 			results = append(results, ValidAgencyIdRequiredWhenMultipleAgenciesResult{
-				FileName: "agency.txt",
+				FileName: FileNameAgency,
 				Line:     a.LineNumber,
 			})
 			continue
@@ -110,7 +110,7 @@ func ValidateAgencies(agencies []*Agency) []Result {
 
 		if usedIds[*a.Id] {
 			results = append(results, FieldIsNotUniqueResult{
-				FileName:  "agency.txt",
+				FileName:  FileNameAgency,
 				FieldName: "agency_id",
 				Line:      a.LineNumber,
 			})
