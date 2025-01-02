@@ -6,7 +6,6 @@ import (
 	"encoding/csv"
 	"github.com/dimchansky/utfbom"
 	"github.com/jlundan/journeys-api/internal/pkg/ggtfs"
-	"github.com/jlundan/journeys-api/internal/pkg/ggtfs/csventities"
 	"io"
 	"os"
 	"path"
@@ -14,7 +13,7 @@ import (
 )
 
 type GTFSContext struct {
-	Agencies      []*csventities.CsvAgency
+	Agencies      []*ggtfs.Agency
 	Routes        []*ggtfs.Route
 	Stops         []*ggtfs.Stop
 	Trips         []*ggtfs.Trip
@@ -85,7 +84,7 @@ func NewGTFSContextForDirectory(gtfsPath string) (*GTFSContext, []error) {
 
 		switch file {
 		case ggtfs.AgenciesFileName:
-			context.Agencies, gtfsErrors = csventities.LoadAgencies(csventities.NewReader(reader))
+			context.Agencies, gtfsErrors = ggtfs.LoadAgencies(ggtfs.NewReader(reader))
 		case ggtfs.RoutesFileName:
 			context.Routes, gtfsErrors = ggtfs.LoadEntitiesFromCSV[*ggtfs.Route](reader, validRouteHeaders, ggtfs.CreateRoute, ggtfs.RoutesFileName)
 		case ggtfs.StopsFileName:

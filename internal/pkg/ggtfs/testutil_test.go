@@ -189,3 +189,25 @@ func tableToString(rows [][]string) string {
 func stringPtr(s string) *string {
 	return &s
 }
+
+func handleValidationResults(t *testing.T, results []Result, expectedResults []Result) {
+	if len(results) != len(expectedResults) {
+		t.Errorf("Expected %d parsed structs, got %d", len(expectedResults), len(results))
+		for i, result := range expectedResults {
+			t.Logf("Expected result %d: (%s) %v", i, result.Code(), result)
+		}
+
+		for i, result := range results {
+			t.Logf("Actual result %d: (%s) %v", i, result.Code(), result)
+		}
+
+		return
+	}
+
+	for i, expected := range expectedResults {
+		isEqual, diff := compareStructs(expected, results[i])
+		if !isEqual {
+			t.Errorf("Struct comparison failed for entity %d:\n%s", i, diff)
+		}
+	}
+}
