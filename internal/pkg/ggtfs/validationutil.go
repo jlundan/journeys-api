@@ -21,6 +21,7 @@ func validateURL(fieldName string, fieldValue string, fileName string, line int)
 }
 
 func validateTimezone(fieldName string, fieldValue string, fileName string, line int) []Result {
+	// Basic regex to validate Continent/City or Continent/City_Name format.
 	match, _ := regexp.MatchString(`^[A-Za-z]+/[A-Za-z_]+$|^[A-Za-z]+/[A-Za-z]+$`, fieldValue)
 	if !match {
 		return []Result{InvalidTimezoneResult{
@@ -34,6 +35,7 @@ func validateTimezone(fieldName string, fieldValue string, fileName string, line
 }
 
 func validateLanguageCode(fieldName string, fieldValue string, fileName string, line int) []Result {
+	// Basic validation for language codes: e.g., "en", "en-US"
 	match, _ := regexp.MatchString(`^[a-zA-Z]{2,3}(-[a-zA-Z]{2,3})?$`, fieldValue)
 	if !match {
 		return []Result{InvalidLanguageCodeResult{
@@ -47,6 +49,7 @@ func validateLanguageCode(fieldName string, fieldValue string, fileName string, 
 }
 
 func validatePhoneNumber(fieldName string, fieldValue string, fileName string, line int) []Result {
+	// Check for minimum length, only contains digits, and common phone number symbols
 	match, _ := regexp.MatchString(`^[\d\s\-+()]{5,}$`, fieldValue)
 	if !match {
 		return []Result{InvalidPhoneNumberResult{
@@ -72,7 +75,7 @@ func validateEmail(fieldName string, fieldValue string, fileName string, line in
 	return []Result{}
 }
 
-func validateField(fieldType string, fieldName string, fieldValue *string, isRequired bool, fileName string, line int) []Result {
+func validateField(fieldType FieldType, fieldName string, fieldValue *string, isRequired bool, fileName string, line int) []Result {
 	hasValue := fieldValue != nil && *fieldValue != ""
 
 	if !isRequired && !hasValue {
@@ -92,19 +95,18 @@ func validateField(fieldType string, fieldName string, fieldValue *string, isReq
 	}
 
 	switch fieldType {
-	case "URL":
-		return append(results, validateURL(fieldName, *fieldValue, fileName, line)...)
-	case "Timezone":
-		return append(results, validateTimezone(fieldName, *fieldValue, fileName, line)...)
-	case "LanguageCode":
-		return append(results, validateLanguageCode(fieldName, *fieldValue, fileName, line)...)
-	case "PhoneNumber":
-		return append(results, validatePhoneNumber(fieldName, *fieldValue, fileName, line)...)
-	case "Email":
-		return append(results, validateEmail(fieldName, *fieldValue, fileName, line)...)
-	default:
-		return results
+	case FieldTypeURL:
+		results = append(results, validateURL(fieldName, *fieldValue, fileName, line)...)
+	case FieldTypeTimezone:
+		results = append(results, validateTimezone(fieldName, *fieldValue, fileName, line)...)
+	case FieldTypeLanguageCode:
+		results = append(results, validateLanguageCode(fieldName, *fieldValue, fileName, line)...)
+	case FieldTypePhoneNumber:
+		results = append(results, validatePhoneNumber(fieldName, *fieldValue, fileName, line)...)
+	case FieldTypeEmail:
+		results = append(results, validateEmail(fieldName, *fieldValue, fileName, line)...)
 	}
+	return results
 }
 
 type FieldTobeValidated interface {
