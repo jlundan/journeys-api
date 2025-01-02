@@ -190,6 +190,28 @@ func stringPtr(s string) *string {
 	return &s
 }
 
+func handleEntityCreateResults[E GtfsEntity](t *testing.T, results []E, expectedResults []E) {
+	if len(results) != len(expectedResults) {
+		t.Errorf("Expected %d parsed structs, got %d", len(expectedResults), len(results))
+		for i, result := range expectedResults {
+			t.Logf("Expected result %d: %v", i, result)
+		}
+
+		for i, result := range results {
+			t.Logf("Actual result %d: %v", i, result)
+		}
+
+		return
+	}
+
+	for i, expected := range expectedResults {
+		isEqual, diff := compareStructs(expected, results[i])
+		if !isEqual {
+			t.Errorf("Struct comparison failed for entity %d:\n%s", i, diff)
+		}
+	}
+}
+
 func handleValidationResults(t *testing.T, results []Result, expectedResults []Result) {
 	if len(results) != len(expectedResults) {
 		t.Errorf("Expected %d parsed structs, got %d", len(expectedResults), len(results))
