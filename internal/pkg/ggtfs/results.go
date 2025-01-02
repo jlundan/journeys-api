@@ -1,7 +1,5 @@
 package ggtfs
 
-import "unicode/utf8"
-
 type Result interface {
 	Code() string
 }
@@ -14,6 +12,56 @@ type InvalidCharactersResult struct {
 
 func (e InvalidCharactersResult) Code() string {
 	return "invalid_characters"
+}
+
+type InvalidURLResult struct {
+	FileName  string
+	FieldName string
+	Line      int
+}
+
+func (e InvalidURLResult) Code() string {
+	return "invalid_url"
+}
+
+type InvalidLanguageCodeResult struct {
+	FileName  string
+	FieldName string
+	Line      int
+}
+
+func (e InvalidLanguageCodeResult) Code() string {
+	return "invalid_language_code"
+}
+
+type InvalidPhoneNumberResult struct {
+	FileName  string
+	FieldName string
+	Line      int
+}
+
+func (e InvalidPhoneNumberResult) Code() string {
+	return "invalid_phone_number"
+}
+
+type InvalidEmailResult struct {
+	FileName  string
+	FieldName string
+	Line      int
+}
+
+func (e InvalidEmailResult) Code() string {
+	return "invalid_email"
+}
+
+type InvalidTimezoneResult struct {
+	FileName  string
+	FieldName string
+	Line      int
+}
+
+func (e InvalidTimezoneResult) Code() string {
+	return "invalid_timezone"
 }
 
 type MissingRequiredFieldResult struct {
@@ -51,45 +99,4 @@ type FieldIsNotUniqueResult struct {
 
 func (e FieldIsNotUniqueResult) Code() string {
 	return "field_is_not_unique"
-}
-
-func validateField(fieldName string, fieldValue *string, isRequired bool, fileName string, line int) []Result {
-	hasValue := fieldValue != nil && *fieldValue != ""
-
-	if !isRequired && !hasValue {
-		return []Result{}
-	}
-
-	if isRequired && !hasValue {
-		return []Result{MissingRequiredFieldResult{FileName: fileName, FieldName: fieldName, Line: line}}
-	}
-
-	// hasValue is true implicitly here
-
-	var results []Result
-
-	if !utf8.ValidString(*fieldValue) {
-		results = append(results, &InvalidCharactersResult{FileName: fileName, FieldName: fieldName, Line: line})
-	}
-
-	//switch field.(type) {
-	//case Text:
-	//	return validateText(field.Raw())
-	//case ID:
-	//	return validateText(field.Raw())
-	//case URL:
-	//	return validateText(field.Raw())
-	//case Timezone:
-	//	return validateText(field.Raw())
-	//case LanguageCode:
-	//	return validateText(field.Raw())
-	//case PhoneNumber:
-	//	return validateText(field.Raw())
-	//case Email:
-	//	return validateText(field.Raw())
-	//default:
-	//	return []Result{}
-	//}
-
-	return results
 }
