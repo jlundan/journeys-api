@@ -1,9 +1,5 @@
 package ggtfs
 
-import (
-	"strings"
-)
-
 type Agency struct {
 	Id         *string // agency_id 		(conditionally required)
 	Name       *string // agency_name 		(required)
@@ -70,10 +66,6 @@ func ValidateAgency(a Agency) []Result {
 	}
 
 	return validationResults
-}
-
-func StringIsNilOrEmpty(id *string) bool {
-	return id == nil || strings.TrimSpace(*id) == ""
 }
 
 func ValidateAgencies(agencies []*Agency) []Result {
