@@ -4,10 +4,14 @@ type Result interface {
 	Code() string
 }
 
-type InvalidCharactersResult struct {
+type SingleLineResult struct {
 	FileName  string
 	FieldName string
 	Line      int
+}
+
+type InvalidCharactersResult struct {
+	SingleLineResult
 }
 
 func (e InvalidCharactersResult) Code() string {
@@ -15,19 +19,87 @@ func (e InvalidCharactersResult) Code() string {
 }
 
 type InvalidURLResult struct {
-	FileName  string
-	FieldName string
-	Line      int
+	SingleLineResult
 }
 
 func (e InvalidURLResult) Code() string {
 	return "invalid_url"
 }
 
+type InvalidColorResult struct {
+	SingleLineResult
+}
+
+func (e InvalidColorResult) Code() string {
+	return "invalid_color"
+}
+
+type InvalidIntegerResult struct {
+	SingleLineResult
+}
+
+func (e InvalidIntegerResult) Code() string {
+	return "invalid_integer"
+}
+
+type InvalidFloatResult struct {
+	SingleLineResult
+}
+
+func (e InvalidFloatResult) Code() string {
+	return "invalid_float"
+}
+
+type InvalidTimeResult struct {
+	SingleLineResult
+}
+
+func (e InvalidTimeResult) Code() string {
+	return "invalid_time"
+}
+
+type InvalidCurrencyCodeResult struct {
+	SingleLineResult
+}
+
+func (e InvalidCurrencyCodeResult) Code() string {
+	return "invalid_currency_code"
+}
+
+type InvalidCurrencyAmountResult struct {
+	SingleLineResult
+}
+
+func (e InvalidCurrencyAmountResult) Code() string {
+	return "invalid_currency_amount"
+}
+
+type InvalidDateResult struct {
+	SingleLineResult
+}
+
+func (e InvalidDateResult) Code() string {
+	return "invalid_date"
+}
+
+type InvalidLatitudeResult struct {
+	SingleLineResult
+}
+
+func (e InvalidLatitudeResult) Code() string {
+	return "invalid_latitude"
+}
+
+type InvalidLongitudeResult struct {
+	SingleLineResult
+}
+
+func (e InvalidLongitudeResult) Code() string {
+	return "invalid_longitude"
+}
+
 type InvalidLanguageCodeResult struct {
-	FileName  string
-	FieldName string
-	Line      int
+	SingleLineResult
 }
 
 func (e InvalidLanguageCodeResult) Code() string {
@@ -35,9 +107,7 @@ func (e InvalidLanguageCodeResult) Code() string {
 }
 
 type InvalidPhoneNumberResult struct {
-	FileName  string
-	FieldName string
-	Line      int
+	SingleLineResult
 }
 
 func (e InvalidPhoneNumberResult) Code() string {
@@ -45,9 +115,7 @@ func (e InvalidPhoneNumberResult) Code() string {
 }
 
 type InvalidEmailResult struct {
-	FileName  string
-	FieldName string
-	Line      int
+	SingleLineResult
 }
 
 func (e InvalidEmailResult) Code() string {
@@ -55,9 +123,7 @@ func (e InvalidEmailResult) Code() string {
 }
 
 type InvalidTimezoneResult struct {
-	FileName  string
-	FieldName string
-	Line      int
+	SingleLineResult
 }
 
 func (e InvalidTimezoneResult) Code() string {
@@ -65,9 +131,7 @@ func (e InvalidTimezoneResult) Code() string {
 }
 
 type MissingRequiredFieldResult struct {
-	FileName  string
-	FieldName string
-	Line      int
+	SingleLineResult
 }
 
 func (e MissingRequiredFieldResult) Code() string {
@@ -92,9 +156,7 @@ func (e ValidAgencyIdRequiredWhenMultipleAgenciesResult) Code() string {
 }
 
 type FieldIsNotUniqueResult struct {
-	FileName  string
-	FieldName string
-	Line      int
+	SingleLineResult
 }
 
 func (e FieldIsNotUniqueResult) Code() string {
