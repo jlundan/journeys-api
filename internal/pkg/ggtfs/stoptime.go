@@ -140,7 +140,8 @@ func ValidateStopTimes(stopTimes []*StopTime, stops []*Stop) ([]error, []string)
 				if stop == nil {
 					continue
 				}
-				if stopTimeItem.StopId.Raw() == stop.Id.Raw() {
+				// TODO: nil check
+				if stopTimeItem.StopId.Raw() == *stop.Id {
 					stopFound = true
 					break
 				}

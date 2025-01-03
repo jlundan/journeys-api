@@ -357,15 +357,18 @@ const (
 	FieldTypeTimezone       FieldType = "Timezone"
 	FieldTypeURL            FieldType = "URL"
 
-	FieldTypeCalendarDay       FieldType = "CalendarDay"
-	FieldTypeCalendarException FieldType = "CalendarException"
-	FieldTypeRouteType         FieldType = "RouteType"
-	FieldTypeContinuousPickup  FieldType = "ContinuousPickup"
-	FieldTypeContinuousDropOff FieldType = "ContinuousDropOff"
+	FieldTypeCalendarDay        FieldType = "CalendarDay"
+	FieldTypeCalendarException  FieldType = "CalendarException"
+	FieldTypeRouteType          FieldType = "RouteType"
+	FieldTypeContinuousPickup   FieldType = "ContinuousPickup"
+	FieldTypeContinuousDropOff  FieldType = "ContinuousDropOff"
+	FieldTypeLocationType       FieldType = "LocationType"
+	FieldTypeWheelchairBoarding FieldType = "WheelchairBoarding"
 
 	FileNameAgency       = "agency.txt"
 	FileNameCalendar     = "calendar.txt"
 	FileNameCalendarDate = "calendar_dates.txt"
 	FileNameRoutes       = "routes.txt"
 	FileNameShapes       = "shapes.txt"
+	FileNameStops        = "stops.txt"
 )

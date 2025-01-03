@@ -1,37 +1,30 @@
 package ggtfs
 
-import (
-	"fmt"
-	"strconv"
-)
-
 type StopExtensions struct {
-	MunicipalityId ID // municipality_id (optional)
+	MunicipalityId *string // municipality_id (optional)
 }
 
 type Stop struct {
-	Id                 ID                 // stop_id 			 (required)
-	Code               Text               // stop_code 			 (optional)
-	Name               Text               // stop_name 			 (conditionally required)
-	TTSName            Text               // tts_stop_name 		 (optional)
-	Desc               Text               // stop_desc, 		 (optional)
-	Lat                Latitude           // stop_lat 			 (conditionally required)
-	Lon                Longitude          // stop_lon 			 (conditionally required)
-	ZoneId             ID                 // zone_id 			 (optional)
-	Url                URL                // stop_url 			 (optional)
-	LocationType       StopLocation       // location_type 		 (optional)
-	ParentStation      ID                 // parent_station 	 (conditionally required)
-	Timezone           Timezone           // stop_timezone 		 (optional)
-	WheelchairBoarding WheelchairBoarding // wheelchair_boarding (optional)
-	PlatformCode       Text               // platform_code 		 (optional)
-	LevelId            ID                 // level_id 			 (optional)
+	Id                 *string // stop_id               (required)
+	Code               *string // stop_code             (optional)
+	Name               *string // stop_name             (conditionally required)
+	TTSName            *string // tts_stop_name         (optional)
+	Desc               *string // stop_desc             (optional)
+	Lat                *string // stop_lat              (conditionally required)
+	Lon                *string // stop_lon              (conditionally required)
+	ZoneId             *string // zone_id               (optional)
+	URL                *string // stop_url              (optional)
+	LocationType       *string // location_type         (optional)
+	ParentStation      *string // parent_station        (conditionally required)
+	Timezone           *string // stop_timezone         (optional)
+	WheelchairBoarding *string // wheelchair_boarding   (optional)
+	PlatformCode       *string // platform_code         (optional)
+	LevelId            *string // level_id              (optional)
 	Extensions         *StopExtensions
 	LineNumber         int
 }
 
 func CreateStop(row []string, headers map[string]int, lineNumber int) *Stop {
-	var parseErrors []error
-
 	stop := Stop{
 		LineNumber: lineNumber,
 	}
@@ -40,96 +33,116 @@ func CreateStop(row []string, headers map[string]int, lineNumber int) *Stop {
 		v := getRowValueForHeaderName(row, headers, hName)
 		switch hName {
 		case "stop_id":
-			stop.Id = NewID(v)
+			stop.Id = v
 		case "stop_code":
-			stop.Code = NewText(v)
+			stop.Code = v
 		case "stop_name":
-			stop.Name = NewText(v)
+			stop.Name = v
 		case "tts_stop_name":
-			stop.TTSName = NewText(v)
+			stop.TTSName = v
 		case "stop_desc":
-			stop.Desc = NewText(v)
+			stop.Desc = v
 		case "stop_lat":
-			stop.Lat = NewLatitude(v)
+			stop.Lat = v
 		case "stop_lon":
-			stop.Lon = NewLongitude(v)
+			stop.Lon = v
 		case "zone_id":
-			stop.ZoneId = NewID(v)
+			stop.ZoneId = v
 		case "stop_url":
-			stop.Url = NewURL(v)
+			stop.URL = v
 		case "location_type":
-			stop.LocationType = NewStopLocation(v)
+			stop.LocationType = v
 		case "parent_station":
-			stop.ParentStation = NewID(v)
+			stop.ParentStation = v
 		case "stop_timezone":
-			stop.Timezone = NewTimezone(v)
+			stop.Timezone = v
 		case "wheelchair_boarding":
-			stop.WheelchairBoarding = NewWheelchairBoarding(v)
+			stop.WheelchairBoarding = v
 		case "level_id":
-			stop.LevelId = NewID(v)
+			stop.LevelId = v
 		case "platform_code":
-			stop.PlatformCode = NewText(v)
+			stop.PlatformCode = v
 		case "municipality_id":
 			stop.Extensions = &StopExtensions{
-				MunicipalityId: NewID(v),
+				MunicipalityId: v,
 			}
 		}
 	}
 
-	if len(parseErrors) > 0 {
-		return &stop
-	}
 	return &stop
 }
 
-func ValidateStop(s Stop) []error {
-	var validationErrors []error
+func ValidateStop(s Stop) []Result {
+	var validationResults []Result
 
-	requiredFields := map[string]FieldTobeValidated{
-		"stop_id": &s.Id,
-	}
-	validateRequiredFields(requiredFields, &validationErrors, s.LineNumber, StopsFileName)
-
-	optionalFields := map[string]FieldTobeValidated{
-		"stop_code":           &s.Id,
-		"stop_name":           &s.Name,
-		"tts_stop_name":       &s.TTSName,
-		"stop_desc":           &s.Desc,
-		"stop_lat":            &s.Lat,
-		"stop_lon":            &s.Lon,
-		"zone_id":             &s.ZoneId,
-		"stop_url":            &s.Url,
-		"location_type":       &s.LocationType,
-		"parent_station":      &s.ParentStation,
-		"stop_timezone":       &s.Timezone,
-		"wheelchair_boarding": &s.WheelchairBoarding,
-		"level_id":            &s.LevelId,
-		"platform_code":       &s.PlatformCode,
-	}
-	validateOptionalFields(optionalFields, &validationErrors, s.LineNumber, StopsFileName)
-
-	if s.LocationType.IsValid() && s.LocationType.Int() <= 3 && !s.Name.IsValid() {
-		validationErrors = append(validationErrors, createFileRowError(StopsFileName, s.LineNumber, "stop_name must be specified for location types 0, 1, and 2"))
-	}
-	if s.LocationType.IsValid() && s.LocationType.Int() <= 3 && !s.Lat.IsValid() {
-		validationErrors = append(validationErrors, createFileRowError(StopsFileName, s.LineNumber, "stop_lat must be specified for location types 0, 1, and 2"))
-	}
-	if s.LocationType.IsValid() && s.LocationType.Int() <= 3 && !s.Lon.IsValid() {
-		validationErrors = append(validationErrors, createFileRowError(StopsFileName, s.LineNumber, "stop_lon must be specified for location types 0, 1, and 2"))
-	}
-	if s.LocationType.IsValid() && s.LocationType.Int() >= 2 && s.LocationType.Int() <= 4 && !s.ParentStation.IsValid() {
-		validationErrors = append(validationErrors, createFileRowError(StopsFileName, s.LineNumber, "parent_station must be specified for location types 2, 3, and 4"))
+	fields := []struct {
+		fieldType FieldType
+		name      string
+		value     *string
+		required  bool
+	}{
+		{FieldTypeID, "stop_id", s.Id, true},
+		{FieldTypeText, "stop_code", s.Code, false},
+		{FieldTypeText, "stop_name", s.Name, false},
+		{FieldTypeText, "tts_stop_name", s.TTSName, false},
+		{FieldTypeText, "stop_desc", s.Desc, false},
+		{FieldTypeID, "zone_id", s.ZoneId, false},
+		{FieldTypeURL, "stop_url", s.URL, false},
+		{FieldTypeLocationType, "location_type", s.LocationType, false},
+		{FieldTypeID, "parent_station", s.ParentStation, false},
+		{FieldTypeTimezone, "stop_timezone", s.Timezone, false},
+		{FieldTypeWheelchairBoarding, "wheelchair_boarding", s.WheelchairBoarding, false},
+		{FieldTypeID, "level_id", s.LevelId, false},
+		{FieldTypeText, "platform_code", s.PlatformCode, false},
 	}
 
-	return validationErrors
+	for _, field := range fields {
+		validationResults = append(validationResults, validateField(field.fieldType, field.name, field.value, field.required, FileNameStops, s.LineNumber)...)
+	}
+
+	requiredFields := []struct {
+		fieldName  string
+		fieldValue *string
+	}{
+		{"stop_name", s.Name},
+		{"stop_lat", s.Lat},
+		{"stop_lon", s.Lon},
+	}
+
+	for _, field := range requiredFields {
+		if StringIsNilOrEmpty(field.fieldValue) && IsLocationTypeValid(s.LocationType) {
+			locationType := *s.LocationType
+			if locationType == "0" || locationType == "1" || locationType == "2" {
+				validationResults = append(validationResults, FieldRequiredForLocationTypeResult{
+					RequiredField: field.fieldName,
+					LocationType:  locationType,
+					FileName:      FileNameStops,
+					Line:          s.LineNumber,
+				})
+			}
+		}
+	}
+
+	if StringIsNilOrEmpty(s.ParentStation) && IsLocationTypeValid(s.LocationType) {
+		locationType := *s.LocationType
+		if locationType == "2" || locationType == "3" || locationType == "4" {
+			validationResults = append(validationResults, FieldRequiredForLocationTypeResult{
+				RequiredField: "parent_station",
+				LocationType:  locationType,
+				FileName:      FileNameStops,
+				Line:          s.LineNumber,
+			})
+		}
+	}
+
+	return validationResults
 }
 
-func ValidateStops(stops []*Stop) ([]error, []string) {
-	var validationErrors []error
-	var recommendations []string
+func ValidateStops(stops []*Stop) []Result {
+	var validationResults []Result
 
 	if stops == nil {
-		return validationErrors, recommendations
+		return validationResults
 	}
 
 	// Check for unique stop_id values.
@@ -139,82 +152,25 @@ func ValidateStops(stops []*Stop) ([]error, []string) {
 			continue
 		}
 
-		vErr := ValidateStop(*stop)
-		if len(vErr) > 0 {
-			validationErrors = append(validationErrors, vErr...)
+		vRes := ValidateStop(*stop)
+		if len(vRes) > 0 {
+			validationResults = append(validationResults, vRes...)
+		}
+
+		if StringIsNilOrEmpty(stop.Id) {
 			continue
 		}
 
-		if usedIds[stop.Id.Raw()] {
-			validationErrors = append(validationErrors, createFileRowError(StopsFileName, stop.LineNumber, fmt.Sprintf("stop_id '%s' is not unique within the file", stop.Id.Raw())))
+		if usedIds[*stop.Id] {
+			validationResults = append(validationResults, FieldIsNotUniqueResult{SingleLineResult{
+				FileName:  FileNameStops,
+				FieldName: "stop_id",
+				Line:      stop.LineNumber,
+			}})
 		} else {
-			usedIds[stop.Id.Raw()] = true
+			usedIds[*stop.Id] = true
 		}
 	}
 
-	return validationErrors, recommendations
-}
-
-//goland:noinspection GoUnusedConst
-const (
-	StopLocationTypeStop           = 0
-	StopLocationTypeStation        = 1
-	StopLocationTypeEntranceOrExit = 2
-	StopLocationTypeGenericNode    = 3
-	StopLocationTypeBoardingArea   = 4
-
-	ParentlessStopWheelchairBoardingNoInformation = 0
-	ParentlessStopWheelchairBoardingSomeVehicles  = 1
-	ParentlessStopWheelchairBoardingNotPossible   = 2
-
-	ChildStopWheelchairBoardingInheritFromParent = 0
-	ChildStopWheelchairBoardingSomePath          = 1
-	ChildStopWheelchairBoardingNoPath            = 2
-
-	StationStopWheelchairBoardingInheritFromParent  = 0
-	StationStopWheelchairBoardingEntranceAccessible = 1
-	StationStopWheelchairBoardingNoAccessiblePath   = 2
-)
-
-type StopLocation struct {
-	Integer
-}
-
-func (s StopLocation) IsValid() bool {
-	val, err := strconv.Atoi(s.Integer.base.raw)
-	if err != nil {
-		return false
-	}
-
-	return val == StopLocationTypeStop || val == StopLocationTypeStation || val == StopLocationTypeEntranceOrExit ||
-		val == StopLocationTypeGenericNode || val == StopLocationTypeBoardingArea
-}
-
-func NewStopLocation(raw *string) StopLocation {
-	if raw == nil {
-		return StopLocation{
-			Integer{base: base{raw: ""}}}
-	}
-	return StopLocation{Integer{base: base{raw: *raw, isPresent: true}}}
-}
-
-type WheelchairBoarding struct {
-	Integer
-}
-
-func (wcb WheelchairBoarding) IsValid() bool {
-	val, err := strconv.Atoi(wcb.Integer.base.raw)
-	if err != nil {
-		return false
-	}
-
-	return val >= 0 && val <= 2
-}
-
-func NewWheelchairBoarding(raw *string) WheelchairBoarding {
-	if raw == nil {
-		return WheelchairBoarding{
-			Integer{base: base{raw: ""}}}
-	}
-	return WheelchairBoarding{Integer{base: base{raw: *raw, isPresent: true}}}
+	return validationResults
 }
