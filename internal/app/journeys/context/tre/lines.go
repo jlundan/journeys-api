@@ -29,18 +29,18 @@ func buildLines(g GTFSContext) Lines {
 		ln := v.LongName
 		sn := v.ShortName
 
-		if !ln.IsValid() || !sn.IsValid() {
+		if ln == nil || sn == nil || len(*ln) == 0 || len(*sn) == 0 {
 			fmt.Println(fmt.Sprintf("skipping malformed line: %v", v.Id))
 			continue
 		}
 
 		l := model.Line{
-			Name:        sn.Raw(),
-			Description: ln.Raw(),
+			Name:        *sn,
+			Description: *ln,
 		}
 
 		all = append(all, &l)
-		byId[sn.Raw()] = &l
+		byId[*sn] = &l
 	}
 
 	sort.Slice(all, func(x, y int) bool {
