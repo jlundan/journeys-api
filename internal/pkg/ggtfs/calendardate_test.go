@@ -3,160 +3,167 @@
 package ggtfs
 
 import (
-	"encoding/csv"
 	"fmt"
-	"strings"
 	"testing"
 )
 
-var validCalendarDateHeaders = []string{"service_id", "date", "exception_type"}
+func TestCreateCalendarDate(t *testing.T) {
+	headerMap := map[string]int{"service_id": 0, "date": 1, "exception_type": 2}
 
-func TestShouldReturnEmptyCalendarDateArrayOnEmptyString(t *testing.T) {
-	agencies, errors := LoadEntitiesFromCSV[*CalendarDate](csv.NewReader(strings.NewReader("")), validCalendarDateHeaders, CreateCalendarDate, CalendarDatesFileName)
-	if len(errors) > 0 {
-		t.Error(errors)
+	tests := map[string]struct {
+		headers    map[string]int
+		rows       [][]string
+		lineNumber int
+		expected   []*CalendarDate
+	}{
+		"empty-row": {
+			headers: headerMap,
+			rows:    [][]string{{"", "", ""}},
+			expected: []*CalendarDate{{
+				ServiceId:     stringPtr(""),
+				Date:          stringPtr(""),
+				ExceptionType: stringPtr(""),
+				LineNumber:    0,
+			}},
+		},
+		"nil-values": {
+			headers: headerMap,
+			rows:    [][]string{nil},
+			expected: []*CalendarDate{{
+				ServiceId:     nil,
+				Date:          nil,
+				ExceptionType: nil,
+				LineNumber:    0,
+			}},
+		},
+		"OK": {
+			headers: headerMap,
+			rows: [][]string{
+				{"111", "20200101", "1"},
+				{"111", "20201201", "2"},
+			},
+			expected: []*CalendarDate{{
+				ServiceId:     stringPtr("111"),
+				Date:          stringPtr("20200101"),
+				ExceptionType: stringPtr("1"),
+				LineNumber:    0,
+			}, {
+				ServiceId:     stringPtr("111"),
+				Date:          stringPtr("20201201"),
+				ExceptionType: stringPtr("2"),
+				LineNumber:    1,
+			}},
+		},
 	}
-	if len(agencies) != 0 {
-		t.Error("expected zero calendar items")
-	}
-}
 
-func TestCalendarDateParsing(t *testing.T) {
-	loadCalendarDatesFunc := func(reader *csv.Reader) ([]interface{}, []error) {
-		calendarDates, errs := LoadEntitiesFromCSV[*CalendarDate](reader, validCalendarDateHeaders, CreateCalendarDate, CalendarDatesFileName)
-		entities := make([]interface{}, len(calendarDates))
-		for i, calendarItem := range calendarDates {
-			entities[i] = calendarItem
-		}
-		return entities, errs
-	}
-
-	validateCalendarItemsFunc := func(entities []interface{}, fixtures map[string][]interface{}) ([]error, []string) {
-		calendarDates := make([]*CalendarDate, len(entities))
-		for i, entity := range entities {
-			if calendarDate, ok := entity.(*CalendarDate); ok {
-				calendarDates[i] = calendarDate
+	for name, tt := range tests {
+		t.Run(fmt.Sprintf("%s", name), func(t *testing.T) {
+			var actual []*CalendarDate
+			for i, row := range tt.rows {
+				actual = append(actual, CreateCalendarDate(row, tt.headers, i))
 			}
-		}
-
-		ciCount := len(fixtures["calendarItems"])
-
-		if ciCount == 0 {
-			return ValidateCalendarDates(calendarDates, nil)
-		}
-
-		calendarItems := make([]*CalendarItem, ciCount)
-		for i, fixture := range fixtures["calendarItems"] {
-			if calendarItem, ok := fixture.(*CalendarItem); ok {
-				calendarItems[i] = calendarItem
-			} else {
-				t.Error(fmt.Sprintf("test setup error: cannot convert %v to CalendarItem pointer. maybe you used value instead of pointer when setting fixtures", fixture))
-			}
-		}
-
-		return ValidateCalendarDates(calendarDates, calendarItems)
+			handleEntityCreateResults(t, tt.expected, actual)
+		})
 	}
-
-	runGenericGTFSParseTest(t, "CalendarDateNOKTestcases", loadCalendarDatesFunc, validateCalendarItemsFunc, false, getCalendarDateNOKTestcases())
-	runGenericGTFSParseTest(t, "CalendarDateOKTestcases", loadCalendarDatesFunc, validateCalendarItemsFunc, false, getCalendarDateOKTestcases())
 }
 
-func getCalendarDateOKTestcases() map[string]ggtfsTestCase {
-	expected1 := CalendarDate{
-		ServiceId:     NewID(stringPtr("1")),
-		Date:          NewDate(stringPtr("20200101")),
-		ExceptionType: NewExceptionTypeEnum(stringPtr("1")),
-		LineNumber:    2,
-	}
-
-	testCases := make(map[string]ggtfsTestCase)
-	testCases["1"] = ggtfsTestCase{
-		csvRows: [][]string{
-			{"service_id", "date", "exception_type"},
-			{"1", "20200101", "1"},
+func TestValidateCalendarDates(t *testing.T) {
+	tests := map[string]struct {
+		actualEntities  []*CalendarDate
+		expectedResults []Result
+		calendarItems   []*CalendarItem
+	}{
+		"nil-slice": {
+			actualEntities:  nil,
+			expectedResults: []Result{},
 		},
-		expectedStructs: []interface{}{&expected1},
-	}
-
-	return testCases
-}
-
-func getCalendarDateNOKTestcases() map[string]ggtfsTestCase {
-	testCases := make(map[string]ggtfsTestCase)
-
-	testCases["parse-failures"] = ggtfsTestCase{
-		csvRows: [][]string{
-			{"service_id", "date", "exception_type"},
-			{" "},
-			{","},
-			{"", ""},
-			{" ", " "},
+		"nil-slice-items": {
+			actualEntities:  []*CalendarDate{nil},
+			expectedResults: []Result{},
 		},
-		expectedErrors: []string{
-			"calendar_dates.txt: record on line 2: wrong number of fields",
-			"calendar_dates.txt: record on line 3: wrong number of fields",
-			"calendar_dates.txt: record on line 4: wrong number of fields",
-			"calendar_dates.txt: record on line 5: wrong number of fields",
+		"invalid-fields": {
+			actualEntities: []*CalendarDate{
+				{
+					ServiceId:     stringPtr("111"), // avoid missing required field
+					Date:          stringPtr("Not a date"),
+					ExceptionType: stringPtr("3"),
+				},
+			},
+			expectedResults: []Result{
+				InvalidDateResult{SingleLineResult{FileName: "calendar_dates.txt", FieldName: "date"}},
+				InvalidCalendarExceptionResult{SingleLineResult{FileName: "calendar_dates.txt", FieldName: "exception_type"}},
+			},
 		},
-	}
-
-	testCases["invalid-fields"] = ggtfsTestCase{
-		csvRows: [][]string{
-			{"service_id", "date", "exception_type"},
-			{" ", " ", " "},
-			{"1000", "20201011", "not an int"},
-			{"1001", "20201011", "0"},
-			{"1001", "20201011", "3"},
-		},
-		expectedErrors: []string{
-			"calendar_dates.txt:2: invalid mandatory field: date",
-			"calendar_dates.txt:2: invalid mandatory field: exception_type",
-			"calendar_dates.txt:2: invalid mandatory field: service_id",
-			"calendar_dates.txt:3: invalid mandatory field: exception_type",
-			"calendar_dates.txt:4: invalid mandatory field: exception_type",
-			"calendar_dates.txt:5: invalid mandatory field: exception_type",
-		},
-	}
-
-	testCases["calendar-reference"] = ggtfsTestCase{
-		csvRows: [][]string{
-			{"service_id", "date", "exception_type"},
-			{"1000", "20201011", "1"},
-			{"1001", "20201011", "2"},
-		},
-		expectedErrors: []string{
-			"calendar_dates.txt:3: referenced service_id '1001' not found in calendar.txt",
-		},
-		fixtures: map[string][]interface{}{
-			"calendarItems": {
-				&CalendarItem{
-					ServiceId: stringPtr("1000"),
+		"empty-calendar-item-slice": {
+			actualEntities: []*CalendarDate{
+				{
+					ServiceId:     stringPtr("111"), // avoid missing required field
+					Date:          stringPtr("20201201"),
+					ExceptionType: stringPtr("1"),
+				},
+			},
+			calendarItems: []*CalendarItem{},
+			expectedResults: []Result{
+				ForeignKeyViolationResult{
+					ReferencingFileName:  "calendar_dates.txt",
+					ReferencingFieldName: "service_id",
+					ReferencedFieldName:  "calendar.txt",
+					ReferencedFileName:   "service_id",
+					OffendingValue:       "111",
+					ReferencedAtRow:      0,
 				},
 			},
 		},
+		"empty-calendar-item-slice-item": {
+			actualEntities: []*CalendarDate{
+				{
+					ServiceId:     stringPtr("111"), // avoid missing required field
+					Date:          stringPtr("20201201"),
+					ExceptionType: stringPtr("1"),
+				},
+			},
+			calendarItems: []*CalendarItem{nil},
+			expectedResults: []Result{
+				ForeignKeyViolationResult{
+					ReferencingFileName:  "calendar_dates.txt",
+					ReferencingFieldName: "service_id",
+					ReferencedFieldName:  "calendar.txt",
+					ReferencedFileName:   "service_id",
+					OffendingValue:       "111",
+					ReferencedAtRow:      0,
+				},
+			},
+		},
+		"missing-calendar-item": {
+			actualEntities: []*CalendarDate{
+				{
+					ServiceId:     stringPtr("111"), // avoid missing required field
+					Date:          stringPtr("20201201"),
+					ExceptionType: stringPtr("1"),
+				},
+			},
+			calendarItems: []*CalendarItem{{ServiceId: stringPtr("112")}},
+			expectedResults: []Result{
+				ForeignKeyViolationResult{
+					ReferencingFileName:  "calendar_dates.txt",
+					ReferencingFieldName: "service_id",
+					ReferencedFieldName:  "calendar.txt",
+					ReferencedFileName:   "service_id",
+					OffendingValue:       "111",
+					ReferencedAtRow:      0,
+				},
+			},
+		},
+		"missing-calendar-date-with-calendar-items": {
+			actualEntities:  []*CalendarDate{nil},
+			calendarItems:   []*CalendarItem{{ServiceId: stringPtr("112")}},
+			expectedResults: []Result{},
+		},
 	}
 
-	return testCases
-}
-
-func TestValidateCalendarDateReferencesReturnsNoErrorsOnNilValues(t *testing.T) {
-	calendarDates := []*CalendarDate{
-		nil,
-	}
-	calendarItems := []*CalendarItem{
-		nil,
-	}
-	var validationErrors *[]error
-
-	validateCalendarDateReferences(calendarDates, calendarItems, validationErrors)
-	if validationErrors != nil {
-		t.Error("Expected no errors")
-	}
-}
-
-func TestNewExceptionTypeEnumReturnsEmptyOnNilArgument(t *testing.T) {
-	nete := NewExceptionTypeEnum(nil)
-	if !nete.IsEmpty() {
-		t.Error("Expected empty ExceptionTypeEnum")
+	for name, tt := range tests {
+		t.Run(fmt.Sprintf("%s", name), func(t *testing.T) {
+			handleValidationResults(t, ValidateCalendarDates(tt.actualEntities, tt.calendarItems), tt.expectedResults)
+		})
 	}
 }

@@ -357,8 +357,10 @@ const (
 	FieldTypeTimezone       FieldType = "Timezone"
 	FieldTypeURL            FieldType = "URL"
 
-	FieldTypeCalendarDay FieldType = "CalendarDay"
+	FieldTypeCalendarDay       FieldType = "CalendarDay"
+	FieldTypeCalendarException FieldType = "CalendarException"
 
-	FileNameAgency   = "agency.txt"
-	FileNameCalendar = "calendar.txt"
+	FileNameAgency       = "agency.txt"
+	FileNameCalendar     = "calendar.txt"
+	FileNameCalendarDate = "calendar_dates.txt"
 )

@@ -1,14 +1,9 @@
 package ggtfs
 
-import (
-	"fmt"
-	"strconv"
-)
-
 type CalendarDate struct {
-	ServiceId     ID                // service_id 		(required)
-	Date          Date              // date 			(required)
-	ExceptionType ExceptionTypeEnum // exception_type 	(required)
+	ServiceId     *string // service_id 	(required)
+	Date          *string // date 			(required)
+	ExceptionType *string // exception_type (required)
 	LineNumber    int
 }
 
@@ -21,45 +16,56 @@ func CreateCalendarDate(row []string, headers map[string]int, lineNumber int) *C
 		v := getRowValueForHeaderName(row, headers, hName)
 		switch hName {
 		case "service_id":
-			calendarDate.ServiceId = NewID(v)
+			calendarDate.ServiceId = v
 		case "date":
-			calendarDate.Date = NewDate(v)
+			calendarDate.Date = v
 		case "exception_type":
-			calendarDate.ExceptionType = NewExceptionTypeEnum(v)
+			calendarDate.ExceptionType = v
 		}
 	}
 
 	return calendarDate
 }
 
-func ValidateCalendarDate(cd CalendarDate) []error {
-	var validationErrors []error
+func ValidateCalendarDate(cd CalendarDate) []Result {
+	var validationResults []Result
 
-	requiredFields := map[string]FieldTobeValidated{
-		"service_id":     &cd.ServiceId,
-		"date":           &cd.Date,
-		"exception_type": &cd.ExceptionType,
+	fields := []struct {
+		fieldType FieldType
+		name      string
+		value     *string
+		required  bool
+	}{
+		{FieldTypeID, "service_id", cd.ServiceId, true},
+		{FieldTypeDate, "date", cd.Date, true},
+		{FieldTypeCalendarException, "exception_type", cd.ExceptionType, true},
 	}
-	validateRequiredFields(requiredFields, &validationErrors, cd.LineNumber, CalendarDatesFileName)
 
-	return validationErrors
+	for _, field := range fields {
+		validationResults = append(validationResults, validateField(field.fieldType, field.name, field.value, field.required, FileNameCalendarDate, cd.LineNumber)...)
+	}
+
+	return validationResults
 }
 
-func ValidateCalendarDates(calendarDates []*CalendarDate, calendarItems []*CalendarItem) ([]error, []string) {
-	var validationErrors []error
+func ValidateCalendarDates(calendarDates []*CalendarDate, calendarItems []*CalendarItem) []Result {
+	var results []Result
 
 	for _, calendarDate := range calendarDates {
-		validationErrors = append(validationErrors, ValidateCalendarDate(*calendarDate)...)
+		if calendarDate == nil {
+			continue
+		}
+		results = append(results, ValidateCalendarDate(*calendarDate)...)
 	}
 
 	if calendarItems != nil {
-		validateCalendarDateReferences(calendarDates, calendarItems, &validationErrors)
+		validateCalendarDateReferences(calendarDates, calendarItems, &results)
 	}
 
-	return validationErrors, nil
+	return results
 }
 
-func validateCalendarDateReferences(calendarDates []*CalendarDate, calendarItems []*CalendarItem, validationErrors *[]error) {
+func validateCalendarDateReferences(calendarDates []*CalendarDate, calendarItems []*CalendarItem, results *[]Result) {
 	serviceIDMap := make(map[string]struct{})
 	for _, item := range calendarItems {
 		if item != nil && !StringIsNilOrEmpty(item.ServiceId) {
@@ -68,39 +74,18 @@ func validateCalendarDateReferences(calendarDates []*CalendarDate, calendarItems
 	}
 
 	for _, calendarDate := range calendarDates {
-		if calendarDate == nil || calendarDate.ServiceId.IsEmpty() {
+		if calendarDate == nil || StringIsNilOrEmpty(calendarDate.ServiceId) {
 			continue
 		}
-		if _, found := serviceIDMap[calendarDate.ServiceId.Raw()]; !found {
-			*validationErrors = append(*validationErrors,
-				createFileRowError(CalendarDatesFileName, calendarDate.LineNumber,
-					fmt.Sprintf("referenced service_id '%s' not found in %s", calendarDate.ServiceId.Raw(), CalendarFileName)))
+		if _, found := serviceIDMap[*calendarDate.ServiceId]; !found {
+			*results = append(*results, ForeignKeyViolationResult{
+				ReferencingFileName:  FileNameCalendarDate,
+				ReferencingFieldName: "service_id",
+				ReferencedFieldName:  FileNameCalendar,
+				ReferencedFileName:   "service_id",
+				OffendingValue:       *calendarDate.ServiceId,
+				ReferencedAtRow:      calendarDate.LineNumber,
+			})
 		}
 	}
-}
-
-const (
-	ServiceAddedForCalendarDate   int = 1
-	ServiceRemovedForCalendarDate int = 2
-)
-
-type ExceptionTypeEnum struct {
-	Integer
-}
-
-func (ete ExceptionTypeEnum) IsValid() bool {
-	val, err := strconv.Atoi(ete.Integer.base.raw)
-	if err != nil {
-		return false
-	}
-
-	return val == ServiceAddedForCalendarDate || val == ServiceRemovedForCalendarDate
-}
-
-func NewExceptionTypeEnum(raw *string) ExceptionTypeEnum {
-	if raw == nil {
-		return ExceptionTypeEnum{
-			Integer{base: base{raw: ""}}}
-	}
-	return ExceptionTypeEnum{Integer{base: base{raw: *raw, isPresent: true}}}
 }
