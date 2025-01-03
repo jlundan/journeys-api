@@ -252,6 +252,15 @@ func (e AgencyIdRecommendedForRouteResult) Code() string {
 	return "agency_id_recommended_for_route"
 }
 
+type TooFewShapePointsResult struct {
+	FileName string
+	ShapeId  string
+}
+
+func (e TooFewShapePointsResult) Code() string {
+	return "too_few_shape_points"
+}
+
 type ForeignKeyViolationResult struct {
 	ReferencingFileName  string
 	ReferencingFieldName string
