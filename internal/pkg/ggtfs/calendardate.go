@@ -62,8 +62,8 @@ func ValidateCalendarDates(calendarDates []*CalendarDate, calendarItems []*Calen
 func validateCalendarDateReferences(calendarDates []*CalendarDate, calendarItems []*CalendarItem, validationErrors *[]error) {
 	serviceIDMap := make(map[string]struct{})
 	for _, item := range calendarItems {
-		if item != nil && !item.ServiceId.IsEmpty() {
-			serviceIDMap[item.ServiceId.Raw()] = struct{}{}
+		if item != nil && !StringIsNilOrEmpty(item.ServiceId) {
+			serviceIDMap[*item.ServiceId] = struct{}{}
 		}
 	}
 

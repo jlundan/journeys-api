@@ -130,7 +130,7 @@ func getCalendarDateNOKTestcases() map[string]ggtfsTestCase {
 		fixtures: map[string][]interface{}{
 			"calendarItems": {
 				&CalendarItem{
-					ServiceId: NewID(stringPtr("1000")),
+					ServiceId: stringPtr("1000"),
 				},
 			},
 		},

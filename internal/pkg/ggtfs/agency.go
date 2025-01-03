@@ -63,7 +63,7 @@ func ValidateAgency(a Agency) []Result {
 	}
 
 	for _, field := range fields {
-		validationResults = append(validationResults, validateField(field.fieldType, field.name, field.value, field.required, "agency.txt", a.LineNumber)...)
+		validationResults = append(validationResults, validateField(field.fieldType, field.name, field.value, field.required, FileNameAgency, a.LineNumber)...)
 	}
 
 	return validationResults
