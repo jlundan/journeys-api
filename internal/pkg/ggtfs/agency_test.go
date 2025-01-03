@@ -116,11 +116,11 @@ func TestValidateAgency(t *testing.T) {
 				{Id: stringPtr("1"), Name: stringPtr("acme"), URL: stringPtr("http://acme.inc"), Timezone: stringPtr("Europe/Helsinki")},
 			},
 			expectedResults: []Result{
-				FieldIsNotUniqueResult{
+				FieldIsNotUniqueResult{SingleLineResult{
 					FileName:  "agency.txt",
 					FieldName: "agency_id",
 				},
-			},
+				}},
 		},
 		"valid-id-when-multiple-agencies": {
 			agencies: []*Agency{
@@ -146,12 +146,12 @@ func TestValidateAgency(t *testing.T) {
 				},
 			},
 			expectedResults: []Result{
-				InvalidURLResult{FileName: "agency.txt", FieldName: "agency_url"},
-				InvalidTimezoneResult{FileName: "agency.txt", FieldName: "agency_timezone"},
-				InvalidLanguageCodeResult{FileName: "agency.txt", FieldName: "agency_lang"},
-				InvalidPhoneNumberResult{FileName: "agency.txt", FieldName: "agency_phone"},
-				InvalidURLResult{FileName: "agency.txt", FieldName: "agency_fare_url"},
-				InvalidEmailResult{FileName: "agency.txt", FieldName: "agency_email"},
+				InvalidURLResult{SingleLineResult{FileName: "agency.txt", FieldName: "agency_url"}},
+				InvalidTimezoneResult{SingleLineResult{FileName: "agency.txt", FieldName: "agency_timezone"}},
+				InvalidLanguageCodeResult{SingleLineResult{FileName: "agency.txt", FieldName: "agency_lang"}},
+				InvalidPhoneNumberResult{SingleLineResult{FileName: "agency.txt", FieldName: "agency_phone"}},
+				InvalidURLResult{SingleLineResult{FileName: "agency.txt", FieldName: "agency_fare_url"}},
+				InvalidEmailResult{SingleLineResult{FileName: "agency.txt", FieldName: "agency_email"}},
 			},
 		},
 	}

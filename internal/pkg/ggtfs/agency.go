@@ -109,11 +109,11 @@ func ValidateAgencies(agencies []*Agency) []Result {
 		}
 
 		if usedIds[*a.Id] {
-			results = append(results, FieldIsNotUniqueResult{
+			results = append(results, FieldIsNotUniqueResult{SingleLineResult{
 				FileName:  FileNameAgency,
 				FieldName: "agency_id",
 				Line:      a.LineNumber,
-			})
+			}})
 		} else {
 			usedIds[*a.Id] = true
 		}
