@@ -138,6 +138,14 @@ func (e InvalidCalendarDayResult) Code() string {
 	return "invalid_calendar_day"
 }
 
+type InvalidCalendarExceptionResult struct {
+	SingleLineResult
+}
+
+func (e InvalidCalendarExceptionResult) Code() string {
+	return "invalid_calendar_exception"
+}
+
 type MissingRequiredFieldResult struct {
 	SingleLineResult
 }
@@ -169,4 +177,17 @@ type FieldIsNotUniqueResult struct {
 
 func (e FieldIsNotUniqueResult) Code() string {
 	return "field_is_not_unique"
+}
+
+type ForeignKeyViolationResult struct {
+	ReferencingFileName  string
+	ReferencingFieldName string
+	ReferencedFieldName  string
+	ReferencedFileName   string
+	OffendingValue       string
+	ReferencedAtRow      int
+}
+
+func (e ForeignKeyViolationResult) Code() string {
+	return "foreign_key_violation"
 }

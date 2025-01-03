@@ -291,18 +291,20 @@ func buildCalendarDatesMap(g GTFSContext) map[string][]*model.DayTypeException {
 	for _, calendarDate := range g.CalendarDates {
 		var date string
 
-		parsedTime, err := time.Parse("20060102", calendarDate.Date.Raw())
+		parsedTime, err := time.Parse("20060102", *calendarDate.Date)
 		if err != nil {
 			fmt.Println("Error parsing date:", err)
-			date = calendarDate.Date.Raw()
+			// TODO: nil check
+			date = *calendarDate.Date
 		} else {
 			date = parsedTime.Format("2006-01-02")
 		}
 
-		result[calendarDate.ServiceId.Raw()] = append(result[calendarDate.ServiceId.Raw()], &model.DayTypeException{
+		// TODO: nil check
+		result[*calendarDate.ServiceId] = append(result[*calendarDate.ServiceId], &model.DayTypeException{
 			From: date,
 			To:   date,
-			Runs: calendarDate.ExceptionType.Raw() == "1",
+			Runs: *calendarDate.ExceptionType == "1",
 		})
 	}
 

@@ -208,6 +208,19 @@ func validateCalendarDay(fieldName string, fieldValue string, fileName string, l
 	return []Result{}
 }
 
+func validateCalendarException(fieldName string, fieldValue string, fileName string, line int) []Result {
+	i, err := strconv.Atoi(fieldValue)
+	if err != nil || i < 1 || i > 2 {
+		return []Result{InvalidCalendarExceptionResult{SingleLineResult{
+			FileName:  fileName,
+			FieldName: fieldName,
+			Line:      line,
+		}}}
+	}
+
+	return []Result{}
+}
+
 func validateField(fieldType FieldType, fieldName string, fieldValue *string, isRequired bool, fileName string, line int) []Result {
 	hasValue := fieldValue != nil && *fieldValue != ""
 
@@ -258,6 +271,8 @@ func validateField(fieldType FieldType, fieldName string, fieldValue *string, is
 		results = append(results, validateLongitude(fieldName, *fieldValue, fileName, line)...)
 	case FieldTypeCalendarDay:
 		results = append(results, validateCalendarDay(fieldName, *fieldValue, fileName, line)...)
+	case FieldTypeCalendarException:
+		results = append(results, validateCalendarException(fieldName, *fieldValue, fileName, line)...)
 	}
 
 	return results
