@@ -221,6 +221,45 @@ func validateCalendarException(fieldName string, fieldValue string, fileName str
 	return []Result{}
 }
 
+func validateRouteType(fieldName string, fieldValue string, fileName string, line int) []Result {
+	i, err := strconv.Atoi(fieldValue)
+	if err != nil || (i != 11 && i != 12 && i < 0 && i > 7) {
+		return []Result{InvalidRouteTypeResult{SingleLineResult{
+			FileName:  fileName,
+			FieldName: fieldName,
+			Line:      line,
+		}}}
+	}
+
+	return []Result{}
+}
+
+func validateContinuousPickup(fieldName string, fieldValue string, fileName string, line int) []Result {
+	i, err := strconv.Atoi(fieldValue)
+	if err != nil || i < 1 || i > 4 {
+		return []Result{InvalidContinuousPickupResult{SingleLineResult{
+			FileName:  fileName,
+			FieldName: fieldName,
+			Line:      line,
+		}}}
+	}
+
+	return []Result{}
+}
+
+func validateContinuousDropOff(fieldName string, fieldValue string, fileName string, line int) []Result {
+	i, err := strconv.Atoi(fieldValue)
+	if err != nil || i < 1 || i > 4 {
+		return []Result{InvalidContinuousDropOffResult{SingleLineResult{
+			FileName:  fileName,
+			FieldName: fieldName,
+			Line:      line,
+		}}}
+	}
+
+	return []Result{}
+}
+
 func validateField(fieldType FieldType, fieldName string, fieldValue *string, isRequired bool, fileName string, line int) []Result {
 	hasValue := fieldValue != nil && *fieldValue != ""
 
@@ -273,6 +312,12 @@ func validateField(fieldType FieldType, fieldName string, fieldValue *string, is
 		results = append(results, validateCalendarDay(fieldName, *fieldValue, fileName, line)...)
 	case FieldTypeCalendarException:
 		results = append(results, validateCalendarException(fieldName, *fieldValue, fileName, line)...)
+	case FieldTypeRouteType:
+		results = append(results, validateRouteType(fieldName, *fieldValue, fileName, line)...)
+	case FieldTypeContinuousPickup:
+		results = append(results, validateContinuousPickup(fieldName, *fieldValue, fileName, line)...)
+	case FieldTypeContinuousDropOff:
+		results = append(results, validateContinuousDropOff(fieldName, *fieldValue, fileName, line)...)
 	}
 
 	return results

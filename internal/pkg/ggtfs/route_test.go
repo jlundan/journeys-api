@@ -3,300 +3,285 @@
 package ggtfs
 
 import (
-	"encoding/csv"
-	"strings"
+	"fmt"
 	"testing"
 )
 
-var validRouteHeaders = []string{"route_id", "agency_id", "route_short_name", "route_long_name", "route_desc",
-	"route_type", "route_url", "route_color", "route_text_color", "route_sort_order", "continuous_pickup",
-	"continuous_drop_off", "network_id"}
+func TestCreateRoute(t *testing.T) {
+	headerMap := map[string]int{"route_id": 0, "agency_id": 1, "route_short_name": 2, "route_long_name": 3,
+		"route_desc": 4, "route_type": 5, "route_url": 6, "route_color": 7, "route_text_color": 8, "route_sort_order": 9,
+		"continuous_pickup": 10, "continuous_drop_off": 11, "network_id": 12}
 
-func TestRouteParsing(t *testing.T) {
-	loadRoutesFunc := func(reader *csv.Reader) ([]interface{}, []error) {
-		routes, errs := LoadEntitiesFromCSV[*Route](reader, validRouteHeaders, CreateRoute, RoutesFileName)
-		entities := make([]interface{}, len(routes))
-		for i, route := range routes {
-			entities[i] = route
-		}
-		return entities, errs
+	tests := map[string]struct {
+		headers    map[string]int
+		rows       [][]string
+		lineNumber int
+		expected   []*Route
+	}{
+		"empty-row": {
+			headers: headerMap,
+			rows:    [][]string{{"", "", "", "", "", "", "", "", "", "", "", "", ""}},
+			expected: []*Route{{
+				Id:                stringPtr(""),
+				AgencyId:          stringPtr(""),
+				ShortName:         stringPtr(""),
+				LongName:          stringPtr(""),
+				Desc:              stringPtr(""),
+				Type:              stringPtr(""),
+				URL:               stringPtr(""),
+				Color:             stringPtr(""),
+				TextColor:         stringPtr(""),
+				SortOrder:         stringPtr(""),
+				ContinuousPickup:  stringPtr(""),
+				ContinuousDropOff: stringPtr(""),
+				NetworkId:         stringPtr(""),
+				LineNumber:        0,
+			}},
+		},
+		"nil-values": {
+			headers: headerMap,
+			rows:    [][]string{nil},
+			expected: []*Route{{
+				Id:                nil,
+				AgencyId:          nil,
+				ShortName:         nil,
+				LongName:          nil,
+				Desc:              nil,
+				Type:              nil,
+				URL:               nil,
+				Color:             nil,
+				TextColor:         nil,
+				SortOrder:         nil,
+				ContinuousPickup:  nil,
+				ContinuousDropOff: nil,
+				NetworkId:         nil,
+				LineNumber:        0,
+			}},
+		},
+		"OK": {
+			headers: headerMap,
+			rows: [][]string{
+				{"1", "Agency", "route1", "route 1", "route description", "3", "https://acme.inc/1", "FFFFFF", "FFF000", "1", "2", "3", "network"},
+			},
+			expected: []*Route{{
+				Id:                stringPtr("1"),
+				AgencyId:          stringPtr("Agency"),
+				ShortName:         stringPtr("route1"),
+				LongName:          stringPtr("route 1"),
+				Desc:              stringPtr("route description"),
+				Type:              stringPtr("3"),
+				URL:               stringPtr("https://acme.inc/1"),
+				Color:             stringPtr("FFFFFF"),
+				TextColor:         stringPtr("FFF000"),
+				SortOrder:         stringPtr("1"),
+				ContinuousPickup:  stringPtr("2"),
+				ContinuousDropOff: stringPtr("3"),
+				NetworkId:         stringPtr("network"),
+				LineNumber:        0,
+			}},
+		},
 	}
 
-	validateRoutesFunc := func(entities []interface{}, fixtures map[string][]interface{}) ([]error, []string) {
-		routes := make([]*Route, len(entities))
-		for i, entity := range entities {
-			if route, ok := entity.(*Route); ok {
-				routes[i] = route
+	for name, tt := range tests {
+		t.Run(fmt.Sprintf("%s", name), func(t *testing.T) {
+			var actual []*Route
+			for i, row := range tt.rows {
+				actual = append(actual, CreateRoute(row, tt.headers, i))
 			}
-		}
-
-		if agenciesFixture, ok := fixtures["agencies"]; !ok || len(agenciesFixture) == 0 {
-			return ValidateRoutes(routes, nil)
-		}
-
-		agencies := make([]*Agency, len(fixtures["agencies"]))
-		for i, entity := range fixtures["agencies"] {
-			if agency, ok := entity.(*Agency); ok {
-				agencies[i] = agency
-			}
-		}
-
-		return ValidateRoutes(routes, agencies)
+			handleEntityCreateResults(t, tt.expected, actual)
+		})
 	}
-
-	runGenericGTFSParseTest(t, "RouteNOKTestcases", loadRoutesFunc, validateRoutesFunc, false, getRouteNOKTestcases())
-	runGenericGTFSParseTest(t, "RouteOKTestcases", loadRoutesFunc, validateRoutesFunc, false, getRouteOKTestcases())
 }
 
-func getRouteOKTestcases() map[string]ggtfsTestCase {
-	id := "1"
-	agency := "ACME"
-	shortName := "1"
-	longName := "route1"
-	desc := "ACME route 1"
-	routeType := "3"
-	u := "https://acme.inc/1"
-	rColor := "FFFFFF"
-	textColor := "000000"
-	so := "1"
-	cpt := "2"
-	cdt := "3"
-	networkId := "1"
-
-	expected1 := Route{
-		Id:                NewID(stringPtr(id)),
-		AgencyId:          NewID(stringPtr(agency)),
-		ShortName:         NewText(stringPtr(shortName)),
-		LongName:          NewText(stringPtr(longName)),
-		Desc:              NewText(stringPtr(desc)),
-		Type:              NewRouteType(stringPtr(routeType)),
-		URL:               NewURL(stringPtr(u)),
-		Color:             NewColor(stringPtr(rColor)),
-		TextColor:         NewColor(stringPtr(textColor)),
-		SortOrder:         NewPositiveInteger(stringPtr(so)),
-		ContinuousPickup:  NewContinuousPickupType(stringPtr(cpt)),
-		ContinuousDropOff: NewContinuousDropOffType(stringPtr(cdt)),
-		NetworkId:         NewID(stringPtr(networkId)),
-		LineNumber:        2,
-	}
-
-	cpt2 := ""
-	cdt2 := ""
-
-	expected2 := Route{
-		Id:                NewID(stringPtr(id)),
-		AgencyId:          NewID(stringPtr(agency)),
-		ShortName:         NewText(stringPtr(shortName)),
-		LongName:          NewText(stringPtr(longName)),
-		Desc:              NewText(stringPtr(desc)),
-		Type:              NewRouteType(stringPtr(routeType)),
-		URL:               NewURL(stringPtr(u)),
-		Color:             NewColor(stringPtr(rColor)),
-		TextColor:         NewColor(stringPtr(textColor)),
-		SortOrder:         NewPositiveInteger(stringPtr(so)),
-		ContinuousPickup:  NewContinuousPickupType(stringPtr(cpt2)),
-		ContinuousDropOff: NewContinuousDropOffType(stringPtr(cdt2)),
-		NetworkId:         NewID(stringPtr(networkId)),
-		LineNumber:        2,
-	}
-	testCases := make(map[string]ggtfsTestCase)
-	testCases["1"] = ggtfsTestCase{
-		csvRows: [][]string{
-			{"route_id", "agency_id", "route_short_name", "route_long_name", "route_desc", "route_type", "route_url", "route_color", "route_text_color", "route_sort_order", "continuous_pickup", "continuous_drop_off", "network_id"},
-			{"1", "ACME", "1", "route1", "ACME route 1", "3", "https://acme.inc/1", "FFFFFF", "000000", "1", "2", "3", "1"},
+func TestValidateRoutes(t *testing.T) {
+	tests := map[string]struct {
+		actualEntities  []*Route
+		expectedResults []Result
+		agencies        []*Agency
+	}{
+		"nil-slice": {
+			actualEntities:  nil,
+			expectedResults: []Result{},
 		},
-		expectedStructs: []interface{}{&expected1},
-	}
-
-	testCases["2"] = ggtfsTestCase{
-		csvRows: [][]string{
-			{"route_id", "agency_id", "route_short_name", "route_long_name", "route_desc", "route_type", "route_url", "route_color", "route_text_color", "route_sort_order", "continuous_pickup", "continuous_drop_off", "network_id"},
-			{"1", "ACME", "1", "route1", "ACME route 1", "3", "https://acme.inc/1", "FFFFFF", "000000", "1", "", "", "1"},
+		"nil-slice-items": {
+			actualEntities:  []*Route{nil},
+			expectedResults: []Result{},
 		},
-		expectedStructs: []interface{}{&expected2},
-	}
-
-	testCases["3"] = ggtfsTestCase{
-		csvRows: [][]string{
-			{"route_id", "route_type", "route_short_name", "agency_id"},
-			{"1", "1", "1", "0"},
-		},
-		expectedErrors: []string{},
-		fixtures: map[string][]interface{}{
-			"agencies": {
-				&Agency{Id: stringPtr("0")},
+		"invalid-fields": {
+			actualEntities: []*Route{
+				{
+					Id:                stringPtr("1"),
+					AgencyId:          stringPtr("Agency"),
+					ShortName:         stringPtr("a way too long short name"),
+					LongName:          stringPtr("route 1"),
+					Desc:              stringPtr("route description"),
+					Type:              stringPtr("8"),
+					URL:               stringPtr("Not an URL"),
+					Color:             stringPtr("not a color"),
+					TextColor:         stringPtr("not a color"),
+					SortOrder:         stringPtr("not an integer"),
+					ContinuousPickup:  stringPtr("4"),
+					ContinuousDropOff: stringPtr("4"),
+					NetworkId:         stringPtr("network"),
+				},
+			},
+			expectedResults: []Result{
+				InvalidURLResult{SingleLineResult{FileName: "routes.txt", FieldName: "route_url", Line: 0}},
+				InvalidColorResult{SingleLineResult{FileName: "routes.txt", FieldName: "route_color", Line: 0}},
+				InvalidColorResult{SingleLineResult{FileName: "routes.txt", FieldName: "route_text_color", Line: 0}},
+				InvalidIntegerResult{SingleLineResult{FileName: "routes.txt", FieldName: "route_sort_order", Line: 0}},
+				TooLongRouteShortNameResult{SingleLineResult{FileName: "routes.txt", FieldName: "route_short_name", Line: 0}},
 			},
 		},
-	}
-
-	return testCases
-}
-
-func getRouteNOKTestcases() map[string]ggtfsTestCase {
-	testCases := make(map[string]ggtfsTestCase)
-	testCases["invalid-fields-must-error-out"] = ggtfsTestCase{
-		csvRows: [][]string{
-			{"route_id", "agency_id", "route_short_name", "route_long_name", "route_desc", "route_type", "route_url", "route_color", "route_text_color", "route_sort_order", "continuous_pickup", "continuous_drop_off", "network_id"},
-			{"", "", "", "", "", "", "", "", "", "", "", "", ""},
-			{"id3", "valid agency", "OK short n", "valid long name", "valid desc", "-1", "not an url", "not a color", "not a color", "not an integer", "999", "999", "network id"},
-			{"id4", "valid agency", "OK short n", "valid long name", "valid desc", "8", "http://example.com", "FFFFFF", "FFFFFF", "-1", "-1", "-1", "valid network id"},
-			{"id5", "valid agency", "OK short n", "valid long name", "valid desc", "9", "http://example.com", "FFFFFF", "FFFFFF", "1", "4", "4", "valid network id"},
-			{"id6", "valid agency", "OK short n", "valid long name", "valid desc", "10", "http://example.com", "FFFFFF", "FFFFFF", "1", "1", "1", "valid network id"},
-			{"id7", "valid agency", "OK short n", "valid long name", "valid desc", "13", "http://example.com", "FFFFFF", "FFFFFF", "1", "1", "1", "valid network id"},
-		},
-		expectedErrors: []string{
-			// "routes.txt:2: invalid field: network_id", // validation not implemented yet
-			"routes.txt:2: invalid mandatory field: route_id",
-			"routes.txt:2: invalid mandatory field: route_type",
-			"routes.txt:2: route_long_name must be specified when route_short_name is empty or not present",
-			"routes.txt:2: route_short_name must be specified when route_long_name is empty or not present",
-			"routes.txt:3: invalid field: continuous_drop_off",
-			"routes.txt:3: invalid field: continuous_pickup",
-			"routes.txt:3: invalid field: route_color",
-			"routes.txt:3: invalid field: route_sort_order",
-			"routes.txt:3: invalid field: route_text_color",
-			"routes.txt:3: invalid field: route_url",
-			"routes.txt:3: invalid mandatory field: route_type",
-			"routes.txt:4: invalid field: continuous_drop_off",
-			"routes.txt:4: invalid field: continuous_pickup",
-			"routes.txt:4: invalid field: route_sort_order",
-			"routes.txt:4: invalid mandatory field: route_type",
-			"routes.txt:5: invalid field: continuous_drop_off",
-			"routes.txt:5: invalid field: continuous_pickup",
-			"routes.txt:5: invalid mandatory field: route_type",
-			"routes.txt:6: invalid mandatory field: route_type",
-			"routes.txt:7: invalid mandatory field: route_type",
-		},
-		expectedRecommendations: []string{
-			"routes.txt:2: specifying agency_id is recommended", // when there isn't multiple agencies in agencies.txt (or agencies.txt is not present)
-		},
-	}
-
-	testCases["short_name-length-should-be-less-than-12-chars"] = ggtfsTestCase{
-		csvRows: [][]string{
-			{"route_id", "agency_id", "route_short_name", "route_long_name", "route_desc", "route_type", "route_url", "route_color", "route_text_color", "route_sort_order", "continuous_pickup", "continuous_drop_off", "network_id"},
-			{"id", "agency", "a name longer than thirteen characters", "long name", "desc", "1", "http://example.com", "FFFFFF", "FFFFFF", "1", "1", "1", "1"},
-		},
-		expectedRecommendations: []string{
-			"routes.txt:2: route_short_name should be less than 12 characters",
-		},
-	}
-
-	// route_short_name is required if routes.route_long_name is empty (id)
-	// route_long_name is required if routes.route_short_name is empty (id)
-	// there should be no errors if either (id2 and id3) or both (id4) are present
-	testCases["short_name-and-long_name-must-be-present-if-the-other-is-not"] = ggtfsTestCase{
-		csvRows: [][]string{
-			{"route_id", "agency_id", "route_short_name", "route_long_name", "route_desc", "route_type", "route_url", "route_color", "route_text_color", "route_sort_order", "continuous_pickup", "continuous_drop_off", "network_id"},
-			{"id", "agency", "", "", "desc", "1", "http://example.com", "FFFFFF", "FFFFFF", "1", "1", "1", "1"},
-			{"id2", "agency", "short", "", "desc", "1", "http://example.com", "FFFFFF", "FFFFFF", "1", "1", "1", "1"},
-			{"id3", "agency", "", "long", "desc", "1", "http://example.com", "FFFFFF", "FFFFFF", "1", "1", "1", "1"},
-			{"id4", "agency", "short", "long", "desc", "1", "http://example.com", "FFFFFF", "FFFFFF", "1", "1", "1", "1"},
-		},
-		expectedErrors: []string{
-			"routes.txt:2: route_long_name must be specified when route_short_name is empty or not present",
-			"routes.txt:2: route_short_name must be specified when route_long_name is empty or not present",
-		},
-	}
-
-	testCases["agency-id-must-match-valid-agency"] = ggtfsTestCase{
-		csvRows: [][]string{
-			{"route_id", "route_type", "route_short_name", "agency_id"},
-			{"2", "1", "2", "1"},
-		},
-		expectedErrors: []string{
-			"routes.txt:2: referenced agency_id '1' not found in agency.txt",
-		},
-		fixtures: map[string][]interface{}{
-			"agencies": {
-				&Agency{Id: stringPtr("0")},
+		"empty-short-and-long-name": {
+			actualEntities: []*Route{
+				{
+					Id:                stringPtr("1"),
+					AgencyId:          stringPtr("Agency"),
+					ShortName:         stringPtr(""),
+					LongName:          stringPtr(""),
+					Desc:              stringPtr("route description"),
+					Type:              stringPtr("3"),
+					URL:               stringPtr("https://acme.inc/1"),
+					Color:             stringPtr("FFFFFF"),
+					TextColor:         stringPtr("FFF000"),
+					SortOrder:         stringPtr("1"),
+					ContinuousPickup:  stringPtr("2"),
+					ContinuousDropOff: stringPtr("3"),
+					NetworkId:         stringPtr("network"),
+				},
+			},
+			expectedResults: []Result{
+				MissingRouteShortNameWhenLongNameIsNotPresentResult{SingleLineResult{FileName: "routes.txt", FieldName: "route_short_name", Line: 0}},
+				MissingRouteLongNameWhenShortNameIsNotPresentResult{SingleLineResult{FileName: "routes.txt", FieldName: "route_long_name", Line: 0}},
 			},
 		},
-	}
-
-	//testCases["agency-id-must-be-specified-when-multiple-agencies-in-agency.txt"] = ggtfsTestCase{
-	//	csvRows: [][]string{
-	//		{"route_id", "route_type", "route_short_name", "agency_id"},
-	//		{"2", "1", "2", ""},
-	//	},
-	//	expectedErrors: []string{
-	//		"routes.txt:2: agency_id is required when there are multiple agencies in agencies.txt",
-	//	},
-	//	fixtures: map[string][]interface{}{
-	//		"agencies": {
-	//			&Agency{Id: stringPtr("0")},
-	//			&Agency{Id: stringPtr("1")},
-	//		},
-	//	},
-	//}
-
-	testCases["route-ids-must-be-unique"] = ggtfsTestCase{
-		csvRows: [][]string{
-			{"route_id", "route_type", "route_short_name", "agency_id"},
-			{"1", "1", "2", "1"},
-			{"1", "1", "2", "1"},
+		"desc-duplicates-route-names": {
+			actualEntities: []*Route{
+				{
+					Id:                stringPtr("1"),
+					AgencyId:          stringPtr("Agency"),
+					ShortName:         stringPtr("route1"),
+					LongName:          stringPtr("route1"),
+					Desc:              stringPtr("route1"),
+					Type:              stringPtr("3"),
+					URL:               stringPtr("https://acme.inc/1"),
+					Color:             stringPtr("FFFFFF"),
+					TextColor:         stringPtr("FFF000"),
+					SortOrder:         stringPtr("1"),
+					ContinuousPickup:  stringPtr("2"),
+					ContinuousDropOff: stringPtr("3"),
+					NetworkId:         stringPtr("network"),
+				},
+			},
+			expectedResults: []Result{
+				DescriptionDuplicatesRouteNameResult{SingleLineResult{FileName: "routes.txt", FieldName: "route_desc", Line: 0}, "route_short_name"},
+				DescriptionDuplicatesRouteNameResult{SingleLineResult{FileName: "routes.txt", FieldName: "route_desc", Line: 0}, "route_long_name"},
+			},
 		},
-		expectedErrors: []string{
-			"routes.txt:3: route_id '1' is not unique within the file",
+		"agency-id-required-when-multiple-agencies": {
+			actualEntities: []*Route{
+				{
+					Id:        stringPtr("1"),
+					AgencyId:  stringPtr(""),
+					ShortName: stringPtr("route1"),
+					LongName:  stringPtr("route 1"),
+					Type:      stringPtr("3"),
+				},
+			},
+			agencies: []*Agency{
+				{Id: stringPtr("111")},
+				{Id: stringPtr("112")},
+				{Id: stringPtr("")}, // Do not crash on empty agency ID
+				{Id: nil},           // Do not crash on nil agency ID
+			},
+			expectedResults: []Result{
+				AgencyIdRequiredForRouteWhenMultipleAgenciesResult{SingleLineResult{FileName: "routes.txt", FieldName: "agency_id", Line: 0}},
+			},
+		},
+		"recommend-agency-id": {
+			actualEntities: []*Route{
+				{
+					Id:        stringPtr("1"),
+					AgencyId:  stringPtr(""),
+					ShortName: stringPtr("route1"),
+					LongName:  stringPtr("route 1"),
+					Type:      stringPtr("3"),
+				},
+			},
+			expectedResults: []Result{
+				AgencyIdRecommendedForRouteResult{SingleLineResult{FileName: "routes.txt", FieldName: "agency_id", Line: 0}},
+			},
+		},
+		"unique-route-id": {
+			actualEntities: []*Route{
+				{
+					Id:        stringPtr("1"),
+					AgencyId:  stringPtr("agency"),
+					ShortName: stringPtr("route1"),
+					LongName:  stringPtr("route 1"),
+					Type:      stringPtr("3"),
+				},
+				{
+					Id:        stringPtr("1"),
+					AgencyId:  stringPtr("agency"),
+					ShortName: stringPtr("route1"),
+					LongName:  stringPtr("route 1"),
+					Type:      stringPtr("3"),
+				},
+			},
+			expectedResults: []Result{
+				FieldIsNotUniqueResult{SingleLineResult{FileName: "routes.txt", FieldName: "route_id", Line: 0}},
+			},
+		},
+		"foreign-key-failure": {
+			actualEntities: []*Route{
+				{
+					Id:        stringPtr("1"),
+					AgencyId:  stringPtr("113"),
+					ShortName: stringPtr("route1"),
+					LongName:  stringPtr("route 1"),
+					Type:      stringPtr("3"),
+				},
+			},
+			agencies: []*Agency{
+				{Id: stringPtr("111")},
+				{Id: stringPtr("112")},
+				{Id: stringPtr("")}, // Do not crash on empty agency ID
+				{Id: nil},           // Do not crash on nil agency ID
+			},
+			expectedResults: []Result{
+				ForeignKeyViolationResult{
+					ReferencingFileName:  "routes.txt",
+					ReferencingFieldName: "agency_id",
+					ReferencedFieldName:  "agency.txt",
+					ReferencedFileName:   "agency_id",
+					OffendingValue:       "113",
+					ReferencedAtRow:      0,
+				},
+			},
+		},
+		"foreign-key-OK": {
+			actualEntities: []*Route{
+				{
+					Id:        stringPtr("1"),
+					AgencyId:  stringPtr("113"),
+					ShortName: stringPtr("route1"),
+					LongName:  stringPtr("route 1"),
+					Type:      stringPtr("3"),
+				},
+			},
+			agencies: []*Agency{
+				{Id: stringPtr("113")},
+				{Id: stringPtr("112")},
+			},
+			expectedResults: []Result{},
 		},
 	}
 
-	testCases["route-desc-should-not-match-short-or-long-name"] = ggtfsTestCase{
-		csvRows: [][]string{
-			{"route_id", "route_type", "agency_id", "route_short_name", "route_long_name", "route_desc"},
-			{"1", "1", "1", "foo", "", "foo"},
-			{"2", "1", "2", "", "foo", "foo"},
-		},
-		expectedRecommendations: []string{
-			"routes.txt:2: route_desc should not be the same as route_short_name or route_long_name",
-			"routes.txt:3: route_desc should not be the same as route_short_name or route_long_name",
-		},
-	}
-
-	return testCases
-}
-
-func TestShouldReturnEmptyRouteArrayOnEmptyString(t *testing.T) {
-	routes, errors := LoadEntitiesFromCSV[*Route](csv.NewReader(strings.NewReader("")), validRouteHeaders, CreateRoute, RoutesFileName)
-	if len(errors) > 0 {
-		t.Error(errors)
-	}
-	if len(routes) != 0 {
-		t.Error("expected zero route items")
-	}
-}
-
-func TestShouldNotFailValidationOnNilRoutes(t *testing.T) {
-	ValidateRoutes(nil, nil)
-}
-
-func TestShouldNotFailValidationOnNilRouteItem(t *testing.T) {
-	ValidateRoutes([]*Route{nil}, nil)
-}
-
-func TestShouldNotFailValidationOnNilAgencyItem(t *testing.T) {
-	ValidateRoutes([]*Route{{
-		AgencyId:   NewID(stringPtr("foo")),
-		LineNumber: 0,
-	}}, []*Agency{nil})
-
-	ValidateRoutes([]*Route{{
-		LineNumber: 0,
-	}}, []*Agency{nil})
-}
-
-func TestStructsShouldNotBePresentOnNilInput(t *testing.T) {
-	cpt := NewContinuousPickupType(nil)
-	if cpt.IsPresent() {
-		t.Error("expected not present field")
-	}
-
-	cdo := NewContinuousDropOffType(nil)
-	if cdo.IsPresent() {
-		t.Error("expected not present field")
-	}
-	rt := NewRouteType(nil)
-	if rt.IsPresent() {
-		t.Error("expected not present field")
+	for name, tt := range tests {
+		t.Run(fmt.Sprintf("%s", name), func(t *testing.T) {
+			handleValidationResults(t, ValidateRoutes(tt.actualEntities, tt.agencies), tt.expectedResults)
+		})
 	}
 }

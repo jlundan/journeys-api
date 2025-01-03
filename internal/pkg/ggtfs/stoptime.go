@@ -237,3 +237,74 @@ func NewTimePoint(raw *string) TimePoint {
 	}
 	return TimePoint{Integer{base: base{raw: *raw, isPresent: true}}}
 }
+
+const (
+	ContinuousStoppingPickupType       = 0
+	NoContinuousStoppingPickupType     = 1
+	MustPhoneAgencyPickupType          = 2
+	MustCoordinateWithDriverPickupType = 3
+)
+
+type ContinuousPickupType struct {
+	Integer
+}
+
+func (cpt ContinuousPickupType) IsValid() bool {
+	// Spec says values "1 or empty mean No continuous stopping drop off."
+	// Empty = valid
+	if cpt.Integer.base.IsEmpty() {
+		return true
+	}
+
+	val, err := strconv.Atoi(cpt.Integer.base.raw)
+
+	if err != nil {
+		return false
+	}
+
+	return val == ContinuousStoppingPickupType || val == NoContinuousStoppingPickupType ||
+		val == MustPhoneAgencyPickupType || val == MustCoordinateWithDriverPickupType
+}
+
+func NewContinuousPickupType(raw *string) ContinuousPickupType {
+	if raw == nil {
+		return ContinuousPickupType{
+			Integer{base: base{raw: ""}}}
+	}
+	return ContinuousPickupType{Integer{base: base{raw: *raw, isPresent: true}}}
+}
+
+const (
+	ContinuousStoppingDropOffType       = 0
+	NoContinuousStoppingDropOffType     = 1
+	MustPhoneAgencyDropOffType          = 2
+	MustCoordinateWithDriverDropOffType = 3
+)
+
+type ContinuousDropOffType struct {
+	Integer
+}
+
+func (cpt ContinuousDropOffType) IsValid() bool {
+	// Spec says "1 or empty - No continuous stopping drop off."
+	// Empty = valid
+	if cpt.Integer.base.IsEmpty() {
+		return true
+	}
+
+	val, err := strconv.Atoi(cpt.Integer.base.raw)
+	if err != nil {
+		return false
+	}
+
+	return val == ContinuousStoppingDropOffType || val == NoContinuousStoppingDropOffType ||
+		val == MustPhoneAgencyDropOffType || val == MustCoordinateWithDriverDropOffType
+}
+
+func NewContinuousDropOffType(raw *string) ContinuousDropOffType {
+	if raw == nil {
+		return ContinuousDropOffType{
+			Integer{base: base{raw: ""}}}
+	}
+	return ContinuousDropOffType{Integer{base: base{raw: *raw, isPresent: true}}}
+}

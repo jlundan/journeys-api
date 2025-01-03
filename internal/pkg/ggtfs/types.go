@@ -359,8 +359,12 @@ const (
 
 	FieldTypeCalendarDay       FieldType = "CalendarDay"
 	FieldTypeCalendarException FieldType = "CalendarException"
+	FieldTypeRouteType         FieldType = "RouteType"
+	FieldTypeContinuousPickup  FieldType = "ContinuousPickup"
+	FieldTypeContinuousDropOff FieldType = "ContinuousDropOff"
 
 	FileNameAgency       = "agency.txt"
 	FileNameCalendar     = "calendar.txt"
 	FileNameCalendarDate = "calendar_dates.txt"
+	FileNameRoutes       = "routes.txt"
 )
