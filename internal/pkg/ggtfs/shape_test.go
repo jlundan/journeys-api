@@ -3,118 +3,116 @@
 package ggtfs
 
 import (
-	"encoding/csv"
-	"strings"
+	"fmt"
 	"testing"
 )
 
-var validShapeHeaders = []string{"shape_id", "shape_pt_lat", "shape_pt_lon", "shape_pt_sequence", "shape_dist_traveled"}
+func TestCreateShape(t *testing.T) {
+	headerMap := map[string]int{"shape_id": 0, "shape_pt_lat": 1, "shape_pt_lon": 2, "shape_pt_sequence": 3, "shape_dist_traveled": 4}
 
-func TestShouldReturnEmptyShapeArrayOnEmptyString(t *testing.T) {
-	agencies, errors := LoadEntitiesFromCSV[*Shape](csv.NewReader(strings.NewReader("")), validShapeHeaders, CreateShape, ShapesFileName)
-	if len(errors) > 0 {
-		t.Error(errors)
+	tests := map[string]struct {
+		headers    map[string]int
+		rows       [][]string
+		lineNumber int
+		expected   []*Shape
+	}{
+		"empty-row": {
+			headers: headerMap,
+			rows:    [][]string{{"", "", "", "", ""}},
+			expected: []*Shape{{
+				Id:           stringPtr(""),
+				PtLat:        stringPtr(""),
+				PtLon:        stringPtr(""),
+				PtSequence:   stringPtr(""),
+				DistTraveled: stringPtr(""),
+				LineNumber:   0,
+			}},
+		},
+		"nil-values": {
+			headers: headerMap,
+			rows:    [][]string{nil},
+			expected: []*Shape{{
+				Id:           nil,
+				PtLat:        nil,
+				PtLon:        nil,
+				PtSequence:   nil,
+				DistTraveled: nil,
+				LineNumber:   0,
+			}},
+		},
+		"OK": {
+			headers: headerMap,
+			rows: [][]string{
+				{"1", "1.111", "1.111", "1", "100"},
+				{"1", "2.111", "2.111", "2", "100"},
+			},
+			expected: []*Shape{{
+				Id:           stringPtr("1"),
+				PtLat:        stringPtr("1.111"),
+				PtLon:        stringPtr("1.111"),
+				PtSequence:   stringPtr("1"),
+				DistTraveled: stringPtr("100"),
+			}, {
+				Id:           stringPtr("1"),
+				PtLat:        stringPtr("2.111"),
+				PtLon:        stringPtr("2.111"),
+				PtSequence:   stringPtr("2"),
+				DistTraveled: stringPtr("100"),
+				LineNumber:   1,
+			}},
+		},
 	}
-	if len(agencies) != 0 {
-		t.Error("expected zero calendar items")
-	}
-}
 
-func TestShapeParsing(t *testing.T) {
-	loadShapesFunc := func(reader *csv.Reader) ([]interface{}, []error) {
-		shapes, errs := LoadEntitiesFromCSV[*Shape](reader, validShapeHeaders, CreateShape, ShapesFileName)
-		entities := make([]interface{}, len(shapes))
-		for i, shape := range shapes {
-			entities[i] = shape
-		}
-		return entities, errs
-	}
-
-	validateShapesFunc := func(entities []interface{}, _ map[string][]interface{}) ([]error, []string) {
-		shapes := make([]*Shape, len(entities))
-		for i, entity := range entities {
-			if shape, ok := entity.(*Shape); ok {
-				shapes[i] = shape
+	for name, tt := range tests {
+		t.Run(fmt.Sprintf("%s", name), func(t *testing.T) {
+			var actual []*Shape
+			for i, row := range tt.rows {
+				actual = append(actual, CreateShape(row, tt.headers, i))
 			}
-		}
-
-		return ValidateShapes(shapes)
+			handleEntityCreateResults(t, tt.expected, actual)
+		})
 	}
-
-	runGenericGTFSParseTest(t, "ShapeOKTestcases", loadShapesFunc, validateShapesFunc, false, getShapeOKTestcases())
-	runGenericGTFSParseTest(t, "ShapeNOKTestcases", loadShapesFunc, validateShapesFunc, false, getShapeNOKTestcases())
 }
 
-func getShapeOKTestcases() map[string]ggtfsTestCase {
-	expected1 := Shape{
-		Id:           NewID(stringPtr("1")),
-		PtLat:        NewLatitude(stringPtr("1.111")),
-		PtLon:        NewLongitude(stringPtr("1.111")),
-		PtSequence:   NewPositiveInteger(stringPtr("1")),
-		DistTraveled: NewPositiveFloat(stringPtr("100")),
-		LineNumber:   2,
-	}
-
-	expected2 := Shape{
-		Id:           NewID(stringPtr("1")),
-		PtLat:        NewLatitude(stringPtr("1.211")),
-		PtLon:        NewLongitude(stringPtr("1.211")),
-		PtSequence:   NewPositiveInteger(stringPtr("2")),
-		DistTraveled: NewPositiveFloat(stringPtr("100")),
-		LineNumber:   3,
-	}
-
-	testCases := make(map[string]ggtfsTestCase)
-	testCases["1"] = ggtfsTestCase{
-		csvRows: [][]string{
-			{"shape_id", "shape_pt_lat", "shape_pt_lon", "shape_pt_sequence", "shape_dist_traveled"},
-			{"1", "1.111", "1.111", "1", "100"},
-			{"1", "1.211", "1.211", "2", "100"},
+func TestValidateShapes(t *testing.T) {
+	tests := map[string]struct {
+		actualEntities  []*Shape
+		expectedResults []Result
+	}{
+		"nil-slice": {
+			actualEntities:  nil,
+			expectedResults: []Result{},
 		},
-		expectedStructs: []interface{}{&expected1, &expected2},
-	}
-
-	return testCases
-}
-
-func getShapeNOKTestcases() map[string]ggtfsTestCase {
-	testCases := make(map[string]ggtfsTestCase)
-	testCases["1"] = ggtfsTestCase{
-		csvRows: [][]string{
-			{"shape_id"},
-			{","},
-			{" "},
+		"nil-slice-items": {
+			actualEntities:  []*Shape{nil},
+			expectedResults: []Result{},
 		},
-		expectedErrors: []string{
-			"shapes.txt: record on line 2: wrong number of fields",
-			"shapes.txt:3: invalid mandatory field: shape_id",
-			"shapes.txt:3: invalid mandatory field: shape_pt_lat",
-			"shapes.txt:3: invalid mandatory field: shape_pt_lon",
-			"shapes.txt:3: invalid mandatory field: shape_pt_sequence",
+		"invalid-fields": {
+			actualEntities: []*Shape{
+				{
+					Id:           stringPtr("1"),
+					PtLat:        stringPtr("Not a latitude"),
+					PtLon:        stringPtr("Not a longitude"),
+					PtSequence:   stringPtr("Not a sequence"),
+					DistTraveled: stringPtr("Not a distance"),
+				},
+			},
+			expectedResults: []Result{
+				InvalidLatitudeResult{SingleLineResult{FileName: "shapes.txt", FieldName: "shape_pt_lat"}},
+				InvalidLongitudeResult{SingleLineResult{FileName: "shapes.txt", FieldName: "shape_pt_lon"}},
+				InvalidIntegerResult{SingleLineResult{FileName: "shapes.txt", FieldName: "shape_pt_sequence"}},
+				InvalidFloatResult{SingleLineResult{FileName: "shapes.txt", FieldName: "shape_dist_traveled"}},
+				TooFewShapePointsResult{
+					FileName: "shapes.txt",
+					ShapeId:  "1",
+				},
+			},
 		},
 	}
 
-	testCases["2"] = ggtfsTestCase{
-		csvRows: [][]string{
-			{"shape_id", "shape_pt_lat", "shape_pt_lon", "shape_pt_sequence", "shape_dist_traveled"},
-			{"1", "11.1", "11.1", "1", ""},
-			{"2", "11.1", "11.1", "1", "invalid"},
-			{"3", "11.1", "11.1", "1", "100"},
-		},
-		expectedErrors: []string{
-			"shapes.txt: shape (1) has less than two shape points",
-			"shapes.txt: shape (3) has less than two shape points",
-			"shapes.txt:3: invalid field: shape_dist_traveled",
-		},
+	for name, tt := range tests {
+		t.Run(fmt.Sprintf("%s", name), func(t *testing.T) {
+			handleValidationResults(t, ValidateShapes(tt.actualEntities), tt.expectedResults)
+		})
 	}
-
-	return testCases
-}
-
-func TestShouldNotFailValidationOnNilShapes(t *testing.T) {
-	ValidateShapes(nil)
-}
-
-func TestShouldNotFailValidationOnNilShapeItem(t *testing.T) {
-	ValidateShapes([]*Shape{nil})
 }

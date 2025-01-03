@@ -367,4 +367,5 @@ const (
 	FileNameCalendar     = "calendar.txt"
 	FileNameCalendarDate = "calendar_dates.txt"
 	FileNameRoutes       = "routes.txt"
+	FileNameShapes       = "shapes.txt"
 )
