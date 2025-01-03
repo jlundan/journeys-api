@@ -108,10 +108,10 @@ func getStopTimeOKTestcases() map[string]ggtfsTestCase {
 		fixtures: map[string][]interface{}{
 			"stops": {
 				&Stop{
-					Id: NewID(stringPtr("0001")),
+					Id: stringPtr("0001"),
 				},
 				&Stop{
-					Id: NewID(stringPtr("0002")),
+					Id: stringPtr("0002"),
 				},
 			},
 		},

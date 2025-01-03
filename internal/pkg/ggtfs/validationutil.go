@@ -260,6 +260,32 @@ func validateContinuousDropOff(fieldName string, fieldValue string, fileName str
 	return []Result{}
 }
 
+func validateLocationType(fieldName string, fieldValue string, fileName string, line int) []Result {
+	i, err := strconv.Atoi(fieldValue)
+	if err != nil || i < 0 || i > 4 {
+		return []Result{InvalidLocationTypeResult{SingleLineResult{
+			FileName:  fileName,
+			FieldName: fieldName,
+			Line:      line,
+		}}}
+	}
+
+	return []Result{}
+}
+
+func validateWheelchairBoarding(fieldName string, fieldValue string, fileName string, line int) []Result {
+	i, err := strconv.Atoi(fieldValue)
+	if err != nil || i < 0 || i > 2 {
+		return []Result{InvalidWheelchairBoardingResult{SingleLineResult{
+			FileName:  fileName,
+			FieldName: fieldName,
+			Line:      line,
+		}}}
+	}
+
+	return []Result{}
+}
+
 func validateField(fieldType FieldType, fieldName string, fieldValue *string, isRequired bool, fileName string, line int) []Result {
 	hasValue := fieldValue != nil && *fieldValue != ""
 
@@ -318,9 +344,26 @@ func validateField(fieldType FieldType, fieldName string, fieldValue *string, is
 		results = append(results, validateContinuousPickup(fieldName, *fieldValue, fileName, line)...)
 	case FieldTypeContinuousDropOff:
 		results = append(results, validateContinuousDropOff(fieldName, *fieldValue, fileName, line)...)
+	case FieldTypeLocationType:
+		results = append(results, validateLocationType(fieldName, *fieldValue, fileName, line)...)
+	case FieldTypeWheelchairBoarding:
+		results = append(results, validateWheelchairBoarding(fieldName, *fieldValue, fileName, line)...)
 	}
 
 	return results
+}
+
+func IsLocationTypeValid(locationType *string) bool {
+	if locationType == nil {
+		return false
+	}
+
+	i, err := strconv.Atoi(*locationType)
+	if err != nil {
+		return false
+	}
+
+	return i >= 0 && i <= 4
 }
 
 type FieldTobeValidated interface {

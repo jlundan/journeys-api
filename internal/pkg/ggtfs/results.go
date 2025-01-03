@@ -252,6 +252,22 @@ func (e AgencyIdRecommendedForRouteResult) Code() string {
 	return "agency_id_recommended_for_route"
 }
 
+type InvalidLocationTypeResult struct {
+	SingleLineResult
+}
+
+func (e InvalidLocationTypeResult) Code() string {
+	return "invalid_location_type"
+}
+
+type InvalidWheelchairBoardingResult struct {
+	SingleLineResult
+}
+
+func (e InvalidWheelchairBoardingResult) Code() string {
+	return "invalid_wheelchair_boarding"
+}
+
 type TooFewShapePointsResult struct {
 	FileName string
 	ShapeId  string
@@ -259,6 +275,17 @@ type TooFewShapePointsResult struct {
 
 func (e TooFewShapePointsResult) Code() string {
 	return "too_few_shape_points"
+}
+
+type FieldRequiredForLocationTypeResult struct {
+	RequiredField string
+	LocationType  string
+	FileName      string
+	Line          int
+}
+
+func (e FieldRequiredForLocationTypeResult) Code() string {
+	return "field_required_for_location_type"
 }
 
 type ForeignKeyViolationResult struct {
