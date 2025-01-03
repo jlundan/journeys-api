@@ -357,5 +357,8 @@ const (
 	FieldTypeTimezone       FieldType = "Timezone"
 	FieldTypeURL            FieldType = "URL"
 
-	FileNameAgency = "agency.txt"
+	FieldTypeCalendarDay FieldType = "CalendarDay"
+
+	FileNameAgency   = "agency.txt"
+	FileNameCalendar = "calendar.txt"
 )

@@ -120,7 +120,7 @@ func ValidateTrips(trips []*Trip, routes []*Route, calendarItems []*CalendarItem
 				if calendarItem == nil {
 					continue
 				}
-				if trip.ServiceId.Raw() == calendarItem.ServiceId.Raw() {
+				if trip.ServiceId.Raw() == *calendarItem.ServiceId {
 					serviceFound = true
 					break
 				}

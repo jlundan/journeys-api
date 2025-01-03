@@ -250,33 +250,34 @@ func buildCalendarMap(g GTFSContext) map[string]calendarFileRow {
 	result := make(map[string]calendarFileRow)
 	for _, calendarItem := range g.CalendarItems {
 		days := make([]string, 0)
-		if calendarItem.Monday.Raw() == "1" {
+		if *calendarItem.Monday == "1" {
 			days = append(days, "monday")
 		}
-		if calendarItem.Tuesday.Raw() == "1" {
+		if *calendarItem.Tuesday == "1" {
 			days = append(days, "tuesday")
 		}
-		if calendarItem.Wednesday.Raw() == "1" {
+		if *calendarItem.Wednesday == "1" {
 			days = append(days, "wednesday")
 		}
-		if calendarItem.Thursday.Raw() == "1" {
+		if *calendarItem.Thursday == "1" {
 			days = append(days, "thursday")
 		}
-		if calendarItem.Friday.Raw() == "1" {
+		if *calendarItem.Friday == "1" {
 			days = append(days, "friday")
 		}
-		if calendarItem.Saturday.Raw() == "1" {
+		if *calendarItem.Saturday == "1" {
 			days = append(days, "saturday")
 		}
-		if calendarItem.Sunday.Raw() == "1" {
+		if *calendarItem.Sunday == "1" {
 			days = append(days, "sunday")
 		}
 
 		serviceId := calendarItem.ServiceId
-		result[serviceId.Raw()] = calendarFileRow{
-			serviceId: serviceId.Raw(),
-			startDate: calendarItem.StartDate.Raw(),
-			endDate:   calendarItem.EndDate.Raw(),
+		//TODO: nil check
+		result[*serviceId] = calendarFileRow{
+			serviceId: *serviceId,
+			startDate: *calendarItem.StartDate,
+			endDate:   *calendarItem.EndDate,
 			dayTypes:  days,
 		}
 	}

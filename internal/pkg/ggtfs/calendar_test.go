@@ -3,115 +3,138 @@
 package ggtfs
 
 import (
-	"encoding/csv"
-	"strings"
+	"fmt"
 	"testing"
 )
 
-var validCalendarHeaders = []string{
-	"service_id", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday", "start_date", "end_date",
-}
-
-func TestShouldReturnEmptyCalendarItemArrayOnEmptyString(t *testing.T) {
-	agencies, errors := LoadEntitiesFromCSV[*CalendarItem](csv.NewReader(strings.NewReader("")), validCalendarHeaders, CreateCalendarItem, CalendarFileName)
-	if len(errors) > 0 {
-		t.Error(errors)
-	}
-	if len(agencies) != 0 {
-		t.Error("expected zero calendar items")
-	}
-}
-
-func TestNewWeekdayEnumReturnsEmptyOnNil(t *testing.T) {
-	we := NewAvailableForWeekdayInfo(nil)
-
-	if we.raw != "" {
-		t.Error("expected empty AvailableForWeekdayInfo")
-	}
-}
-
-func TestCalendarItemParsing(t *testing.T) {
-	loadCalendarItemsFunc := func(reader *csv.Reader) ([]interface{}, []error) {
-		calendarItems, errs := LoadEntitiesFromCSV[*CalendarItem](reader, validCalendarHeaders, CreateCalendarItem, CalendarFileName)
-		entities := make([]interface{}, len(calendarItems))
-		for i, calendarItem := range calendarItems {
-			entities[i] = calendarItem
-		}
-		return entities, errs
+func TestCreateCalendarItem(t *testing.T) {
+	headerMap := map[string]int{"service_id": 0, "monday": 1, "tuesday": 2, "wednesday": 3,
+		"thursday": 4, "friday": 5, "saturday": 6, "sunday": 7, "start_date": 8, "end_date": 9,
 	}
 
-	validateCalendarItemsFunc := func(entities []interface{}, _fixtures map[string][]interface{}) ([]error, []string) {
-		calendarItems := make([]*CalendarItem, len(entities))
-		for i, entity := range entities {
-			if calendarItem, ok := entity.(*CalendarItem); ok {
-				calendarItems[i] = calendarItem
+	tests := map[string]struct {
+		headers    map[string]int
+		rows       [][]string
+		lineNumber int
+		expected   []*CalendarItem
+	}{
+		"empty-row": {
+			headers: headerMap,
+			rows:    [][]string{{"", "", "", "", "", "", "", "", "", ""}},
+			expected: []*CalendarItem{{
+				ServiceId:  stringPtr(""),
+				Monday:     stringPtr(""),
+				Tuesday:    stringPtr(""),
+				Wednesday:  stringPtr(""),
+				Thursday:   stringPtr(""),
+				Friday:     stringPtr(""),
+				Saturday:   stringPtr(""),
+				Sunday:     stringPtr(""),
+				StartDate:  stringPtr(""),
+				EndDate:    stringPtr(""),
+				LineNumber: 0,
+			}},
+		},
+		"nil-values": {
+			headers: headerMap,
+			rows:    [][]string{nil},
+			expected: []*CalendarItem{{
+				ServiceId:  nil,
+				Monday:     nil,
+				Tuesday:    nil,
+				Wednesday:  nil,
+				Thursday:   nil,
+				Friday:     nil,
+				Saturday:   nil,
+				Sunday:     nil,
+				StartDate:  nil,
+				EndDate:    nil,
+				LineNumber: 0,
+			}},
+		},
+		"OK": {
+			headers: headerMap,
+			rows: [][]string{
+				{"111", "1", "1", "1", "1", "1", "0", "0", "20200101", "20200102"},
+				{"112", "0", "0", "0", "0", "0", "1", "1", "20200101", "20200102"},
+			},
+			expected: []*CalendarItem{{
+				ServiceId:  stringPtr("111"),
+				Monday:     stringPtr("1"),
+				Tuesday:    stringPtr("1"),
+				Wednesday:  stringPtr("1"),
+				Thursday:   stringPtr("1"),
+				Friday:     stringPtr("1"),
+				Saturday:   stringPtr("0"),
+				Sunday:     stringPtr("0"),
+				StartDate:  stringPtr("20200101"),
+				EndDate:    stringPtr("20200102"),
+				LineNumber: 0,
+			}, {
+				ServiceId:  stringPtr("112"),
+				Monday:     stringPtr("0"),
+				Tuesday:    stringPtr("0"),
+				Wednesday:  stringPtr("0"),
+				Thursday:   stringPtr("0"),
+				Friday:     stringPtr("0"),
+				Saturday:   stringPtr("1"),
+				Sunday:     stringPtr("1"),
+				StartDate:  stringPtr("20200101"),
+				EndDate:    stringPtr("20200102"),
+				LineNumber: 1,
+			}},
+		},
+	}
+
+	for name, tt := range tests {
+		t.Run(fmt.Sprintf("%s", name), func(t *testing.T) {
+			var actual []*CalendarItem
+			for i, row := range tt.rows {
+				actual = append(actual, CreateCalendarItem(row, tt.headers, i))
 			}
-		}
-		return ValidateCalendarItems(calendarItems)
+			handleEntityCreateResults(t, tt.expected, actual)
+		})
 	}
-
-	runGenericGTFSParseTest(t, "CalendarItemNOKTestcases", loadCalendarItemsFunc, validateCalendarItemsFunc, false, getCalendarItemNOKTestcases())
-	runGenericGTFSParseTest(t, "CalendarItemOKTestcases", loadCalendarItemsFunc, validateCalendarItemsFunc, false, getCalendarItemOKTestcases())
 }
 
-func getCalendarItemNOKTestcases() map[string]ggtfsTestCase {
-	testCases := make(map[string]ggtfsTestCase)
-
-	testCases["invalid-fields"] = ggtfsTestCase{
-		csvRows: [][]string{
-			{"service_id", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday", "start_date", "end_date"},
-			{" ", " ", " ", " ", " ", " ", " ", " ", " ", " "},
-			{"SERVICE0", "3", "not a day", "-1", "2", "2", "2", "2", "not a date", "20181313"},
+func TestValidateCalendarItems(t *testing.T) {
+	tests := map[string]struct {
+		actualEntities  []*CalendarItem
+		expectedResults []Result
+	}{
+		"nil-slice": {
+			actualEntities:  nil,
+			expectedResults: []Result{},
 		},
-		expectedErrors: []string{
-			"calendar.txt:2: invalid mandatory field: end_date",
-			"calendar.txt:2: invalid mandatory field: friday",
-			"calendar.txt:2: invalid mandatory field: monday",
-			"calendar.txt:2: invalid mandatory field: saturday",
-			"calendar.txt:2: invalid mandatory field: service_id",
-			"calendar.txt:2: invalid mandatory field: start_date",
-			"calendar.txt:2: invalid mandatory field: sunday",
-			"calendar.txt:2: invalid mandatory field: thursday",
-			"calendar.txt:2: invalid mandatory field: tuesday",
-			"calendar.txt:2: invalid mandatory field: wednesday",
-			"calendar.txt:3: invalid mandatory field: end_date",
-			"calendar.txt:3: invalid mandatory field: friday",
-			"calendar.txt:3: invalid mandatory field: monday",
-			"calendar.txt:3: invalid mandatory field: saturday",
-			"calendar.txt:3: invalid mandatory field: start_date",
-			"calendar.txt:3: invalid mandatory field: sunday",
-			"calendar.txt:3: invalid mandatory field: thursday",
-			"calendar.txt:3: invalid mandatory field: tuesday",
-			"calendar.txt:3: invalid mandatory field: wednesday",
+		"nil-slice-items": {
+			actualEntities:  []*CalendarItem{nil},
+			expectedResults: []Result{},
+		},
+		"invalid-fields": {
+			actualEntities: []*CalendarItem{
+				{
+					ServiceId: stringPtr("111"), // avoid missing required field
+					Monday:    stringPtr("-1"),
+					Tuesday:   stringPtr("2"),
+					Wednesday: stringPtr("0"),        // avoid missing required field
+					Thursday:  stringPtr("0"),        // avoid missing required field
+					Friday:    stringPtr("0"),        // avoid missing required field
+					Saturday:  stringPtr("1"),        // avoid missing required field
+					Sunday:    stringPtr("1"),        // avoid missing required field
+					StartDate: stringPtr("20200101"), // avoid missing required field
+					EndDate:   stringPtr("20200102"), // avoid missing required field
+				},
+			},
+			expectedResults: []Result{
+				InvalidCalendarDayResult{SingleLineResult{FileName: "calendar.txt", FieldName: "monday"}},
+				InvalidCalendarDayResult{SingleLineResult{FileName: "calendar.txt", FieldName: "tuesday"}},
+			},
 		},
 	}
 
-	return testCases
-}
-
-func getCalendarItemOKTestcases() map[string]ggtfsTestCase {
-	expected1 := CalendarItem{
-		ServiceId:  NewID(stringPtr("111")),
-		Monday:     NewAvailableForWeekdayInfo(stringPtr("1")),
-		Tuesday:    NewAvailableForWeekdayInfo(stringPtr("1")),
-		Wednesday:  NewAvailableForWeekdayInfo(stringPtr("1")),
-		Thursday:   NewAvailableForWeekdayInfo(stringPtr("1")),
-		Friday:     NewAvailableForWeekdayInfo(stringPtr("1")),
-		Saturday:   NewAvailableForWeekdayInfo(stringPtr("1")),
-		Sunday:     NewAvailableForWeekdayInfo(stringPtr("1")),
-		StartDate:  NewDate(stringPtr("20200101")),
-		EndDate:    NewDate(stringPtr("20200102")),
-		LineNumber: 2,
+	for name, tt := range tests {
+		t.Run(fmt.Sprintf("%s", name), func(t *testing.T) {
+			handleValidationResults(t, ValidateCalendarItems(tt.actualEntities), tt.expectedResults)
+		})
 	}
-
-	testCases := make(map[string]ggtfsTestCase)
-	testCases["1"] = ggtfsTestCase{
-		csvRows: [][]string{
-			{"service_id", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday", "start_date", "end_date"},
-			{"111", "1", "1", "1", "1", "1", "1", "1", "20200101", "20200102"},
-		},
-		expectedStructs: []interface{}{&expected1},
-	}
-
-	return testCases
 }

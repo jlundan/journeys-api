@@ -1,20 +1,16 @@
 package ggtfs
 
-import (
-	"strconv"
-)
-
 type CalendarItem struct {
-	ServiceId  ID                      // service_id 	(required)
-	Monday     AvailableForWeekdayInfo // monday		(required)
-	Tuesday    AvailableForWeekdayInfo // tuesday		(required)
-	Wednesday  AvailableForWeekdayInfo // wednesday		(required)
-	Thursday   AvailableForWeekdayInfo // thursday		(required)
-	Friday     AvailableForWeekdayInfo // friday		(required)
-	Saturday   AvailableForWeekdayInfo // saturday		(required)
-	Sunday     AvailableForWeekdayInfo // sunday		(required)
-	StartDate  Date                    // start_date	(required)
-	EndDate    Date                    // end_date		(required)
+	ServiceId  *string // service_id 	(required)
+	Monday     *string // monday		(required)
+	Tuesday    *string // tuesday		(required)
+	Wednesday  *string // wednesday		(required)
+	Thursday   *string // thursday		(required)
+	Friday     *string // friday		(required)
+	Saturday   *string // saturday		(required)
+	Sunday     *string // sunday		(required)
+	StartDate  *string // start_date	(required)
+	EndDate    *string // end_date		(required)
 	LineNumber int
 }
 
@@ -27,85 +23,68 @@ func CreateCalendarItem(row []string, headers map[string]int, lineNumber int) *C
 		v := getRowValueForHeaderName(row, headers, hName)
 		switch hName {
 		case "service_id":
-			calendarItem.ServiceId = NewID(v)
+			calendarItem.ServiceId = v
 		case "monday":
-			calendarItem.Monday = NewAvailableForWeekdayInfo(v)
+			calendarItem.Monday = v
 		case "tuesday":
-			calendarItem.Tuesday = NewAvailableForWeekdayInfo(v)
+			calendarItem.Tuesday = v
 		case "wednesday":
-			calendarItem.Wednesday = NewAvailableForWeekdayInfo(v)
+			calendarItem.Wednesday = v
 		case "thursday":
-			calendarItem.Thursday = NewAvailableForWeekdayInfo(v)
+			calendarItem.Thursday = v
 		case "friday":
-			calendarItem.Friday = NewAvailableForWeekdayInfo(v)
+			calendarItem.Friday = v
 		case "saturday":
-			calendarItem.Saturday = NewAvailableForWeekdayInfo(v)
+			calendarItem.Saturday = v
 		case "sunday":
-			calendarItem.Sunday = NewAvailableForWeekdayInfo(v)
+			calendarItem.Sunday = v
 		case "start_date":
-			calendarItem.StartDate = NewDate(v)
+			calendarItem.StartDate = v
 		case "end_date":
-			calendarItem.EndDate = NewDate(v)
+			calendarItem.EndDate = v
 		}
 	}
 
 	return calendarItem
 }
 
-func ValidateCalendarItem(c CalendarItem) []error {
-	var validationErrors []error
+func ValidateCalendarItem(c CalendarItem) []Result {
+	var validationResults []Result
 
-	requiredFields := map[string]FieldTobeValidated{
-		"service_id": &c.ServiceId,
-		"monday":     &c.Monday,
-		"tuesday":    &c.Tuesday,
-		"wednesday":  &c.Wednesday,
-		"thursday":   &c.Thursday,
-		"friday":     &c.Friday,
-		"saturday":   &c.Saturday,
-		"sunday":     &c.Sunday,
-		"start_date": &c.StartDate,
-		"end_date":   &c.EndDate,
+	fields := []struct {
+		fieldType FieldType
+		name      string
+		value     *string
+		required  bool
+	}{
+		{FieldTypeID, "service_id", c.ServiceId, true},
+		{FieldTypeCalendarDay, "monday", c.Monday, true},
+		{FieldTypeCalendarDay, "tuesday", c.Tuesday, true},
+		{FieldTypeCalendarDay, "wednesday", c.Wednesday, true},
+		{FieldTypeCalendarDay, "thursday", c.Thursday, true},
+		{FieldTypeCalendarDay, "friday", c.Friday, true},
+		{FieldTypeCalendarDay, "saturday", c.Saturday, true},
+		{FieldTypeCalendarDay, "sunday", c.Sunday, true},
+		{FieldTypeDate, "start_date", c.StartDate, true},
+		{FieldTypeDate, "end_date", c.EndDate, true},
 	}
-	validateRequiredFields(requiredFields, &validationErrors, c.LineNumber, CalendarFileName)
 
-	return validationErrors
+	for _, field := range fields {
+		validationResults = append(validationResults, validateField(field.fieldType, field.name, field.value, field.required, FileNameCalendar, c.LineNumber)...)
+	}
+
+	return validationResults
 }
 
-func ValidateCalendarItems(calendarItems []*CalendarItem) ([]error, []string) {
-	var validationErrors []error
+func ValidateCalendarItems(calendarItems []*CalendarItem) []Result {
+	var results []Result
 
 	for _, calendarItem := range calendarItems {
-		validationErrors = append(validationErrors, ValidateCalendarItem(*calendarItem)...)
+		if calendarItem == nil {
+			continue
+		}
+		results = append(results, ValidateCalendarItem(*calendarItem)...)
 	}
 
-	return validationErrors, nil
-}
-
-//goland:noinspection GoUnusedConst
-const (
-	CalendarAvailableForWeekday    string = "1"
-	CalendarNotAvailableForWeekday string = "0"
-)
-
-type AvailableForWeekdayInfo struct {
-	Integer
-}
-
-func (w AvailableForWeekdayInfo) IsValid() bool {
-	val, err := strconv.Atoi(w.Integer.base.raw)
-
-	if err != nil {
-		return false
-	}
-
-	return val == 0 || val == 1
-}
-
-func NewAvailableForWeekdayInfo(raw *string) AvailableForWeekdayInfo {
-	if raw == nil {
-		return AvailableForWeekdayInfo{
-			Integer{base: base{raw: ""}}}
-	}
-	return AvailableForWeekdayInfo{Integer{base: base{raw: *raw, isPresent: true}}}
+	return results
 }

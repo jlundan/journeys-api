@@ -130,6 +130,14 @@ func (e InvalidTimezoneResult) Code() string {
 	return "invalid_timezone"
 }
 
+type InvalidCalendarDayResult struct {
+	SingleLineResult
+}
+
+func (e InvalidCalendarDayResult) Code() string {
+	return "invalid_calendar_day"
+}
+
 type MissingRequiredFieldResult struct {
 	SingleLineResult
 }
