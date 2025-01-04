@@ -15,16 +15,39 @@ func NewReader(r *csv.Reader) *GtfsCsvReader {
 }
 
 func LoadAgencies(reader *GtfsCsvReader) ([]*Agency, []error) {
-	return loadCsvEntities2[*Agency]("agency", reader, CreateAgency)
+	return loadCsvEntities[*Agency](defaultAgencyHeaders, reader, CreateAgency)
 }
 
-func loadCsvEntities2[T CsvEntity](entityType string, reader *GtfsCsvReader, entityCreator csvEntityCreator[T]) ([]T, []error) {
-	var errs []error
+func LoadRoutes(reader *GtfsCsvReader) ([]*Route, []error) {
+	return loadCsvEntities[*Route](defaultRouteHeaders, reader, CreateRoute)
+}
 
-	headerNames, hErr := getEntityHeaders(entityType, reader)
-	if hErr != nil {
-		return []T{}, []error{hErr}
-	}
+func LoadStops(reader *GtfsCsvReader) ([]*Stop, []error) {
+	return loadCsvEntities[*Stop](defaultStopHeaders, reader, CreateStop)
+}
+
+func LoadTrips(reader *GtfsCsvReader) ([]*Trip, []error) {
+	return loadCsvEntities[*Trip](defaultTripHeaders, reader, CreateTrip)
+}
+
+func LoadStopTimes(reader *GtfsCsvReader) ([]*StopTime, []error) {
+	return loadCsvEntities[*StopTime](defaultStopTimeHeaders, reader, CreateStopTime)
+}
+
+func LoadCalendar(reader *GtfsCsvReader) ([]*CalendarItem, []error) {
+	return loadCsvEntities[*CalendarItem](defaultCalendarHeaders, reader, CreateCalendarItem)
+}
+
+func LoadCalendarDates(reader *GtfsCsvReader) ([]*CalendarDate, []error) {
+	return loadCsvEntities[*CalendarDate](defaultCalendarDateHeaders, reader, CreateCalendarDate)
+}
+
+func LoadShapes(reader *GtfsCsvReader) ([]*Shape, []error) {
+	return loadCsvEntities[*Shape](defaultShapeHeaders, reader, CreateShape)
+}
+
+func loadCsvEntities[T CsvEntity](headerNames []string, reader *GtfsCsvReader, entityCreator csvEntityCreator[T]) ([]T, []error) {
+	var errs []error
 
 	headers, indexingErrors := getHeaderIndex(reader.csvReader, headerNames)
 
@@ -67,72 +90,6 @@ func loadCsvEntities2[T CsvEntity](entityType string, reader *GtfsCsvReader, ent
 
 	return entities, errs
 }
-
-func getEntityHeaders(entityType string, reader *GtfsCsvReader) ([]string, error) {
-	switch entityType {
-	case "agency":
-		return defaultAgencyHeaders, nil
-	default:
-		return []string{}, fmt.Errorf("unknown entity: %s", entityType)
-	}
-}
-
-//func getRowValueForHeaderName(row []string, headers map[string]int, headerName string) *string {
-//	pos, ok := headers[headerName]
-//
-//	if !ok {
-//		pos = -1
-//	}
-//
-//	if pos < 0 || pos >= len(row) {
-//		return nil
-//	}
-//
-//	return &row[pos]
-//}
-//
-//func getHeaderIndex(r *csv.Reader, validHeaderList []string) (map[string]int, []error) {
-//	headerRow, err := r.Read()
-//	if err == io.EOF {
-//		return map[string]int{}, []error{}
-//	}
-//
-//	if err != nil {
-//		return map[string]int{}, []error{err}
-//	}
-//
-//	var readErrors []error
-//	headerIndex := map[string]int{}
-//	encounteredHeaders := map[string]bool{}
-//
-//	validHeaders := toSet(validHeaderList)
-//
-//	for index, header := range headerRow {
-//		header = strings.TrimSpace(header)
-//
-//		if encounteredHeaders[header] {
-//			readErrors = append(readErrors, fmt.Errorf("duplicate header name: %s", header))
-//			continue
-//		}
-//
-//		if _, found := validHeaders[header]; !found {
-//			headerIndex[header] = -1
-//			continue
-//		}
-//
-//		encounteredHeaders[header] = true
-//		headerIndex[header] = index
-//	}
-//	return headerIndex, readErrors
-//}
-//
-//func toSet[T comparable](slice []T) map[T]struct{} {
-//	set := make(map[T]struct{}, len(slice))
-//	for _, item := range slice {
-//		set[item] = struct{}{}
-//	}
-//	return set
-//}
 
 type GtfsCsvReader struct {
 	csvReader          *csv.Reader
