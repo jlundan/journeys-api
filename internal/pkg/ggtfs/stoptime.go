@@ -1,35 +1,28 @@
 package ggtfs
 
-import (
-	"fmt"
-	"strconv"
-)
-
 type StopTime struct {
-	TripId                   ID                    // trip_id 						(required)
-	ArrivalTime              Time                  // arrival_time 					(conditionally required)
-	DepartureTime            Time                  // departure_time 				(conditionally required)
-	StopId                   ID                    // stop_id 						(conditionally required)
-	LocationGroupId          ID                    // location_group_id 			(conditionally forbidden)
-	LocationId               ID                    // location_id 					(conditionally forbidden)
-	StopSequence             Integer               // stop_sequence 				(required)
-	StopHeadSign             Text                  // stop_headsign 				(optional)
-	StartPickupDropOffWindow Time                  // start_pickup_drop_off_window 	(conditionally required)
-	EndPickupDropOffWindow   Time                  // end_pickup_drop_off_window 	(conditionally required)
-	PickupType               PickupType            // pickup_type 					(conditionally required)
-	DropOffType              DropOffType           // drop_off_type 				(conditionally required)
-	ContinuousPickup         ContinuousPickupType  // continuous_pickup 			(conditionally required)
-	ContinuousDropOff        ContinuousDropOffType // continuous_drop_off 			(conditionally required)
-	ShapeDistTraveled        Float                 // shape_dist_traveled 			(optional)
-	Timepoint                TimePoint             // timepoint 					(optional)
-	PickupBookingRuleId      ID                    // pickup_booking_rule_id 		(optional)
-	DropOffBookingRuleId     ID                    // drop_off_booking_rule_id 		(optional)
+	TripId                   *string // trip_id                      (required)
+	ArrivalTime              *string // arrival_time                 (conditionally required)
+	DepartureTime            *string // departure_time               (conditionally required)
+	StopId                   *string // stop_id                      (conditionally required)
+	LocationGroupId          *string // location_group_id            (conditionally forbidden)
+	LocationId               *string // location_id                  (conditionally forbidden)
+	StopSequence             *string // stop_sequence                (required)
+	StopHeadSign             *string // stop_headsign                (optional)
+	StartPickupDropOffWindow *string // start_pickup_drop_off_window (conditionally required)
+	EndPickupDropOffWindow   *string // end_pickup_drop_off_window   (conditionally required)
+	PickupType               *string // pickup_type                  (conditionally required)
+	DropOffType              *string // drop_off_type                (conditionally required)
+	ContinuousPickup         *string // continuous_pickup            (conditionally required)
+	ContinuousDropOff        *string // continuous_drop_off          (conditionally required)
+	ShapeDistTraveled        *string // shape_dist_traveled          (optional)
+	Timepoint                *string // timepoint                    (optional)
+	PickupBookingRuleId      *string // pickup_booking_rule_id       (optional)
+	DropOffBookingRuleId     *string // drop_off_booking_rule_id     (optional)
 	LineNumber               int
 }
 
 func CreateStopTime(row []string, headers map[string]int, lineNumber int) *StopTime {
-	var parseErrors []error
-
 	stopTime := StopTime{
 		LineNumber: lineNumber,
 	}
@@ -39,89 +32,89 @@ func CreateStopTime(row []string, headers map[string]int, lineNumber int) *StopT
 
 		switch hName {
 		case "trip_id":
-			stopTime.TripId = NewID(v)
+			stopTime.TripId = v
 		case "arrival_time":
-			stopTime.ArrivalTime = NewTime(v)
+			stopTime.ArrivalTime = v
 		case "departure_time":
-			stopTime.DepartureTime = NewTime(v)
+			stopTime.DepartureTime = v
 		case "stop_id":
-			stopTime.StopId = NewID(v)
+			stopTime.StopId = v
 		case "location_group_id":
-			stopTime.LocationGroupId = NewID(v)
+			stopTime.LocationGroupId = v
 		case "location_id":
-			stopTime.LocationId = NewID(v)
+			stopTime.LocationId = v
 		case "stop_sequence":
-			stopTime.StopSequence = NewInteger(v)
+			stopTime.StopSequence = v
 		case "stop_headsign":
-			stopTime.StopHeadSign = NewText(v)
+			stopTime.StopHeadSign = v
 		case "start_pickup_drop_off_window":
-			stopTime.StartPickupDropOffWindow = NewTime(v)
+			stopTime.StartPickupDropOffWindow = v
 		case "end_pickup_drop_off_window":
-			stopTime.EndPickupDropOffWindow = NewTime(v)
+			stopTime.EndPickupDropOffWindow = v
 		case "pickup_type":
-			stopTime.PickupType = NewPickupType(v)
+			stopTime.PickupType = v
 		case "drop_off_type":
-			stopTime.DropOffType = NewDropOffType(v)
+			stopTime.DropOffType = v
 		case "continuous_pickup":
-			stopTime.ContinuousPickup = NewContinuousPickupType(v)
+			stopTime.ContinuousPickup = v
 		case "continuous_drop_off":
-			stopTime.ContinuousDropOff = NewContinuousDropOffType(v)
+			stopTime.ContinuousDropOff = v
 		case "shape_dist_traveled":
-			stopTime.ShapeDistTraveled = NewFloat(v)
+			stopTime.ShapeDistTraveled = v
 		case "timepoint":
-			stopTime.Timepoint = NewTimePoint(v)
+			stopTime.Timepoint = v
 		case "pickup_booking_rule_id":
-			stopTime.PickupBookingRuleId = NewID(v)
+			stopTime.PickupBookingRuleId = v
 		case "drop_off_booking_rule_id":
-			stopTime.DropOffBookingRuleId = NewID(v)
+			stopTime.DropOffBookingRuleId = v
 		}
 
 	}
 
-	if len(parseErrors) > 0 {
-		return &stopTime
-	}
 	return &stopTime
 }
 
-func ValidateStopTime(st StopTime) []error {
-	var validationErrors []error
+func ValidateStopTime(st StopTime) []Result {
+	var validationResults []Result
 
-	requiredFields := map[string]FieldTobeValidated{
-		"trip_id":       &st.TripId,
-		"stop_sequence": &st.StopSequence,
+	fields := []struct {
+		fieldType FieldType
+		name      string
+		value     *string
+		required  bool
+	}{
+		{FieldTypeID, "trip_id", st.TripId, true},
+		{FieldTypeTime, "arrival_time", st.ArrivalTime, false},
+		{FieldTypeTime, "departure_time", st.DepartureTime, false},
+		{FieldTypeID, "stop_id", st.StopId, false},
+		{FieldTypeID, "location_group_id", st.LocationGroupId, false},
+		{FieldTypeID, "location_id", st.LocationId, false},
+		{FieldTypeInteger, "stop_sequence", st.StopSequence, true},
+		{FieldTypeText, "stop_headsign", st.StopHeadSign, false},
+		{FieldTypeTime, "start_pickup_drop_off_window", st.StartPickupDropOffWindow, false},
+		{FieldTypeTime, "end_pickup_drop_off_window", st.EndPickupDropOffWindow, false},
+		{FieldTypePickupType, "pickup_type", st.PickupType, false},
+		{FieldTypeDropOffType, "drop_off_type", st.DropOffType, false},
+		{FieldTypeContinuousPickup, "continuous_pickup", st.ContinuousPickup, false},
+		{FieldTypeContinuousDropOff, "continuous_drop_off", st.ContinuousDropOff, false},
+		{FieldTypeFloat, "shape_dist_traveled", st.ShapeDistTraveled, false},
+		{FieldTypeTimepoint, "timepoint", st.Timepoint, false},
+		{FieldTypeID, "pickup_booking_rule_id", st.PickupBookingRuleId, false},
+		{FieldTypeID, "drop_off_booking_rule_id", st.DropOffBookingRuleId, false},
 	}
-	validateRequiredFields(requiredFields, &validationErrors, st.LineNumber, StopTimesFileName)
 
-	optionalFields := map[string]FieldTobeValidated{
-		"arrival_time":                 &st.ArrivalTime,
-		"departure_time":               &st.DepartureTime,
-		"stop_id":                      &st.StopId,
-		"location_group_id":            &st.LocationGroupId,
-		"location_id":                  &st.LocationId,
-		"stop_headsign":                &st.StopHeadSign,
-		"start_pickup_drop_off_window": &st.StartPickupDropOffWindow,
-		"end_pickup_drop_off_window":   &st.EndPickupDropOffWindow,
-		"pickup_type":                  &st.PickupType,
-		"drop_off_type":                &st.DropOffType,
-		"continuous_pickup":            &st.ContinuousPickup,
-		"continuous_drop_off":          &st.ContinuousDropOff,
-		"shape_dist_traveled":          &st.ShapeDistTraveled,
-		"timepoint":                    &st.Timepoint,
-		"pickup_booking_rule_id":       &st.PickupBookingRuleId,
-		"drop_off_booking_rule_id":     &st.DropOffBookingRuleId,
+	for _, field := range fields {
+		validationResults = append(validationResults, validateField(field.fieldType, field.name, field.value, field.required, FileNameStopTimes, st.LineNumber)...)
 	}
-	validateOptionalFields(optionalFields, &validationErrors, st.LineNumber, StopTimesFileName)
 
-	return validationErrors
+	return validationResults
 }
 
-func ValidateStopTimes(stopTimes []*StopTime, stops []*Stop) ([]error, []string) {
-	var validationErrors []error
-	var recommendations []string
+func ValidateStopTimes(stopTimes []*StopTime, stops []*Stop) []Result {
+	var validationResults []Result
 
 	if stopTimes == nil {
-		return validationErrors, recommendations
+		return validationResults
 	}
 
 	for _, stopTimeItem := range stopTimes {
@@ -129,9 +122,9 @@ func ValidateStopTimes(stopTimes []*StopTime, stops []*Stop) ([]error, []string)
 			continue
 		}
 
-		vErr := ValidateStopTime(*stopTimeItem)
-		if len(vErr) > 0 {
-			validationErrors = append(validationErrors, vErr...)
+		vRes := ValidateStopTime(*stopTimeItem)
+		if len(vRes) > 0 {
+			validationResults = append(validationResults, vRes...)
 		}
 
 		stopFound := false
@@ -141,171 +134,178 @@ func ValidateStopTimes(stopTimes []*StopTime, stops []*Stop) ([]error, []string)
 					continue
 				}
 				// TODO: nil check
-				if stopTimeItem.StopId.Raw() == *stop.Id {
+				if *stopTimeItem.StopId == *stop.Id {
 					stopFound = true
 					break
 				}
 			}
 		}
 		if !stopFound {
-			validationErrors = append(validationErrors, createFileRowError(StopTimesFileName, stopTimeItem.LineNumber, fmt.Sprintf("stop_id (%v) references to an unknown stop", stopTimeItem.StopId.Raw())))
+			validationResults = append(validationResults, ForeignKeyViolationResult{
+				ReferencingFileName:  FileNameStopTimes,
+				ReferencingFieldName: "stop_id",
+				ReferencedFieldName:  FileNameStops,
+				ReferencedFileName:   "stop_id",
+				OffendingValue:       *stopTimeItem.StopId,
+				ReferencedAtRow:      stopTimeItem.LineNumber,
+			})
 		}
 	}
 
-	return validationErrors, recommendations
+	return validationResults
 }
 
-const (
-	StopTimePickupTypeRegularlyScheduled       = 0
-	StopTimePickupTypeNoPickup                 = 1
-	StopTimePickupTypeMustPhoneAgency          = 2
-	StopTimePickupTypeMustCoordinateWithDriver = 3
-)
-
-type PickupType struct {
-	Integer
-}
-
-func (pt PickupType) IsValid() bool {
-	val, err := strconv.Atoi(pt.Integer.base.raw)
-	if err != nil {
-		return false
-	}
-
-	return val == StopTimePickupTypeRegularlyScheduled || val == StopTimePickupTypeNoPickup ||
-		val == StopTimePickupTypeMustPhoneAgency || val == StopTimePickupTypeMustCoordinateWithDriver
-}
-
-func NewPickupType(raw *string) PickupType {
-	if raw == nil {
-		return PickupType{
-			Integer{base: base{raw: ""}}}
-	}
-	return PickupType{Integer{base: base{raw: *raw, isPresent: true}}}
-}
-
-const (
-	DropOffTypeRegularlyScheduled        = 0
-	DropOffTypeNoDropOff                 = 1
-	DropOffTypeMustPhoneAgency           = 2
-	DropOffTypeRMustCoordinateWithDriver = 3
-)
-
-type DropOffType struct {
-	Integer
-}
-
-func (dot DropOffType) IsValid() bool {
-	val, err := strconv.Atoi(dot.Integer.base.raw)
-	if err != nil {
-		return false
-	}
-
-	return val == DropOffTypeRegularlyScheduled || val == DropOffTypeNoDropOff ||
-		val == DropOffTypeMustPhoneAgency || val == DropOffTypeRMustCoordinateWithDriver
-}
-
-func NewDropOffType(raw *string) DropOffType {
-	if raw == nil {
-		return DropOffType{
-			Integer{base: base{raw: ""}}}
-	}
-	return DropOffType{Integer{base: base{raw: *raw, isPresent: true}}}
-}
-
-const (
-	TimePointApproximate = 0
-	TimePointExact       = 1
-)
-
-type TimePoint struct {
-	Integer
-}
-
-func (dot TimePoint) IsValid() bool {
-	val, err := strconv.Atoi(dot.Integer.base.raw)
-	if err != nil {
-		return false
-	}
-
-	return val == TimePointApproximate || val == TimePointExact
-}
-
-func NewTimePoint(raw *string) TimePoint {
-	if raw == nil {
-		return TimePoint{
-			Integer{base: base{raw: ""}}}
-	}
-	return TimePoint{Integer{base: base{raw: *raw, isPresent: true}}}
-}
-
-const (
-	ContinuousStoppingPickupType       = 0
-	NoContinuousStoppingPickupType     = 1
-	MustPhoneAgencyPickupType          = 2
-	MustCoordinateWithDriverPickupType = 3
-)
-
-type ContinuousPickupType struct {
-	Integer
-}
-
-func (cpt ContinuousPickupType) IsValid() bool {
-	// Spec says values "1 or empty mean No continuous stopping drop off."
-	// Empty = valid
-	if cpt.Integer.base.IsEmpty() {
-		return true
-	}
-
-	val, err := strconv.Atoi(cpt.Integer.base.raw)
-
-	if err != nil {
-		return false
-	}
-
-	return val == ContinuousStoppingPickupType || val == NoContinuousStoppingPickupType ||
-		val == MustPhoneAgencyPickupType || val == MustCoordinateWithDriverPickupType
-}
-
-func NewContinuousPickupType(raw *string) ContinuousPickupType {
-	if raw == nil {
-		return ContinuousPickupType{
-			Integer{base: base{raw: ""}}}
-	}
-	return ContinuousPickupType{Integer{base: base{raw: *raw, isPresent: true}}}
-}
-
-const (
-	ContinuousStoppingDropOffType       = 0
-	NoContinuousStoppingDropOffType     = 1
-	MustPhoneAgencyDropOffType          = 2
-	MustCoordinateWithDriverDropOffType = 3
-)
-
-type ContinuousDropOffType struct {
-	Integer
-}
-
-func (cpt ContinuousDropOffType) IsValid() bool {
-	// Spec says "1 or empty - No continuous stopping drop off."
-	// Empty = valid
-	if cpt.Integer.base.IsEmpty() {
-		return true
-	}
-
-	val, err := strconv.Atoi(cpt.Integer.base.raw)
-	if err != nil {
-		return false
-	}
-
-	return val == ContinuousStoppingDropOffType || val == NoContinuousStoppingDropOffType ||
-		val == MustPhoneAgencyDropOffType || val == MustCoordinateWithDriverDropOffType
-}
-
-func NewContinuousDropOffType(raw *string) ContinuousDropOffType {
-	if raw == nil {
-		return ContinuousDropOffType{
-			Integer{base: base{raw: ""}}}
-	}
-	return ContinuousDropOffType{Integer{base: base{raw: *raw, isPresent: true}}}
-}
+//const (
+//	StopTimePickupTypeRegularlyScheduled       = 0
+//	StopTimePickupTypeNoPickup                 = 1
+//	StopTimePickupTypeMustPhoneAgency          = 2
+//	StopTimePickupTypeMustCoordinateWithDriver = 3
+//)
+//
+//type PickupType struct {
+//	Integer
+//}
+//
+//func (pt PickupType) IsValid() bool {
+//	val, err := strconv.Atoi(pt.Integer.base.raw)
+//	if err != nil {
+//		return false
+//	}
+//
+//	return val == StopTimePickupTypeRegularlyScheduled || val == StopTimePickupTypeNoPickup ||
+//		val == StopTimePickupTypeMustPhoneAgency || val == StopTimePickupTypeMustCoordinateWithDriver
+//}
+//
+//func NewPickupType(raw *string) PickupType {
+//	if raw == nil {
+//		return PickupType{
+//			Integer{base: base{raw: ""}}}
+//	}
+//	return PickupType{Integer{base: base{raw: *raw, isPresent: true}}}
+//}
+//
+//const (
+//	DropOffTypeRegularlyScheduled        = 0
+//	DropOffTypeNoDropOff                 = 1
+//	DropOffTypeMustPhoneAgency           = 2
+//	DropOffTypeRMustCoordinateWithDriver = 3
+//)
+//
+//type DropOffType struct {
+//	Integer
+//}
+//
+//func (dot DropOffType) IsValid() bool {
+//	val, err := strconv.Atoi(dot.Integer.base.raw)
+//	if err != nil {
+//		return false
+//	}
+//
+//	return val == DropOffTypeRegularlyScheduled || val == DropOffTypeNoDropOff ||
+//		val == DropOffTypeMustPhoneAgency || val == DropOffTypeRMustCoordinateWithDriver
+//}
+//
+//func NewDropOffType(raw *string) DropOffType {
+//	if raw == nil {
+//		return DropOffType{
+//			Integer{base: base{raw: ""}}}
+//	}
+//	return DropOffType{Integer{base: base{raw: *raw, isPresent: true}}}
+//}
+//
+//const (
+//	TimePointApproximate = 0
+//	TimePointExact       = 1
+//)
+//
+//type TimePoint struct {
+//	Integer
+//}
+//
+//func (dot TimePoint) IsValid() bool {
+//	val, err := strconv.Atoi(dot.Integer.base.raw)
+//	if err != nil {
+//		return false
+//	}
+//
+//	return val == TimePointApproximate || val == TimePointExact
+//}
+//
+//func NewTimePoint(raw *string) TimePoint {
+//	if raw == nil {
+//		return TimePoint{
+//			Integer{base: base{raw: ""}}}
+//	}
+//	return TimePoint{Integer{base: base{raw: *raw, isPresent: true}}}
+//}
+//
+//const (
+//	ContinuousStoppingPickupType       = 0
+//	NoContinuousStoppingPickupType     = 1
+//	MustPhoneAgencyPickupType          = 2
+//	MustCoordinateWithDriverPickupType = 3
+//)
+//
+//type ContinuousPickupType struct {
+//	Integer
+//}
+//
+//func (cpt ContinuousPickupType) IsValid() bool {
+//	// Spec says values "1 or empty mean No continuous stopping drop off."
+//	// Empty = valid
+//	if cpt.Integer.base.IsEmpty() {
+//		return true
+//	}
+//
+//	val, err := strconv.Atoi(cpt.Integer.base.raw)
+//
+//	if err != nil {
+//		return false
+//	}
+//
+//	return val == ContinuousStoppingPickupType || val == NoContinuousStoppingPickupType ||
+//		val == MustPhoneAgencyPickupType || val == MustCoordinateWithDriverPickupType
+//}
+//
+//func NewContinuousPickupType(raw *string) ContinuousPickupType {
+//	if raw == nil {
+//		return ContinuousPickupType{
+//			Integer{base: base{raw: ""}}}
+//	}
+//	return ContinuousPickupType{Integer{base: base{raw: *raw, isPresent: true}}}
+//}
+//
+//const (
+//	ContinuousStoppingDropOffType       = 0
+//	NoContinuousStoppingDropOffType     = 1
+//	MustPhoneAgencyDropOffType          = 2
+//	MustCoordinateWithDriverDropOffType = 3
+//)
+//
+//type ContinuousDropOffType struct {
+//	Integer
+//}
+//
+//func (cpt ContinuousDropOffType) IsValid() bool {
+//	// Spec says "1 or empty - No continuous stopping drop off."
+//	// Empty = valid
+//	if cpt.Integer.base.IsEmpty() {
+//		return true
+//	}
+//
+//	val, err := strconv.Atoi(cpt.Integer.base.raw)
+//	if err != nil {
+//		return false
+//	}
+//
+//	return val == ContinuousStoppingDropOffType || val == NoContinuousStoppingDropOffType ||
+//		val == MustPhoneAgencyDropOffType || val == MustCoordinateWithDriverDropOffType
+//}
+//
+//func NewContinuousDropOffType(raw *string) ContinuousDropOffType {
+//	if raw == nil {
+//		return ContinuousDropOffType{
+//			Integer{base: base{raw: ""}}}
+//	}
+//	return ContinuousDropOffType{Integer{base: base{raw: *raw, isPresent: true}}}
+//}

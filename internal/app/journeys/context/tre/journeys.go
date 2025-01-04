@@ -9,6 +9,7 @@ import (
 	"github.com/jlundan/journeys-api/internal/pkg/ggtfs"
 	"github.com/jlundan/journeys-api/internal/pkg/utils"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -62,15 +63,26 @@ func buildJourneys(g GTFSContext, lines Lines, routes Routes, stopPoints StopPoi
 	var tripIdToJourneyCalls = make(map[string][]*model.JourneyCall)
 	var tripIdToStopTimes = make(map[string][]*ggtfs.StopTime)
 
+	//TODO: nil check
 	for _, st := range g.StopTimes {
-		tripIdToStopTimes[st.TripId.Raw()] = append(tripIdToStopTimes[st.TripId.Raw()], st)
+		tripIdToStopTimes[*st.TripId] = append(tripIdToStopTimes[*st.TripId], st)
 	}
 
 	usedHashes := make([]string, 0)
 
 	for tripId, stArr := range tripIdToStopTimes {
+
+		// TODO: better nil functionality
 		sort.Slice(stArr, func(x, y int) bool {
-			return stArr[x].StopSequence.Int() < stArr[y].StopSequence.Int()
+			sx, err := strconv.Atoi(*stArr[x].StopSequence)
+			if err != nil {
+				return false
+			}
+			sy, err := strconv.Atoi(*stArr[y].StopSequence)
+			if err != nil {
+				return false
+			}
+			return sx < sy
 		})
 
 		// GTFS stop_times.txt contains trips (Journeys) and sequence of stops (JourneyPatterns) merged into one stop time list
@@ -98,15 +110,15 @@ func buildJourneys(g GTFSContext, lines Lines, routes Routes, stopPoints StopPoi
 		}
 
 		for _, stopTime := range stArr {
-			sp, err := stopPoints.GetOne(stopTime.StopId.Raw())
+			sp, err := stopPoints.GetOne(*stopTime.StopId)
 			if err != nil {
 				fmt.Println(fmt.Sprintf("Unknown stop point in trip, ignoring it. trip_id:%v, stop_id:%v", tripId, stopTime.TripId))
 				continue
 			}
 
 			tripIdToJourneyCalls[tripId] = append(tripIdToJourneyCalls[tripId], &model.JourneyCall{
-				DepartureTime: stopTime.DepartureTime.Raw(),
-				ArrivalTime:   stopTime.ArrivalTime.Raw(),
+				DepartureTime: *stopTime.DepartureTime,
+				ArrivalTime:   *stopTime.ArrivalTime,
 				StopPoint:     sp,
 			})
 
@@ -314,7 +326,7 @@ func buildCalendarDatesMap(g GTFSContext) map[string][]*model.DayTypeException {
 func stopPointIdsToMd5(arr []*ggtfs.StopTime) string {
 	bucket := md5.New()
 	for _, v := range arr {
-		bucket.Write([]byte(v.StopId.Raw()))
+		bucket.Write([]byte(*v.StopId))
 	}
 
 	return hex.EncodeToString(bucket.Sum(nil))
