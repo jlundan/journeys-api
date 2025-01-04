@@ -1,86 +1,24 @@
 package journeys
 
 import (
-	"bytes"
 	"github.com/bradfitz/gomemcache/memcache"
 	"github.com/gorilla/mux"
 	"github.com/jlundan/journeys-api/internal/app/journeys/context/tre"
 	"github.com/jlundan/journeys-api/internal/app/journeys/routes"
 	"github.com/spf13/cobra"
 	"log"
-	"net/http"
 	"os"
 )
 
-var mc *memcache.Client
 var dryRun bool
-
-func corsMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Set headers to allow CORS
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-		w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
-
-		// If it's a preflight request, stop here
-		if r.Method == "OPTIONS" {
-			return
-		}
-
-		next.ServeHTTP(w, r)
-	})
-}
+var disableCache bool
 
 func init() {
-	if os.Getenv("MEMCACHED_URL") != "" {
-		mc = memcache.New(os.Getenv("MEMCACHED_URL"))
-	}
-
-	mainCommand.Flags().BoolVar(&dryRun, "dry-run", false, "Perform a dry run without starting the server")
+	MainCommand.Flags().BoolVar(&disableCache, "disable-cache", false, "Do not use cache")
+	MainCommand.Flags().BoolVar(&dryRun, "dry-run", false, "Perform a dry run without starting the server")
 }
 
-func cacheMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		key := r.URL.String()
-
-		item, err := mc.Get(key)
-		if err == nil {
-			// Cache hit, send response
-			_, err = w.Write(item.Value)
-			if err != nil {
-				rw := NewResponseWriter(w)
-				next.ServeHTTP(rw, r)
-			}
-			return
-		}
-
-		rw := NewResponseWriter(w)
-		next.ServeHTTP(rw, r)
-
-		// Cache the new response
-		_ = mc.Set(&memcache.Item{Key: key, Value: rw.body.Bytes()})
-	})
-}
-
-type ResponseWriter struct {
-	http.ResponseWriter
-	body *bytes.Buffer
-}
-
-func NewResponseWriter(w http.ResponseWriter) *ResponseWriter {
-	return &ResponseWriter{w, new(bytes.Buffer)}
-}
-
-func (rw *ResponseWriter) Write(b []byte) (int, error) {
-	rw.body.Write(b)
-	return rw.ResponseWriter.Write(b)
-}
-
-func Run() {
-	_ = mainCommand.Execute()
-}
-
-var mainCommand = &cobra.Command{
+var MainCommand = &cobra.Command{
 	Use:   "journeys",
 	Short: "journeys",
 	Long:  "Run the app",
@@ -111,10 +49,17 @@ var mainCommand = &cobra.Command{
 
 		r := mux.NewRouter()
 		r.Use(corsMiddleware)
-		if mc != nil {
-			log.Println("Using memcached")
-			r.Use(cacheMiddleware)
+
+		if !disableCache {
+			cmw, err := NewMemcachedCacheMiddleware(memcache.New(os.Getenv("MEMCACHED_URL")))
+			if err != nil {
+				log.Println(err)
+				return
+			}
+			log.Println("Using cache")
+			r.Use(cmw.Middleware)
 		}
+
 		routes.InjectMunicipalityRoutes(r, ctx)
 		routes.InjectLineRoutes(r, ctx)
 		routes.InjectJourneyPatternRoutes(r, ctx)
