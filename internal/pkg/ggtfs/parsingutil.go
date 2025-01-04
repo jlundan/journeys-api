@@ -7,44 +7,6 @@ import (
 	"strings"
 )
 
-func LoadEntitiesFromCSV[T GtfsEntity](csvReader *csv.Reader, validHeaders []string, entityCreator entityCreator[T], fileName string) ([]T, []error) {
-	var errs []error
-
-	headers, indexingErrors := getHeaderIndex(csvReader, validHeaders)
-
-	if len(indexingErrors) > 0 {
-		for _, e := range indexingErrors {
-			errs = append(errs, createFileError(fileName, fmt.Sprintf("%v", e.Error())))
-		}
-	}
-
-	if len(headers) == 0 {
-		return []T{}, errs
-	}
-
-	var entities []T
-
-	lineNumber := 2
-	for {
-		row, err := csvReader.Read()
-		if err == io.EOF {
-			break
-		}
-
-		if err != nil {
-			errs = append(errs, createFileError(fileName, fmt.Sprintf("%v", err.Error())))
-			lineNumber++
-			continue
-		}
-
-		entities = append(entities, entityCreator(row, headers, lineNumber))
-
-		lineNumber++
-	}
-
-	return entities, errs
-}
-
 func getRowValueForHeaderName(row []string, headers map[string]int, headerName string) *string {
 	pos, ok := headers[headerName]
 

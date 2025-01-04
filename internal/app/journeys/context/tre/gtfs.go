@@ -55,26 +55,8 @@ func NewGTFSContextForDirectory(gtfsPath string) (*GTFSContext, []error) {
 	context := GTFSContext{}
 	var gtfsErrors []error
 
-	var validShapeHeaders = []string{"shape_id", "shape_pt_lat", "shape_pt_lon", "shape_pt_sequence", "shape_dist_traveled"}
-	var validStopHeaders = []string{"stop_id", "stop_code", "stop_name", "stop_desc", "stop_lat", "stop_lon", "zone_id",
-		"stop_url", "location_type", "parent_station", "stop_timezone", "wheelchair_boarding", "level_id", "platform_code", "municipality_id"}
-	//var validAgencyHeaders = []string{"agency_id", "agency_name", "agency_url", "agency_timezone",
-	//	"agency_lang", "agency_phone", "agency_fare_url", "agency_email"}
-	var validCalendarHeaders = []string{
-		"service_id", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday", "start_date", "end_date",
-	}
-	var validCalendarDateHeaders = []string{"service_id", "date", "exception_type"}
-	var validRouteHeaders = []string{"route_id", "agency_id", "route_short_name", "route_long_name", "route_desc",
-		"route_type", "route_url", "route_color", "route_text_color", "route_sort_order", "continuous_pickup",
-		"continuous_drop_off", "network_id"}
-	var validStopTimeHeaders = []string{"trip_id", "arrival_time", "departure_time", "stop_id", "stop_sequence",
-		"stop_headsign", "pickup_type", "drop_off_type", "continuous_pickup", "continuous_drop_off",
-		"shape_dist_traveled", "timepoint"}
-	var validTripHeaders = []string{"route_id", "service_id", "trip_id", "trip_headsign", "trip_short_name",
-		"direction_id", "block_id", "shape_id", "wheelchair_accessible", "bikes_allowed"}
-
-	files := []string{ggtfs.AgenciesFileName, ggtfs.RoutesFileName, ggtfs.StopsFileName, ggtfs.TripsFileName, ggtfs.StopTimesFileName,
-		ggtfs.CalendarFileName, ggtfs.CalendarDatesFileName, ggtfs.ShapesFileName}
+	files := []string{ggtfs.FileNameAgency, ggtfs.FileNameRoutes, ggtfs.FileNameStops, ggtfs.FileNameTrips, ggtfs.FileNameStopTimes,
+		ggtfs.FileNameCalendar, ggtfs.FileNameCalendarDate, ggtfs.FileNameShapes}
 
 	for _, file := range files {
 		reader, err := CreateCSVReaderForFile(path.Join(gtfsPath, file))
@@ -83,22 +65,22 @@ func NewGTFSContextForDirectory(gtfsPath string) (*GTFSContext, []error) {
 		}
 
 		switch file {
-		case ggtfs.AgenciesFileName:
+		case ggtfs.FileNameAgency:
 			context.Agencies, gtfsErrors = ggtfs.LoadAgencies(ggtfs.NewReader(reader))
-		case ggtfs.RoutesFileName:
-			context.Routes, gtfsErrors = ggtfs.LoadEntitiesFromCSV[*ggtfs.Route](reader, validRouteHeaders, ggtfs.CreateRoute, ggtfs.RoutesFileName)
-		case ggtfs.StopsFileName:
-			context.Stops, gtfsErrors = ggtfs.LoadEntitiesFromCSV[*ggtfs.Stop](reader, validStopHeaders, ggtfs.CreateStop, ggtfs.StopsFileName)
-		case ggtfs.TripsFileName:
-			context.Trips, gtfsErrors = ggtfs.LoadEntitiesFromCSV[*ggtfs.Trip](reader, validTripHeaders, ggtfs.CreateTrip, ggtfs.TripsFileName)
-		case ggtfs.StopTimesFileName:
-			context.StopTimes, gtfsErrors = ggtfs.LoadEntitiesFromCSV[*ggtfs.StopTime](reader, validStopTimeHeaders, ggtfs.CreateStopTime, ggtfs.StopTimesFileName)
-		case ggtfs.CalendarFileName:
-			context.CalendarItems, gtfsErrors = ggtfs.LoadEntitiesFromCSV[*ggtfs.CalendarItem](reader, validCalendarHeaders, ggtfs.CreateCalendarItem, ggtfs.CalendarFileName)
-		case ggtfs.CalendarDatesFileName:
-			context.CalendarDates, gtfsErrors = ggtfs.LoadEntitiesFromCSV[*ggtfs.CalendarDate](reader, validCalendarDateHeaders, ggtfs.CreateCalendarDate, ggtfs.CalendarDatesFileName)
-		case ggtfs.ShapesFileName:
-			context.Shapes, gtfsErrors = ggtfs.LoadEntitiesFromCSV[*ggtfs.Shape](reader, validShapeHeaders, ggtfs.CreateShape, ggtfs.ShapesFileName)
+		case ggtfs.FileNameRoutes:
+			context.Routes, gtfsErrors = ggtfs.LoadRoutes(ggtfs.NewReader(reader))
+		case ggtfs.FileNameStops:
+			context.Stops, gtfsErrors = ggtfs.LoadStops(ggtfs.NewReader(reader))
+		case ggtfs.FileNameTrips:
+			context.Trips, gtfsErrors = ggtfs.LoadTrips(ggtfs.NewReader(reader))
+		case ggtfs.FileNameStopTimes:
+			context.StopTimes, gtfsErrors = ggtfs.LoadStopTimes(ggtfs.NewReader(reader))
+		case ggtfs.FileNameCalendar:
+			context.CalendarItems, gtfsErrors = ggtfs.LoadCalendar(ggtfs.NewReader(reader))
+		case ggtfs.FileNameCalendarDate:
+			context.CalendarDates, gtfsErrors = ggtfs.LoadCalendarDates(ggtfs.NewReader(reader))
+		case ggtfs.FileNameShapes:
+			context.Shapes, gtfsErrors = ggtfs.LoadShapes(ggtfs.NewReader(reader))
 		}
 
 		if len(gtfsErrors) > 0 {
