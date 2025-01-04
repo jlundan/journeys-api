@@ -325,6 +325,45 @@ func validateTimepoint(fieldName string, fieldValue string, fileName string, lin
 	return []Result{}
 }
 
+func validateDirectionId(fieldName string, fieldValue string, fileName string, line int) []Result {
+	i, err := strconv.Atoi(fieldValue)
+	if err != nil || i < 0 || i > 1 {
+		return []Result{InvalidDirectionIdResult{SingleLineResult{
+			FileName:  fileName,
+			FieldName: fieldName,
+			Line:      line,
+		}}}
+	}
+
+	return []Result{}
+}
+
+func validateWheelchairAccessible(fieldName string, fieldValue string, fileName string, line int) []Result {
+	i, err := strconv.Atoi(fieldValue)
+	if err != nil || i < 0 || i > 2 {
+		return []Result{InvalidWheelchairAccessibleResult{SingleLineResult{
+			FileName:  fileName,
+			FieldName: fieldName,
+			Line:      line,
+		}}}
+	}
+
+	return []Result{}
+}
+
+func validateTypeBikesAllowed(fieldName string, fieldValue string, fileName string, line int) []Result {
+	i, err := strconv.Atoi(fieldValue)
+	if err != nil || i < 0 || i > 2 {
+		return []Result{InvalidBikesAllowedResult{SingleLineResult{
+			FileName:  fileName,
+			FieldName: fieldName,
+			Line:      line,
+		}}}
+	}
+
+	return []Result{}
+}
+
 func validateField(fieldType FieldType, fieldName string, fieldValue *string, isRequired bool, fileName string, line int) []Result {
 	hasValue := fieldValue != nil && *fieldValue != ""
 
@@ -393,6 +432,12 @@ func validateField(fieldType FieldType, fieldName string, fieldValue *string, is
 		results = append(results, validateDropOffType(fieldName, *fieldValue, fileName, line)...)
 	case FieldTypeTimepoint:
 		results = append(results, validateTimepoint(fieldName, *fieldValue, fileName, line)...)
+	case FieldTypeDirectionId:
+		results = append(results, validateDirectionId(fieldName, *fieldValue, fileName, line)...)
+	case FieldTypeWheelchairAccessible:
+		results = append(results, validateWheelchairAccessible(fieldName, *fieldValue, fileName, line)...)
+	case FieldTypeBikesAllowed:
+		results = append(results, validateTypeBikesAllowed(fieldName, *fieldValue, fileName, line)...)
 	}
 
 	return results
