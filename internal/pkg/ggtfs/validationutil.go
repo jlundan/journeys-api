@@ -185,7 +185,7 @@ func validateTime(fieldName string, fieldValue string, fileName string, line int
 	// through the night. For example, 25:00:00 represents 1:00:00 AM the next day.
 	match, _ := regexp.MatchString(`^(0[0-9]|1[0-9]|2[0-9]|3[0-9]|4[0-7]):([0-5][0-9]):([0-5][0-9])$|^([0-9]|1[0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])$`, fieldValue)
 	if !match {
-		return []Result{InvalidCurrencyAmountResult{SingleLineResult{
+		return []Result{InvalidTimeResult{SingleLineResult{
 			FileName:  fileName,
 			FieldName: fieldName,
 			Line:      line,
@@ -286,6 +286,45 @@ func validateWheelchairBoarding(fieldName string, fieldValue string, fileName st
 	return []Result{}
 }
 
+func validatePickupType(fieldName string, fieldValue string, fileName string, line int) []Result {
+	i, err := strconv.Atoi(fieldValue)
+	if err != nil || i < 0 || i > 3 {
+		return []Result{InvalidPickupTypeResult{SingleLineResult{
+			FileName:  fileName,
+			FieldName: fieldName,
+			Line:      line,
+		}}}
+	}
+
+	return []Result{}
+}
+
+func validateDropOffType(fieldName string, fieldValue string, fileName string, line int) []Result {
+	i, err := strconv.Atoi(fieldValue)
+	if err != nil || i < 0 || i > 3 {
+		return []Result{InvalidDropOffTypeResult{SingleLineResult{
+			FileName:  fileName,
+			FieldName: fieldName,
+			Line:      line,
+		}}}
+	}
+
+	return []Result{}
+}
+
+func validateTimepoint(fieldName string, fieldValue string, fileName string, line int) []Result {
+	i, err := strconv.Atoi(fieldValue)
+	if err != nil || i < 0 || i > 1 {
+		return []Result{InvalidTimepointResult{SingleLineResult{
+			FileName:  fileName,
+			FieldName: fieldName,
+			Line:      line,
+		}}}
+	}
+
+	return []Result{}
+}
+
 func validateField(fieldType FieldType, fieldName string, fieldValue *string, isRequired bool, fileName string, line int) []Result {
 	hasValue := fieldValue != nil && *fieldValue != ""
 
@@ -348,6 +387,12 @@ func validateField(fieldType FieldType, fieldName string, fieldValue *string, is
 		results = append(results, validateLocationType(fieldName, *fieldValue, fileName, line)...)
 	case FieldTypeWheelchairBoarding:
 		results = append(results, validateWheelchairBoarding(fieldName, *fieldValue, fileName, line)...)
+	case FieldTypePickupType:
+		results = append(results, validatePickupType(fieldName, *fieldValue, fileName, line)...)
+	case FieldTypeDropOffType:
+		results = append(results, validateDropOffType(fieldName, *fieldValue, fileName, line)...)
+	case FieldTypeTimepoint:
+		results = append(results, validateTimepoint(fieldName, *fieldValue, fileName, line)...)
 	}
 
 	return results

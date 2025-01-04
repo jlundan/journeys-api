@@ -203,6 +203,30 @@ func (e InvalidContinuousDropOffResult) Code() string {
 	return "invalid_continuous_drop_off"
 }
 
+type InvalidPickupTypeResult struct {
+	SingleLineResult
+}
+
+func (e InvalidPickupTypeResult) Code() string {
+	return "invalid_pickup_type"
+}
+
+type InvalidDropOffTypeResult struct {
+	SingleLineResult
+}
+
+func (e InvalidDropOffTypeResult) Code() string {
+	return "invalid_drop_off_type"
+}
+
+type InvalidTimepointResult struct {
+	SingleLineResult
+}
+
+func (e InvalidTimepointResult) Code() string {
+	return "invalid_timepoint"
+}
+
 type MissingRouteShortNameWhenLongNameIsNotPresentResult struct {
 	SingleLineResult
 }
