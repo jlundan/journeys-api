@@ -367,6 +367,10 @@ const (
 	FieldTypeDropOffType        FieldType = "DropOffType"
 	FieldTypeTimepoint          FieldType = "Timepoint"
 
+	FieldTypeDirectionId          FieldType = "DirectionId"
+	FieldTypeWheelchairAccessible FieldType = "WheelchairAccessible"
+	FieldTypeBikesAllowed         FieldType = "BikesAllowed"
+
 	FileNameAgency       = "agency.txt"
 	FileNameCalendar     = "calendar.txt"
 	FileNameCalendarDate = "calendar_dates.txt"
@@ -374,4 +378,5 @@ const (
 	FileNameShapes       = "shapes.txt"
 	FileNameStops        = "stops.txt"
 	FileNameStopTimes    = "stop_times.txt"
+	FileNameTrips        = "trips.txt"
 )

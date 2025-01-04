@@ -227,6 +227,30 @@ func (e InvalidTimepointResult) Code() string {
 	return "invalid_timepoint"
 }
 
+type InvalidDirectionIdResult struct {
+	SingleLineResult
+}
+
+func (e InvalidDirectionIdResult) Code() string {
+	return "invalid_direction_id"
+}
+
+type InvalidWheelchairAccessibleResult struct {
+	SingleLineResult
+}
+
+func (e InvalidWheelchairAccessibleResult) Code() string {
+	return "invalid_wheelchair_accessible"
+}
+
+type InvalidBikesAllowedResult struct {
+	SingleLineResult
+}
+
+func (e InvalidBikesAllowedResult) Code() string {
+	return "invalid_bikes_allowed"
+}
+
 type MissingRouteShortNameWhenLongNameIsNotPresentResult struct {
 	SingleLineResult
 }
