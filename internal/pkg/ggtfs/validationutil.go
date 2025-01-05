@@ -8,379 +8,379 @@ import (
 	"unicode/utf8"
 )
 
-func validateURL(fieldName string, fieldValue string, fileName string, line int) []Result {
+func validateURL(fieldName string, fieldValue string, fileName string, line int) []ValidationNotice {
 	_, err := url.ParseRequestURI(fieldValue)
 	if err != nil {
-		return []Result{InvalidURLResult{SingleLineResult{
+		return []ValidationNotice{InvalidURLNotice{SingleLineNotice{
 			FileName:  fileName,
 			FieldName: fieldName,
 			Line:      line,
 		}}}
 	}
 
-	return []Result{}
+	return []ValidationNotice{}
 }
 
-func validateColor(fieldName string, fieldValue string, fileName string, line int) []Result {
+func validateColor(fieldName string, fieldValue string, fileName string, line int) []ValidationNotice {
 	match, _ := regexp.MatchString(`^[0-9A-Fa-f]{6}$`, fieldValue)
 	if !match {
-		return []Result{InvalidColorResult{SingleLineResult{
+		return []ValidationNotice{InvalidColorNotice{SingleLineNotice{
 			FileName:  fileName,
 			FieldName: fieldName,
 			Line:      line,
 		}}}
 	}
 
-	return []Result{}
+	return []ValidationNotice{}
 }
 
-func validateTimezone(fieldName string, fieldValue string, fileName string, line int) []Result {
+func validateTimezone(fieldName string, fieldValue string, fileName string, line int) []ValidationNotice {
 	// Basic regex to validate Continent/City or Continent/City_Name format.
 	match, _ := regexp.MatchString(`^[A-Za-z]+/[A-Za-z_]+$|^[A-Za-z]+/[A-Za-z]+$`, fieldValue)
 	if !match {
-		return []Result{InvalidTimezoneResult{SingleLineResult{
+		return []ValidationNotice{InvalidTimezoneNotice{SingleLineNotice{
 			FileName:  fileName,
 			FieldName: fieldName,
 			Line:      line,
 		}}}
 	}
 
-	return []Result{}
+	return []ValidationNotice{}
 }
 
-func validateLanguageCode(fieldName string, fieldValue string, fileName string, line int) []Result {
+func validateLanguageCode(fieldName string, fieldValue string, fileName string, line int) []ValidationNotice {
 	// Basic validation for language codes: e.g., "en", "en-US"
 	match, _ := regexp.MatchString(`^[a-zA-Z]{2,3}(-[a-zA-Z]{2,3})?$`, fieldValue)
 	if !match {
-		return []Result{InvalidLanguageCodeResult{SingleLineResult{
+		return []ValidationNotice{InvalidLanguageCodeNotice{SingleLineNotice{
 			FileName:  fileName,
 			FieldName: fieldName,
 			Line:      line,
 		}}}
 	}
 
-	return []Result{}
+	return []ValidationNotice{}
 }
 
-func validatePhoneNumber(fieldName string, fieldValue string, fileName string, line int) []Result {
+func validatePhoneNumber(fieldName string, fieldValue string, fileName string, line int) []ValidationNotice {
 	// Check for minimum length, only contains digits, and common phone number symbols
 	match, _ := regexp.MatchString(`^[\d\s\-+()]{5,}$`, fieldValue)
 	if !match {
-		return []Result{InvalidPhoneNumberResult{SingleLineResult{
+		return []ValidationNotice{InvalidPhoneNumberNotice{SingleLineNotice{
 			FileName:  fileName,
 			FieldName: fieldName,
 			Line:      line,
 		}}}
 	}
 
-	return []Result{}
+	return []ValidationNotice{}
 }
 
-func validateEmail(fieldName string, fieldValue string, fileName string, line int) []Result {
+func validateEmail(fieldName string, fieldValue string, fileName string, line int) []ValidationNotice {
 	_, err := mail.ParseAddress(fieldValue)
 	if err != nil {
-		return []Result{InvalidEmailResult{SingleLineResult{
+		return []ValidationNotice{InvalidEmailNotice{SingleLineNotice{
 			FileName:  fileName,
 			FieldName: fieldName,
 			Line:      line,
 		}}}
 	}
 
-	return []Result{}
+	return []ValidationNotice{}
 }
 
-func validateLatitude(fieldName string, fieldValue string, fileName string, line int) []Result {
+func validateLatitude(fieldName string, fieldValue string, fileName string, line int) []ValidationNotice {
 	value, err := strconv.ParseFloat(fieldValue, 64)
 	if err != nil || value < -90.0 && value > 90.0 {
-		return []Result{InvalidLatitudeResult{SingleLineResult{
+		return []ValidationNotice{InvalidLatitudeNotice{SingleLineNotice{
 			FileName:  fileName,
 			FieldName: fieldName,
 			Line:      line,
 		}}}
 	}
 
-	return []Result{}
+	return []ValidationNotice{}
 }
 
-func validateLongitude(fieldName string, fieldValue string, fileName string, line int) []Result {
+func validateLongitude(fieldName string, fieldValue string, fileName string, line int) []ValidationNotice {
 	value, err := strconv.ParseFloat(fieldValue, 64)
 	if err != nil || value < -180.0 && value > 180.0 {
-		return []Result{InvalidLongitudeResult{SingleLineResult{
+		return []ValidationNotice{InvalidLongitudeNotice{SingleLineNotice{
 			FileName:  fileName,
 			FieldName: fieldName,
 			Line:      line,
 		}}}
 	}
 
-	return []Result{}
+	return []ValidationNotice{}
 }
 
-func validateDate(fieldName string, fieldValue string, fileName string, line int) []Result {
+func validateDate(fieldName string, fieldValue string, fileName string, line int) []ValidationNotice {
 	match, _ := regexp.MatchString(`^(19|20)\d{2}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])$`, fieldValue)
 	if !match {
-		return []Result{InvalidDateResult{SingleLineResult{
+		return []ValidationNotice{InvalidDateNotice{SingleLineNotice{
 			FileName:  fileName,
 			FieldName: fieldName,
 			Line:      line,
 		}}}
 	}
 
-	return []Result{}
+	return []ValidationNotice{}
 }
 
-func validateFloat(fieldName string, fieldValue string, fileName string, line int) []Result {
+func validateFloat(fieldName string, fieldValue string, fileName string, line int) []ValidationNotice {
 	_, err := strconv.ParseFloat(fieldValue, 64)
 	if err != nil {
-		return []Result{InvalidFloatResult{SingleLineResult{
+		return []ValidationNotice{InvalidFloatNotice{SingleLineNotice{
 			FileName:  fileName,
 			FieldName: fieldName,
 			Line:      line,
 		}}}
 	}
 
-	return []Result{}
+	return []ValidationNotice{}
 }
 
-func validateInteger(fieldName string, fieldValue string, fileName string, line int) []Result {
+func validateInteger(fieldName string, fieldValue string, fileName string, line int) []ValidationNotice {
 	_, err := strconv.Atoi(fieldValue)
 	if err != nil {
-		return []Result{InvalidIntegerResult{SingleLineResult{
+		return []ValidationNotice{InvalidIntegerNotice{SingleLineNotice{
 			FileName:  fileName,
 			FieldName: fieldName,
 			Line:      line,
 		}}}
 	}
 
-	return []Result{}
+	return []ValidationNotice{}
 }
 
-func validateCurrencyAmount(fieldName string, fieldValue string, fileName string, line int) []Result {
+func validateCurrencyAmount(fieldName string, fieldValue string, fileName string, line int) []ValidationNotice {
 	_, err := strconv.ParseFloat(fieldValue, 64)
 	if err != nil {
-		return []Result{InvalidCurrencyAmountResult{SingleLineResult{
+		return []ValidationNotice{InvalidCurrencyAmountNotice{SingleLineNotice{
 			FileName:  fileName,
 			FieldName: fieldName,
 			Line:      line,
 		}}}
 	}
 
-	return []Result{}
+	return []ValidationNotice{}
 }
 
-func validateCurrencyCode(fieldName string, fieldValue string, fileName string, line int) []Result {
+func validateCurrencyCode(fieldName string, fieldValue string, fileName string, line int) []ValidationNotice {
 	match, _ := regexp.MatchString(`^[A-Z]{3}$`, fieldValue)
 	if !match {
-		return []Result{InvalidCurrencyAmountResult{SingleLineResult{
+		return []ValidationNotice{InvalidCurrencyAmountNotice{SingleLineNotice{
 			FileName:  fileName,
 			FieldName: fieldName,
 			Line:      line,
 		}}}
 	}
 
-	return []Result{}
+	return []ValidationNotice{}
 }
 
-func validateTime(fieldName string, fieldValue string, fileName string, line int) []Result {
+func validateTime(fieldName string, fieldValue string, fileName string, line int) []ValidationNotice {
 	// Checks if the Time is in the valid HH:MM:SS or H:MM:SS format. The hour is between 0 and 47, since the trips on the service day might run
 	// through the night. For example, 25:00:00 represents 1:00:00 AM the next day.
 	match, _ := regexp.MatchString(`^(0[0-9]|1[0-9]|2[0-9]|3[0-9]|4[0-7]):([0-5][0-9]):([0-5][0-9])$|^([0-9]|1[0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])$`, fieldValue)
 	if !match {
-		return []Result{InvalidTimeResult{SingleLineResult{
+		return []ValidationNotice{InvalidTimeNotice{SingleLineNotice{
 			FileName:  fileName,
 			FieldName: fieldName,
 			Line:      line,
 		}}}
 	}
 
-	return []Result{}
+	return []ValidationNotice{}
 }
 
-func validateCalendarDay(fieldName string, fieldValue string, fileName string, line int) []Result {
+func validateCalendarDay(fieldName string, fieldValue string, fileName string, line int) []ValidationNotice {
 	i, err := strconv.Atoi(fieldValue)
 	if err != nil || i < 0 || i > 1 {
-		return []Result{InvalidCalendarDayResult{SingleLineResult{
+		return []ValidationNotice{InvalidCalendarDayNotice{SingleLineNotice{
 			FileName:  fileName,
 			FieldName: fieldName,
 			Line:      line,
 		}}}
 	}
 
-	return []Result{}
+	return []ValidationNotice{}
 }
 
-func validateCalendarException(fieldName string, fieldValue string, fileName string, line int) []Result {
+func validateCalendarException(fieldName string, fieldValue string, fileName string, line int) []ValidationNotice {
 	i, err := strconv.Atoi(fieldValue)
 	if err != nil || i < 1 || i > 2 {
-		return []Result{InvalidCalendarExceptionResult{SingleLineResult{
+		return []ValidationNotice{InvalidCalendarExceptionNotice{SingleLineNotice{
 			FileName:  fileName,
 			FieldName: fieldName,
 			Line:      line,
 		}}}
 	}
 
-	return []Result{}
+	return []ValidationNotice{}
 }
 
-func validateRouteType(fieldName string, fieldValue string, fileName string, line int) []Result {
+func validateRouteType(fieldName string, fieldValue string, fileName string, line int) []ValidationNotice {
 	i, err := strconv.Atoi(fieldValue)
 	if err != nil || (i != 11 && i != 12 && i < 0 && i > 7) {
-		return []Result{InvalidRouteTypeResult{SingleLineResult{
+		return []ValidationNotice{InvalidRouteTypeNotice{SingleLineNotice{
 			FileName:  fileName,
 			FieldName: fieldName,
 			Line:      line,
 		}}}
 	}
 
-	return []Result{}
+	return []ValidationNotice{}
 }
 
-func validateContinuousPickup(fieldName string, fieldValue string, fileName string, line int) []Result {
+func validateContinuousPickup(fieldName string, fieldValue string, fileName string, line int) []ValidationNotice {
 	i, err := strconv.Atoi(fieldValue)
 	if err != nil || i < 1 || i > 4 {
-		return []Result{InvalidContinuousPickupResult{SingleLineResult{
+		return []ValidationNotice{InvalidContinuousPickupNotice{SingleLineNotice{
 			FileName:  fileName,
 			FieldName: fieldName,
 			Line:      line,
 		}}}
 	}
 
-	return []Result{}
+	return []ValidationNotice{}
 }
 
-func validateContinuousDropOff(fieldName string, fieldValue string, fileName string, line int) []Result {
+func validateContinuousDropOff(fieldName string, fieldValue string, fileName string, line int) []ValidationNotice {
 	i, err := strconv.Atoi(fieldValue)
 	if err != nil || i < 1 || i > 4 {
-		return []Result{InvalidContinuousDropOffResult{SingleLineResult{
+		return []ValidationNotice{InvalidContinuousDropOffNotice{SingleLineNotice{
 			FileName:  fileName,
 			FieldName: fieldName,
 			Line:      line,
 		}}}
 	}
 
-	return []Result{}
+	return []ValidationNotice{}
 }
 
-func validateLocationType(fieldName string, fieldValue string, fileName string, line int) []Result {
+func validateLocationType(fieldName string, fieldValue string, fileName string, line int) []ValidationNotice {
 	i, err := strconv.Atoi(fieldValue)
 	if err != nil || i < 0 || i > 4 {
-		return []Result{InvalidLocationTypeResult{SingleLineResult{
+		return []ValidationNotice{InvalidLocationTypeNotice{SingleLineNotice{
 			FileName:  fileName,
 			FieldName: fieldName,
 			Line:      line,
 		}}}
 	}
 
-	return []Result{}
+	return []ValidationNotice{}
 }
 
-func validateWheelchairBoarding(fieldName string, fieldValue string, fileName string, line int) []Result {
+func validateWheelchairBoarding(fieldName string, fieldValue string, fileName string, line int) []ValidationNotice {
 	i, err := strconv.Atoi(fieldValue)
 	if err != nil || i < 0 || i > 2 {
-		return []Result{InvalidWheelchairBoardingResult{SingleLineResult{
+		return []ValidationNotice{InvalidWheelchairBoardingValueNotice{SingleLineNotice{
 			FileName:  fileName,
 			FieldName: fieldName,
 			Line:      line,
 		}}}
 	}
 
-	return []Result{}
+	return []ValidationNotice{}
 }
 
-func validatePickupType(fieldName string, fieldValue string, fileName string, line int) []Result {
+func validatePickupType(fieldName string, fieldValue string, fileName string, line int) []ValidationNotice {
 	i, err := strconv.Atoi(fieldValue)
 	if err != nil || i < 0 || i > 3 {
-		return []Result{InvalidPickupTypeResult{SingleLineResult{
+		return []ValidationNotice{InvalidPickupTypeNotice{SingleLineNotice{
 			FileName:  fileName,
 			FieldName: fieldName,
 			Line:      line,
 		}}}
 	}
 
-	return []Result{}
+	return []ValidationNotice{}
 }
 
-func validateDropOffType(fieldName string, fieldValue string, fileName string, line int) []Result {
+func validateDropOffType(fieldName string, fieldValue string, fileName string, line int) []ValidationNotice {
 	i, err := strconv.Atoi(fieldValue)
 	if err != nil || i < 0 || i > 3 {
-		return []Result{InvalidDropOffTypeResult{SingleLineResult{
+		return []ValidationNotice{InvalidDropOffTypeNotice{SingleLineNotice{
 			FileName:  fileName,
 			FieldName: fieldName,
 			Line:      line,
 		}}}
 	}
 
-	return []Result{}
+	return []ValidationNotice{}
 }
 
-func validateTimepoint(fieldName string, fieldValue string, fileName string, line int) []Result {
+func validateTimepoint(fieldName string, fieldValue string, fileName string, line int) []ValidationNotice {
 	i, err := strconv.Atoi(fieldValue)
 	if err != nil || i < 0 || i > 1 {
-		return []Result{InvalidTimepointResult{SingleLineResult{
+		return []ValidationNotice{InvalidTimepointNotice{SingleLineNotice{
 			FileName:  fileName,
 			FieldName: fieldName,
 			Line:      line,
 		}}}
 	}
 
-	return []Result{}
+	return []ValidationNotice{}
 }
 
-func validateDirectionId(fieldName string, fieldValue string, fileName string, line int) []Result {
+func validateDirectionId(fieldName string, fieldValue string, fileName string, line int) []ValidationNotice {
 	i, err := strconv.Atoi(fieldValue)
 	if err != nil || i < 0 || i > 1 {
-		return []Result{InvalidDirectionIdResult{SingleLineResult{
+		return []ValidationNotice{InvalidDirectionIdNotice{SingleLineNotice{
 			FileName:  fileName,
 			FieldName: fieldName,
 			Line:      line,
 		}}}
 	}
 
-	return []Result{}
+	return []ValidationNotice{}
 }
 
-func validateWheelchairAccessible(fieldName string, fieldValue string, fileName string, line int) []Result {
+func validateWheelchairAccessible(fieldName string, fieldValue string, fileName string, line int) []ValidationNotice {
 	i, err := strconv.Atoi(fieldValue)
 	if err != nil || i < 0 || i > 2 {
-		return []Result{InvalidWheelchairAccessibleResult{SingleLineResult{
+		return []ValidationNotice{InvalidWheelchairAccessibleNotice{SingleLineNotice{
 			FileName:  fileName,
 			FieldName: fieldName,
 			Line:      line,
 		}}}
 	}
 
-	return []Result{}
+	return []ValidationNotice{}
 }
 
-func validateTypeBikesAllowed(fieldName string, fieldValue string, fileName string, line int) []Result {
+func validateTypeBikesAllowed(fieldName string, fieldValue string, fileName string, line int) []ValidationNotice {
 	i, err := strconv.Atoi(fieldValue)
 	if err != nil || i < 0 || i > 2 {
-		return []Result{InvalidBikesAllowedResult{SingleLineResult{
+		return []ValidationNotice{InvalidBikesAllowedNotice{SingleLineNotice{
 			FileName:  fileName,
 			FieldName: fieldName,
 			Line:      line,
 		}}}
 	}
 
-	return []Result{}
+	return []ValidationNotice{}
 }
 
-func validateField(fieldType FieldType, fieldName string, fieldValue *string, isRequired bool, fileName string, line int) []Result {
+func validateField(fieldType FieldType, fieldName string, fieldValue *string, isRequired bool, fileName string, line int) []ValidationNotice {
 	hasValue := fieldValue != nil && *fieldValue != ""
 
 	if !isRequired && !hasValue {
-		return []Result{}
+		return []ValidationNotice{}
 	}
 
 	if isRequired && !hasValue {
-		return []Result{MissingRequiredFieldResult{SingleLineResult{FileName: fileName, FieldName: fieldName, Line: line}}}
+		return []ValidationNotice{MissingRequiredFieldNotice{SingleLineNotice{FileName: fileName, FieldName: fieldName, Line: line}}}
 	}
 
 	// hasValue is true implicitly here
 
-	var results []Result
+	var results []ValidationNotice
 
 	if !utf8.ValidString(*fieldValue) {
-		results = append(results, &InvalidCharactersResult{SingleLineResult{FileName: fileName, FieldName: fieldName, Line: line}})
+		results = append(results, &InvalidCharacterNotice{SingleLineNotice{FileName: fileName, FieldName: fieldName, Line: line}})
 	}
 
 	switch fieldType {

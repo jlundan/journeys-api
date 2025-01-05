@@ -1,342 +1,463 @@
 package ggtfs
 
-type Result interface {
+type ValidationNotice interface {
 	Code() string
+	Severity() ValidationNoticeSeverity
 }
 
-type SingleLineResult struct {
+type SingleLineNotice struct {
 	FileName  string
 	FieldName string
 	Line      int
 }
 
-type InvalidCharactersResult struct {
-	SingleLineResult
+type InvalidCharacterNotice struct {
+	SingleLineNotice
 }
 
-func (e InvalidCharactersResult) Code() string {
+func (r InvalidCharacterNotice) Code() string {
 	return "invalid_characters"
 }
-
-type InvalidURLResult struct {
-	SingleLineResult
+func (r InvalidCharacterNotice) Severity() ValidationNoticeSeverity {
+	return SeverityViolation
 }
 
-func (e InvalidURLResult) Code() string {
+type InvalidURLNotice struct {
+	SingleLineNotice
+}
+
+func (r InvalidURLNotice) Code() string {
 	return "invalid_url"
 }
-
-type InvalidColorResult struct {
-	SingleLineResult
+func (r InvalidURLNotice) Severity() ValidationNoticeSeverity {
+	return SeverityViolation
 }
 
-func (e InvalidColorResult) Code() string {
+type InvalidColorNotice struct {
+	SingleLineNotice
+}
+
+func (r InvalidColorNotice) Code() string {
 	return "invalid_color"
 }
-
-type InvalidIntegerResult struct {
-	SingleLineResult
+func (r InvalidColorNotice) Severity() ValidationNoticeSeverity {
+	return SeverityViolation
 }
 
-func (e InvalidIntegerResult) Code() string {
+type InvalidIntegerNotice struct {
+	SingleLineNotice
+}
+
+func (r InvalidIntegerNotice) Code() string {
 	return "invalid_integer"
 }
-
-type InvalidFloatResult struct {
-	SingleLineResult
+func (r InvalidIntegerNotice) Severity() ValidationNoticeSeverity {
+	return SeverityViolation
 }
 
-func (e InvalidFloatResult) Code() string {
+type InvalidFloatNotice struct {
+	SingleLineNotice
+}
+
+func (r InvalidFloatNotice) Code() string {
 	return "invalid_float"
 }
-
-type InvalidTimeResult struct {
-	SingleLineResult
+func (r InvalidFloatNotice) Severity() ValidationNoticeSeverity {
+	return SeverityViolation
 }
 
-func (e InvalidTimeResult) Code() string {
+type InvalidTimeNotice struct {
+	SingleLineNotice
+}
+
+func (r InvalidTimeNotice) Code() string {
 	return "invalid_time"
 }
-
-type InvalidCurrencyCodeResult struct {
-	SingleLineResult
+func (r InvalidTimeNotice) Severity() ValidationNoticeSeverity {
+	return SeverityViolation
 }
 
-func (e InvalidCurrencyCodeResult) Code() string {
+type InvalidCurrencyCodeNotice struct {
+	SingleLineNotice
+}
+
+func (r InvalidCurrencyCodeNotice) Code() string {
 	return "invalid_currency_code"
 }
-
-type InvalidCurrencyAmountResult struct {
-	SingleLineResult
+func (r InvalidCurrencyCodeNotice) Severity() ValidationNoticeSeverity {
+	return SeverityViolation
 }
 
-func (e InvalidCurrencyAmountResult) Code() string {
+type InvalidCurrencyAmountNotice struct {
+	SingleLineNotice
+}
+
+func (r InvalidCurrencyAmountNotice) Code() string {
 	return "invalid_currency_amount"
 }
-
-type InvalidDateResult struct {
-	SingleLineResult
+func (r InvalidCurrencyAmountNotice) Severity() ValidationNoticeSeverity {
+	return SeverityViolation
 }
 
-func (e InvalidDateResult) Code() string {
+type InvalidDateNotice struct {
+	SingleLineNotice
+}
+
+func (r InvalidDateNotice) Code() string {
 	return "invalid_date"
 }
-
-type InvalidLatitudeResult struct {
-	SingleLineResult
+func (r InvalidDateNotice) Severity() ValidationNoticeSeverity {
+	return SeverityViolation
 }
 
-func (e InvalidLatitudeResult) Code() string {
+type InvalidLatitudeNotice struct {
+	SingleLineNotice
+}
+
+func (r InvalidLatitudeNotice) Code() string {
 	return "invalid_latitude"
 }
-
-type InvalidLongitudeResult struct {
-	SingleLineResult
+func (r InvalidLatitudeNotice) Severity() ValidationNoticeSeverity {
+	return SeverityViolation
 }
 
-func (e InvalidLongitudeResult) Code() string {
+type InvalidLongitudeNotice struct {
+	SingleLineNotice
+}
+
+func (r InvalidLongitudeNotice) Code() string {
 	return "invalid_longitude"
 }
-
-type InvalidLanguageCodeResult struct {
-	SingleLineResult
+func (r InvalidLongitudeNotice) Severity() ValidationNoticeSeverity {
+	return SeverityViolation
 }
 
-func (e InvalidLanguageCodeResult) Code() string {
+type InvalidLanguageCodeNotice struct {
+	SingleLineNotice
+}
+
+func (r InvalidLanguageCodeNotice) Code() string {
 	return "invalid_language_code"
 }
-
-type InvalidPhoneNumberResult struct {
-	SingleLineResult
+func (r InvalidLanguageCodeNotice) Severity() ValidationNoticeSeverity {
+	return SeverityViolation
 }
 
-func (e InvalidPhoneNumberResult) Code() string {
+type InvalidPhoneNumberNotice struct {
+	SingleLineNotice
+}
+
+func (r InvalidPhoneNumberNotice) Code() string {
 	return "invalid_phone_number"
 }
-
-type InvalidEmailResult struct {
-	SingleLineResult
+func (r InvalidPhoneNumberNotice) Severity() ValidationNoticeSeverity {
+	return SeverityViolation
 }
 
-func (e InvalidEmailResult) Code() string {
+type InvalidEmailNotice struct {
+	SingleLineNotice
+}
+
+func (r InvalidEmailNotice) Code() string {
 	return "invalid_email"
 }
-
-type InvalidTimezoneResult struct {
-	SingleLineResult
+func (r InvalidEmailNotice) Severity() ValidationNoticeSeverity {
+	return SeverityViolation
 }
 
-func (e InvalidTimezoneResult) Code() string {
+type InvalidTimezoneNotice struct {
+	SingleLineNotice
+}
+
+func (r InvalidTimezoneNotice) Code() string {
 	return "invalid_timezone"
 }
-
-type InvalidCalendarDayResult struct {
-	SingleLineResult
+func (r InvalidTimezoneNotice) Severity() ValidationNoticeSeverity {
+	return SeverityViolation
 }
 
-func (e InvalidCalendarDayResult) Code() string {
+type InvalidCalendarDayNotice struct {
+	SingleLineNotice
+}
+
+func (r InvalidCalendarDayNotice) Code() string {
 	return "invalid_calendar_day"
 }
-
-type InvalidCalendarExceptionResult struct {
-	SingleLineResult
+func (r InvalidCalendarDayNotice) Severity() ValidationNoticeSeverity {
+	return SeverityViolation
 }
 
-func (e InvalidCalendarExceptionResult) Code() string {
+type InvalidCalendarExceptionNotice struct {
+	SingleLineNotice
+}
+
+func (r InvalidCalendarExceptionNotice) Code() string {
 	return "invalid_calendar_exception"
 }
-
-type MissingRequiredFieldResult struct {
-	SingleLineResult
+func (r InvalidCalendarExceptionNotice) Severity() ValidationNoticeSeverity {
+	return SeverityViolation
 }
 
-func (e MissingRequiredFieldResult) Code() string {
+type MissingRequiredFieldNotice struct {
+	SingleLineNotice
+}
+
+func (r MissingRequiredFieldNotice) Code() string {
 	return "missing_required_field"
 }
+func (r MissingRequiredFieldNotice) Severity() ValidationNoticeSeverity {
+	return SeverityViolation
+}
 
-type SingleAgencyRecommendedResult struct {
+type SingleAgencyRecommendedNotice struct {
 	FileName string
 }
 
-func (e SingleAgencyRecommendedResult) Code() string {
+func (r SingleAgencyRecommendedNotice) Code() string {
 	return "single_agency_recommended"
 }
+func (r SingleAgencyRecommendedNotice) Severity() ValidationNoticeSeverity {
+	return SeverityRecommendation
+}
 
-type ValidAgencyIdRequiredWhenMultipleAgenciesResult struct {
+type ValidAgencyIdRequiredWhenMultipleAgenciesNotice struct {
 	FileName string
 	Line     int
 }
 
-func (e ValidAgencyIdRequiredWhenMultipleAgenciesResult) Code() string {
+func (r ValidAgencyIdRequiredWhenMultipleAgenciesNotice) Code() string {
 	return "valid_agency_id_required_when_multiple_agencies"
 }
-
-type FieldIsNotUniqueResult struct {
-	SingleLineResult
+func (r ValidAgencyIdRequiredWhenMultipleAgenciesNotice) Severity() ValidationNoticeSeverity {
+	return SeverityViolation
 }
 
-func (e FieldIsNotUniqueResult) Code() string {
+type FieldIsNotUniqueNotice struct {
+	SingleLineNotice
+}
+
+func (r FieldIsNotUniqueNotice) Code() string {
 	return "field_is_not_unique"
 }
-
-type InvalidRouteTypeResult struct {
-	SingleLineResult
+func (r FieldIsNotUniqueNotice) Severity() ValidationNoticeSeverity {
+	return SeverityViolation
 }
 
-func (e InvalidRouteTypeResult) Code() string {
+type InvalidRouteTypeNotice struct {
+	SingleLineNotice
+}
+
+func (r InvalidRouteTypeNotice) Code() string {
 	return "invalid_route_type"
 }
-
-type InvalidContinuousPickupResult struct {
-	SingleLineResult
+func (r InvalidRouteTypeNotice) Severity() ValidationNoticeSeverity {
+	return SeverityViolation
 }
 
-func (e InvalidContinuousPickupResult) Code() string {
+type InvalidContinuousPickupNotice struct {
+	SingleLineNotice
+}
+
+func (r InvalidContinuousPickupNotice) Code() string {
 	return "invalid_continuous_pickup"
 }
-
-type InvalidContinuousDropOffResult struct {
-	SingleLineResult
+func (r InvalidContinuousPickupNotice) Severity() ValidationNoticeSeverity {
+	return SeverityViolation
 }
 
-func (e InvalidContinuousDropOffResult) Code() string {
+type InvalidContinuousDropOffNotice struct {
+	SingleLineNotice
+}
+
+func (r InvalidContinuousDropOffNotice) Code() string {
 	return "invalid_continuous_drop_off"
 }
-
-type InvalidPickupTypeResult struct {
-	SingleLineResult
+func (r InvalidContinuousDropOffNotice) Severity() ValidationNoticeSeverity {
+	return SeverityViolation
 }
 
-func (e InvalidPickupTypeResult) Code() string {
+type InvalidPickupTypeNotice struct {
+	SingleLineNotice
+}
+
+func (r InvalidPickupTypeNotice) Code() string {
 	return "invalid_pickup_type"
 }
-
-type InvalidDropOffTypeResult struct {
-	SingleLineResult
+func (r InvalidPickupTypeNotice) Severity() ValidationNoticeSeverity {
+	return SeverityViolation
 }
 
-func (e InvalidDropOffTypeResult) Code() string {
+type InvalidDropOffTypeNotice struct {
+	SingleLineNotice
+}
+
+func (r InvalidDropOffTypeNotice) Code() string {
 	return "invalid_drop_off_type"
 }
-
-type InvalidTimepointResult struct {
-	SingleLineResult
+func (r InvalidDropOffTypeNotice) Severity() ValidationNoticeSeverity {
+	return SeverityViolation
 }
 
-func (e InvalidTimepointResult) Code() string {
+type InvalidTimepointNotice struct {
+	SingleLineNotice
+}
+
+func (r InvalidTimepointNotice) Code() string {
 	return "invalid_timepoint"
 }
-
-type InvalidDirectionIdResult struct {
-	SingleLineResult
+func (r InvalidTimepointNotice) Severity() ValidationNoticeSeverity {
+	return SeverityViolation
 }
 
-func (e InvalidDirectionIdResult) Code() string {
+type InvalidDirectionIdNotice struct {
+	SingleLineNotice
+}
+
+func (r InvalidDirectionIdNotice) Code() string {
 	return "invalid_direction_id"
 }
-
-type InvalidWheelchairAccessibleResult struct {
-	SingleLineResult
+func (r InvalidDirectionIdNotice) Severity() ValidationNoticeSeverity {
+	return SeverityViolation
 }
 
-func (e InvalidWheelchairAccessibleResult) Code() string {
+type InvalidWheelchairAccessibleNotice struct {
+	SingleLineNotice
+}
+
+func (r InvalidWheelchairAccessibleNotice) Code() string {
 	return "invalid_wheelchair_accessible"
 }
-
-type InvalidBikesAllowedResult struct {
-	SingleLineResult
+func (r InvalidWheelchairAccessibleNotice) Severity() ValidationNoticeSeverity {
+	return SeverityViolation
 }
 
-func (e InvalidBikesAllowedResult) Code() string {
+type InvalidBikesAllowedNotice struct {
+	SingleLineNotice
+}
+
+func (r InvalidBikesAllowedNotice) Code() string {
 	return "invalid_bikes_allowed"
 }
-
-type MissingRouteShortNameWhenLongNameIsNotPresentResult struct {
-	SingleLineResult
+func (r InvalidBikesAllowedNotice) Severity() ValidationNoticeSeverity {
+	return SeverityViolation
 }
 
-func (e MissingRouteShortNameWhenLongNameIsNotPresentResult) Code() string {
+type MissingRouteShortNameWhenLongNameIsNotPresentNotice struct {
+	SingleLineNotice
+}
+
+func (r MissingRouteShortNameWhenLongNameIsNotPresentNotice) Code() string {
 	return "missing_route_short_name_when_long_name_is_not_present"
 }
-
-type MissingRouteLongNameWhenShortNameIsNotPresentResult struct {
-	SingleLineResult
+func (r MissingRouteShortNameWhenLongNameIsNotPresentNotice) Severity() ValidationNoticeSeverity {
+	return SeverityViolation
 }
 
-func (e MissingRouteLongNameWhenShortNameIsNotPresentResult) Code() string {
+type MissingRouteLongNameWhenShortNameIsNotPresentNotice struct {
+	SingleLineNotice
+}
+
+func (r MissingRouteLongNameWhenShortNameIsNotPresentNotice) Code() string {
 	return "missing_route_long_name_when_short_name_is_not_present"
 }
-
-type TooLongRouteShortNameResult struct {
-	SingleLineResult
+func (r MissingRouteLongNameWhenShortNameIsNotPresentNotice) Severity() ValidationNoticeSeverity {
+	return SeverityViolation
 }
 
-func (e TooLongRouteShortNameResult) Code() string {
+type TooLongRouteShortNameNotice struct {
+	SingleLineNotice
+}
+
+func (r TooLongRouteShortNameNotice) Code() string {
 	return "too_long_route_short_name"
 }
+func (r TooLongRouteShortNameNotice) Severity() ValidationNoticeSeverity {
+	return SeverityRecommendation
+}
 
-type DescriptionDuplicatesRouteNameResult struct {
-	SingleLineResult
+type RouteDescriptionDuplicatesNameNotice struct {
+	SingleLineNotice
 	DuplicatingField string
 }
 
-func (e DescriptionDuplicatesRouteNameResult) Code() string {
+func (r RouteDescriptionDuplicatesNameNotice) Code() string {
 	return "description_duplicates_route_name"
 }
-
-type AgencyIdRequiredForRouteWhenMultipleAgenciesResult struct {
-	SingleLineResult
+func (r RouteDescriptionDuplicatesNameNotice) Severity() ValidationNoticeSeverity {
+	return SeverityRecommendation
 }
 
-func (e AgencyIdRequiredForRouteWhenMultipleAgenciesResult) Code() string {
+type AgencyIdRequiredForRouteWhenMultipleAgenciesNotice struct {
+	SingleLineNotice
+}
+
+func (r AgencyIdRequiredForRouteWhenMultipleAgenciesNotice) Code() string {
 	return "agency_id_required_for_route_when_multiple_agencies"
 }
-
-type AgencyIdRecommendedForRouteResult struct {
-	SingleLineResult
+func (r AgencyIdRequiredForRouteWhenMultipleAgenciesNotice) Severity() ValidationNoticeSeverity {
+	return SeverityViolation
 }
 
-func (e AgencyIdRecommendedForRouteResult) Code() string {
+type AgencyIdRecommendedForRouteNotice struct {
+	SingleLineNotice
+}
+
+func (r AgencyIdRecommendedForRouteNotice) Code() string {
 	return "agency_id_recommended_for_route"
 }
-
-type InvalidLocationTypeResult struct {
-	SingleLineResult
+func (r AgencyIdRecommendedForRouteNotice) Severity() ValidationNoticeSeverity {
+	return SeverityRecommendation
 }
 
-func (e InvalidLocationTypeResult) Code() string {
+type InvalidLocationTypeNotice struct {
+	SingleLineNotice
+}
+
+func (r InvalidLocationTypeNotice) Code() string {
 	return "invalid_location_type"
 }
-
-type InvalidWheelchairBoardingResult struct {
-	SingleLineResult
+func (r InvalidLocationTypeNotice) Severity() ValidationNoticeSeverity {
+	return SeverityViolation
 }
 
-func (e InvalidWheelchairBoardingResult) Code() string {
-	return "invalid_wheelchair_boarding"
+type InvalidWheelchairBoardingValueNotice struct {
+	SingleLineNotice
 }
 
-type TooFewShapePointsResult struct {
+func (r InvalidWheelchairBoardingValueNotice) Code() string {
+	return "invalid_wheelchair_boarding_value"
+}
+func (r InvalidWheelchairBoardingValueNotice) Severity() ValidationNoticeSeverity {
+	return SeverityViolation
+}
+
+type TooFewShapePointsNotice struct {
 	FileName string
 	ShapeId  string
 }
 
-func (e TooFewShapePointsResult) Code() string {
+func (r TooFewShapePointsNotice) Code() string {
 	return "too_few_shape_points"
 }
+func (r TooFewShapePointsNotice) Severity() ValidationNoticeSeverity {
+	return SeverityViolation
+}
 
-type FieldRequiredForLocationTypeResult struct {
+type FieldRequiredForStopLocationTypeNotice struct {
 	RequiredField string
 	LocationType  string
 	FileName      string
 	Line          int
 }
 
-func (e FieldRequiredForLocationTypeResult) Code() string {
+func (r FieldRequiredForStopLocationTypeNotice) Code() string {
 	return "field_required_for_location_type"
 }
+func (r FieldRequiredForStopLocationTypeNotice) Severity() ValidationNoticeSeverity {
+	return SeverityViolation
+}
 
-type ForeignKeyViolationResult struct {
+type ForeignKeyViolationNotice struct {
 	ReferencingFileName  string
 	ReferencingFieldName string
 	ReferencedFieldName  string
@@ -345,6 +466,9 @@ type ForeignKeyViolationResult struct {
 	ReferencedAtRow      int
 }
 
-func (e ForeignKeyViolationResult) Code() string {
+func (r ForeignKeyViolationNotice) Code() string {
 	return "foreign_key_violation"
+}
+func (r ForeignKeyViolationNotice) Severity() ValidationNoticeSeverity {
+	return SeverityViolation
 }

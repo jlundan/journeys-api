@@ -112,16 +112,16 @@ func TestCreateStopTime(t *testing.T) {
 func TestValidateStopTimes(t *testing.T) {
 	tests := map[string]struct {
 		actualEntities  []*StopTime
-		expectedResults []Result
+		expectedResults []ValidationNotice
 		stops           []*Stop
 	}{
 		"nil-slice": {
 			actualEntities:  nil,
-			expectedResults: []Result{},
+			expectedResults: []ValidationNotice{},
 		},
 		"nil-slice-items": {
 			actualEntities:  []*StopTime{nil},
-			expectedResults: []Result{},
+			expectedResults: []ValidationNotice{},
 		},
 		"invalid-fields": {
 			actualEntities: []*StopTime{
@@ -147,21 +147,21 @@ func TestValidateStopTimes(t *testing.T) {
 				},
 			},
 			stops: []*Stop{{Id: stringPtr("0001")}},
-			expectedResults: []Result{
-				InvalidTimeResult{SingleLineResult{FileName: "stop_times.txt", FieldName: "arrival_time"}},
-				InvalidTimeResult{SingleLineResult{FileName: "stop_times.txt", FieldName: "departure_time"}},
+			expectedResults: []ValidationNotice{
+				InvalidTimeNotice{SingleLineNotice{FileName: "stop_times.txt", FieldName: "arrival_time"}},
+				InvalidTimeNotice{SingleLineNotice{FileName: "stop_times.txt", FieldName: "departure_time"}},
 
-				InvalidIntegerResult{SingleLineResult{FileName: "stop_times.txt", FieldName: "stop_sequence"}},
-				InvalidTimeResult{SingleLineResult{FileName: "stop_times.txt", FieldName: "start_pickup_drop_off_window"}},
-				InvalidTimeResult{SingleLineResult{FileName: "stop_times.txt", FieldName: "end_pickup_drop_off_window"}},
+				InvalidIntegerNotice{SingleLineNotice{FileName: "stop_times.txt", FieldName: "stop_sequence"}},
+				InvalidTimeNotice{SingleLineNotice{FileName: "stop_times.txt", FieldName: "start_pickup_drop_off_window"}},
+				InvalidTimeNotice{SingleLineNotice{FileName: "stop_times.txt", FieldName: "end_pickup_drop_off_window"}},
 
-				InvalidPickupTypeResult{SingleLineResult{FileName: "stop_times.txt", FieldName: "pickup_type"}},
-				InvalidDropOffTypeResult{SingleLineResult{FileName: "stop_times.txt", FieldName: "drop_off_type"}},
+				InvalidPickupTypeNotice{SingleLineNotice{FileName: "stop_times.txt", FieldName: "pickup_type"}},
+				InvalidDropOffTypeNotice{SingleLineNotice{FileName: "stop_times.txt", FieldName: "drop_off_type"}},
 
-				InvalidContinuousPickupResult{SingleLineResult{FileName: "stop_times.txt", FieldName: "continuous_pickup"}},
-				InvalidContinuousDropOffResult{SingleLineResult{FileName: "stop_times.txt", FieldName: "continuous_drop_off"}},
-				InvalidFloatResult{SingleLineResult{FileName: "stop_times.txt", FieldName: "shape_dist_traveled"}},
-				InvalidTimepointResult{SingleLineResult{FileName: "stop_times.txt", FieldName: "timepoint"}},
+				InvalidContinuousPickupNotice{SingleLineNotice{FileName: "stop_times.txt", FieldName: "continuous_pickup"}},
+				InvalidContinuousDropOffNotice{SingleLineNotice{FileName: "stop_times.txt", FieldName: "continuous_drop_off"}},
+				InvalidFloatNotice{SingleLineNotice{FileName: "stop_times.txt", FieldName: "shape_dist_traveled"}},
+				InvalidTimepointNotice{SingleLineNotice{FileName: "stop_times.txt", FieldName: "timepoint"}},
 			},
 		},
 		"missing-stop": {
@@ -176,8 +176,8 @@ func TestValidateStopTimes(t *testing.T) {
 				{Id: stringPtr("0002")},
 				nil, // For coverage
 			},
-			expectedResults: []Result{
-				ForeignKeyViolationResult{
+			expectedResults: []ValidationNotice{
+				ForeignKeyViolationNotice{
 					ReferencingFileName:  "stop_times.txt",
 					ReferencingFieldName: "stop_id",
 					ReferencedFieldName:  "stops.txt",

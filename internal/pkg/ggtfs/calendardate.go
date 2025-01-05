@@ -27,8 +27,8 @@ func CreateCalendarDate(row []string, headers map[string]int, lineNumber int) *C
 	return calendarDate
 }
 
-func ValidateCalendarDate(cd CalendarDate) []Result {
-	var validationResults []Result
+func ValidateCalendarDate(cd CalendarDate) []ValidationNotice {
+	var validationResults []ValidationNotice
 
 	fields := []struct {
 		fieldType FieldType
@@ -48,8 +48,8 @@ func ValidateCalendarDate(cd CalendarDate) []Result {
 	return validationResults
 }
 
-func ValidateCalendarDates(calendarDates []*CalendarDate, calendarItems []*CalendarItem) []Result {
-	var results []Result
+func ValidateCalendarDates(calendarDates []*CalendarDate, calendarItems []*CalendarItem) []ValidationNotice {
+	var results []ValidationNotice
 
 	for _, calendarDate := range calendarDates {
 		if calendarDate == nil {
@@ -65,7 +65,7 @@ func ValidateCalendarDates(calendarDates []*CalendarDate, calendarItems []*Calen
 	return results
 }
 
-func validateCalendarDateReferences(calendarDates []*CalendarDate, calendarItems []*CalendarItem, results *[]Result) {
+func validateCalendarDateReferences(calendarDates []*CalendarDate, calendarItems []*CalendarItem, results *[]ValidationNotice) {
 	serviceIDMap := make(map[string]struct{})
 	for _, item := range calendarItems {
 		if item != nil && !StringIsNilOrEmpty(item.ServiceId) {
@@ -78,7 +78,7 @@ func validateCalendarDateReferences(calendarDates []*CalendarDate, calendarItems
 			continue
 		}
 		if _, found := serviceIDMap[*calendarDate.ServiceId]; !found {
-			*results = append(*results, ForeignKeyViolationResult{
+			*results = append(*results, ForeignKeyViolationNotice{
 				ReferencingFileName:  FileNameCalendarDate,
 				ReferencingFieldName: "service_id",
 				ReferencedFieldName:  FileNameCalendar,

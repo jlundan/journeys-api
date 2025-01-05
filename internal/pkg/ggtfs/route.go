@@ -58,8 +58,8 @@ func CreateRoute(row []string, headers map[string]int, lineNumber int) *Route {
 	return &route
 }
 
-func ValidateRoute(r Route) []Result {
-	var validationResults []Result
+func ValidateRoute(r Route) []ValidationNotice {
+	var validationResults []ValidationNotice
 
 	fields := []struct {
 		fieldType FieldType
@@ -87,12 +87,12 @@ func ValidateRoute(r Route) []Result {
 	}
 
 	if StringIsNilOrEmpty(r.ShortName) && StringIsNilOrEmpty(r.LongName) {
-		validationResults = append(validationResults, MissingRouteShortNameWhenLongNameIsNotPresentResult{SingleLineResult{
+		validationResults = append(validationResults, MissingRouteShortNameWhenLongNameIsNotPresentNotice{SingleLineNotice{
 			FileName:  FileNameRoutes,
 			FieldName: "route_short_name",
 			Line:      r.LineNumber,
 		}})
-		validationResults = append(validationResults, MissingRouteLongNameWhenShortNameIsNotPresentResult{SingleLineResult{
+		validationResults = append(validationResults, MissingRouteLongNameWhenShortNameIsNotPresentNotice{SingleLineNotice{
 			FileName:  FileNameRoutes,
 			FieldName: "route_long_name",
 			Line:      r.LineNumber,
@@ -100,7 +100,7 @@ func ValidateRoute(r Route) []Result {
 	}
 
 	if r.ShortName != nil && len(*r.ShortName) >= 12 {
-		validationResults = append(validationResults, TooLongRouteShortNameResult{SingleLineResult{
+		validationResults = append(validationResults, TooLongRouteShortNameNotice{SingleLineNotice{
 			FileName:  FileNameRoutes,
 			FieldName: "route_short_name",
 			Line:      r.LineNumber,
@@ -108,7 +108,7 @@ func ValidateRoute(r Route) []Result {
 	}
 
 	if r.Desc != nil && r.ShortName != nil && *r.Desc == *r.ShortName {
-		validationResults = append(validationResults, DescriptionDuplicatesRouteNameResult{SingleLineResult{
+		validationResults = append(validationResults, RouteDescriptionDuplicatesNameNotice{SingleLineNotice{
 			FileName:  FileNameRoutes,
 			FieldName: "route_desc",
 			Line:      r.LineNumber,
@@ -116,7 +116,7 @@ func ValidateRoute(r Route) []Result {
 	}
 
 	if r.Desc != nil && r.LongName != nil && *r.Desc == *r.LongName {
-		validationResults = append(validationResults, DescriptionDuplicatesRouteNameResult{SingleLineResult{
+		validationResults = append(validationResults, RouteDescriptionDuplicatesNameNotice{SingleLineNotice{
 			FileName:  FileNameRoutes,
 			FieldName: "route_desc",
 			Line:      r.LineNumber,
@@ -126,8 +126,8 @@ func ValidateRoute(r Route) []Result {
 	return validationResults
 }
 
-func ValidateRoutes(routes []*Route, agencies []*Agency) []Result {
-	var validationResults []Result
+func ValidateRoutes(routes []*Route, agencies []*Agency) []ValidationNotice {
+	var validationResults []ValidationNotice
 
 	// Count the number of agencies in agencies.txt, this is used to determine if agency_id is required or recommended later on.
 	numAgencies := 0
@@ -158,13 +158,13 @@ func ValidateRoutes(routes []*Route, agencies []*Agency) []Result {
 
 		// agency_id is required only if there are multiple agencies in agencies.txt, recommended otherwise.
 		if numAgencies > 1 && StringIsNilOrEmpty(route.AgencyId) {
-			validationResults = append(validationResults, AgencyIdRequiredForRouteWhenMultipleAgenciesResult{SingleLineResult{
+			validationResults = append(validationResults, AgencyIdRequiredForRouteWhenMultipleAgenciesNotice{SingleLineNotice{
 				FileName:  FileNameRoutes,
 				FieldName: "agency_id",
 				Line:      route.LineNumber,
 			}})
 		} else if StringIsNilOrEmpty(route.AgencyId) {
-			validationResults = append(validationResults, AgencyIdRecommendedForRouteResult{SingleLineResult{
+			validationResults = append(validationResults, AgencyIdRecommendedForRouteNotice{SingleLineNotice{
 				FileName:  FileNameRoutes,
 				FieldName: "agency_id",
 				Line:      route.LineNumber,
@@ -173,7 +173,7 @@ func ValidateRoutes(routes []*Route, agencies []*Agency) []Result {
 
 		// route_id must be unique within the routes.txt file
 		if usedIds[*route.Id] {
-			validationResults = append(validationResults, FieldIsNotUniqueResult{SingleLineResult{
+			validationResults = append(validationResults, FieldIsNotUniqueNotice{SingleLineNotice{
 				FileName:  FileNameRoutes,
 				FieldName: "route_id",
 				Line:      route.LineNumber,
@@ -200,7 +200,7 @@ func ValidateRoutes(routes []*Route, agencies []*Agency) []Result {
 		}
 
 		if !matchingAgencyFound {
-			validationResults = append(validationResults, ForeignKeyViolationResult{
+			validationResults = append(validationResults, ForeignKeyViolationNotice{
 				ReferencingFileName:  FileNameRoutes,
 				ReferencingFieldName: "agency_id",
 				ReferencedFieldName:  FileNameAgency,

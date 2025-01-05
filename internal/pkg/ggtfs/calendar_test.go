@@ -100,15 +100,15 @@ func TestCreateCalendarItem(t *testing.T) {
 func TestValidateCalendarItems(t *testing.T) {
 	tests := map[string]struct {
 		actualEntities  []*CalendarItem
-		expectedResults []Result
+		expectedResults []ValidationNotice
 	}{
 		"nil-slice": {
 			actualEntities:  nil,
-			expectedResults: []Result{},
+			expectedResults: []ValidationNotice{},
 		},
 		"nil-slice-items": {
 			actualEntities:  []*CalendarItem{nil},
-			expectedResults: []Result{},
+			expectedResults: []ValidationNotice{},
 		},
 		"invalid-fields": {
 			actualEntities: []*CalendarItem{
@@ -125,9 +125,9 @@ func TestValidateCalendarItems(t *testing.T) {
 					EndDate:   stringPtr("20200102"), // avoid missing required field
 				},
 			},
-			expectedResults: []Result{
-				InvalidCalendarDayResult{SingleLineResult{FileName: "calendar.txt", FieldName: "monday"}},
-				InvalidCalendarDayResult{SingleLineResult{FileName: "calendar.txt", FieldName: "tuesday"}},
+			expectedResults: []ValidationNotice{
+				InvalidCalendarDayNotice{SingleLineNotice{FileName: "calendar.txt", FieldName: "monday"}},
+				InvalidCalendarDayNotice{SingleLineNotice{FileName: "calendar.txt", FieldName: "tuesday"}},
 			},
 		},
 	}

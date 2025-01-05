@@ -102,20 +102,20 @@ func TestCreateStop(t *testing.T) {
 func TestValidateStops(t *testing.T) {
 	tests := map[string]struct {
 		actualEntities  []*Stop
-		expectedResults []Result
+		expectedResults []ValidationNotice
 	}{
 		"nil-slice": {
 			actualEntities:  nil,
-			expectedResults: []Result{},
+			expectedResults: []ValidationNotice{},
 		},
 		"nil-slice-items": {
 			actualEntities:  []*Stop{nil},
-			expectedResults: []Result{},
+			expectedResults: []ValidationNotice{},
 		},
 		"nil-stop-id": {
 			actualEntities: []*Stop{{Id: nil}},
-			expectedResults: []Result{
-				MissingRequiredFieldResult{SingleLineResult{FileName: "stops.txt", FieldName: "stop_id", Line: 0}},
+			expectedResults: []ValidationNotice{
+				MissingRequiredFieldNotice{SingleLineNotice{FileName: "stops.txt", FieldName: "stop_id", Line: 0}},
 			},
 		},
 		"invalid-fields": {
@@ -131,11 +131,11 @@ func TestValidateStops(t *testing.T) {
 					WheelchairBoarding: stringPtr("3"),
 				},
 			},
-			expectedResults: []Result{
-				InvalidURLResult{SingleLineResult{FileName: "stops.txt", FieldName: "stop_url"}},
-				InvalidLocationTypeResult{SingleLineResult{FileName: "stops.txt", FieldName: "location_type"}},
-				InvalidTimezoneResult{SingleLineResult{FileName: "stops.txt", FieldName: "stop_timezone"}},
-				InvalidWheelchairBoardingResult{SingleLineResult{FileName: "stops.txt", FieldName: "wheelchair_boarding"}},
+			expectedResults: []ValidationNotice{
+				InvalidURLNotice{SingleLineNotice{FileName: "stops.txt", FieldName: "stop_url"}},
+				InvalidLocationTypeNotice{SingleLineNotice{FileName: "stops.txt", FieldName: "location_type"}},
+				InvalidTimezoneNotice{SingleLineNotice{FileName: "stops.txt", FieldName: "stop_timezone"}},
+				InvalidWheelchairBoardingValueNotice{SingleLineNotice{FileName: "stops.txt", FieldName: "wheelchair_boarding"}},
 			},
 		},
 		"empty-fields-for-location-types": {
@@ -156,22 +156,22 @@ func TestValidateStops(t *testing.T) {
 				{Id: stringPtr("0011"), Name: stringPtr("Place 0001"), ParentStation: stringPtr(""), LocationType: stringPtr("3"), Lat: stringPtr("11.1111111"), Lon: stringPtr("11.1111111"), LineNumber: 10},
 				{Id: stringPtr("0012"), Name: stringPtr("Place 0001"), ParentStation: stringPtr(""), LocationType: stringPtr("4"), Lat: stringPtr("11.1111111"), Lon: stringPtr("11.1111111"), LineNumber: 11},
 			},
-			expectedResults: []Result{
-				FieldRequiredForLocationTypeResult{RequiredField: "stop_name", LocationType: "0", FileName: "stops.txt", Line: 0},
-				FieldRequiredForLocationTypeResult{RequiredField: "stop_name", LocationType: "1", FileName: "stops.txt", Line: 1},
-				FieldRequiredForLocationTypeResult{RequiredField: "stop_name", LocationType: "2", FileName: "stops.txt", Line: 2},
+			expectedResults: []ValidationNotice{
+				FieldRequiredForStopLocationTypeNotice{RequiredField: "stop_name", LocationType: "0", FileName: "stops.txt", Line: 0},
+				FieldRequiredForStopLocationTypeNotice{RequiredField: "stop_name", LocationType: "1", FileName: "stops.txt", Line: 1},
+				FieldRequiredForStopLocationTypeNotice{RequiredField: "stop_name", LocationType: "2", FileName: "stops.txt", Line: 2},
 
-				FieldRequiredForLocationTypeResult{RequiredField: "stop_lat", LocationType: "0", FileName: "stops.txt", Line: 3},
-				FieldRequiredForLocationTypeResult{RequiredField: "stop_lat", LocationType: "1", FileName: "stops.txt", Line: 4},
-				FieldRequiredForLocationTypeResult{RequiredField: "stop_lat", LocationType: "2", FileName: "stops.txt", Line: 5},
+				FieldRequiredForStopLocationTypeNotice{RequiredField: "stop_lat", LocationType: "0", FileName: "stops.txt", Line: 3},
+				FieldRequiredForStopLocationTypeNotice{RequiredField: "stop_lat", LocationType: "1", FileName: "stops.txt", Line: 4},
+				FieldRequiredForStopLocationTypeNotice{RequiredField: "stop_lat", LocationType: "2", FileName: "stops.txt", Line: 5},
 
-				FieldRequiredForLocationTypeResult{RequiredField: "stop_lon", LocationType: "0", FileName: "stops.txt", Line: 6},
-				FieldRequiredForLocationTypeResult{RequiredField: "stop_lon", LocationType: "1", FileName: "stops.txt", Line: 7},
-				FieldRequiredForLocationTypeResult{RequiredField: "stop_lon", LocationType: "2", FileName: "stops.txt", Line: 8},
+				FieldRequiredForStopLocationTypeNotice{RequiredField: "stop_lon", LocationType: "0", FileName: "stops.txt", Line: 6},
+				FieldRequiredForStopLocationTypeNotice{RequiredField: "stop_lon", LocationType: "1", FileName: "stops.txt", Line: 7},
+				FieldRequiredForStopLocationTypeNotice{RequiredField: "stop_lon", LocationType: "2", FileName: "stops.txt", Line: 8},
 
-				FieldRequiredForLocationTypeResult{RequiredField: "parent_station", LocationType: "2", FileName: "stops.txt", Line: 9},
-				FieldRequiredForLocationTypeResult{RequiredField: "parent_station", LocationType: "3", FileName: "stops.txt", Line: 10},
-				FieldRequiredForLocationTypeResult{RequiredField: "parent_station", LocationType: "4", FileName: "stops.txt", Line: 11},
+				FieldRequiredForStopLocationTypeNotice{RequiredField: "parent_station", LocationType: "2", FileName: "stops.txt", Line: 9},
+				FieldRequiredForStopLocationTypeNotice{RequiredField: "parent_station", LocationType: "3", FileName: "stops.txt", Line: 10},
+				FieldRequiredForStopLocationTypeNotice{RequiredField: "parent_station", LocationType: "4", FileName: "stops.txt", Line: 11},
 			},
 		},
 		"unique-stop-id": {
@@ -179,8 +179,8 @@ func TestValidateStops(t *testing.T) {
 				{Id: stringPtr("1"), Lat: stringPtr("11.1111111"), Lon: stringPtr("11.1111111")},
 				{Id: stringPtr("1"), Lat: stringPtr("11.1111111"), Lon: stringPtr("11.1111111")},
 			},
-			expectedResults: []Result{
-				FieldIsNotUniqueResult{SingleLineResult{FileName: "stops.txt", FieldName: "stop_id", Line: 0}},
+			expectedResults: []ValidationNotice{
+				FieldIsNotUniqueNotice{SingleLineNotice{FileName: "stops.txt", FieldName: "stop_id", Line: 0}},
 			},
 		},
 	}

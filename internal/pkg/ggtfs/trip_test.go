@@ -86,18 +86,18 @@ func TestCreateTrip(t *testing.T) {
 func TestValidateTrips(t *testing.T) {
 	tests := map[string]struct {
 		actualEntities  []*Trip
-		expectedResults []Result
+		expectedResults []ValidationNotice
 		routes          []*Route
 		calendarItems   []*CalendarItem
 		shapes          []*Shape
 	}{
 		"nil-slice": {
 			actualEntities:  nil,
-			expectedResults: []Result{},
+			expectedResults: []ValidationNotice{},
 		},
 		"nil-slice-items": {
 			actualEntities:  []*Trip{nil},
-			expectedResults: []Result{},
+			expectedResults: []ValidationNotice{},
 		},
 		"invalid-fields": {
 			actualEntities: []*Trip{
@@ -110,10 +110,10 @@ func TestValidateTrips(t *testing.T) {
 					BikesAllowed:         stringPtr("5"),
 				},
 			},
-			expectedResults: []Result{
-				InvalidDirectionIdResult{SingleLineResult{FileName: "trips.txt", FieldName: "direction_id"}},
-				InvalidWheelchairAccessibleResult{SingleLineResult{FileName: "trips.txt", FieldName: "wheelchair_accessible"}},
-				InvalidBikesAllowedResult{SingleLineResult{FileName: "trips.txt", FieldName: "bikes_allowed"}},
+			expectedResults: []ValidationNotice{
+				InvalidDirectionIdNotice{SingleLineNotice{FileName: "trips.txt", FieldName: "direction_id"}},
+				InvalidWheelchairAccessibleNotice{SingleLineNotice{FileName: "trips.txt", FieldName: "wheelchair_accessible"}},
+				InvalidBikesAllowedNotice{SingleLineNotice{FileName: "trips.txt", FieldName: "bikes_allowed"}},
 			},
 		},
 		"missing-foreign-keys": {
@@ -128,8 +128,8 @@ func TestValidateTrips(t *testing.T) {
 			calendarItems: []*CalendarItem{},
 			routes:        []*Route{},
 			shapes:        []*Shape{},
-			expectedResults: []Result{
-				ForeignKeyViolationResult{
+			expectedResults: []ValidationNotice{
+				ForeignKeyViolationNotice{
 					ReferencingFileName:  "trips.txt",
 					ReferencingFieldName: "route_id",
 					ReferencedFieldName:  "routes.txt",
@@ -137,7 +137,7 @@ func TestValidateTrips(t *testing.T) {
 					OffendingValue:       "ROUTE_1",
 					ReferencedAtRow:      0,
 				},
-				ForeignKeyViolationResult{
+				ForeignKeyViolationNotice{
 					ReferencingFileName:  "trips.txt",
 					ReferencingFieldName: "service_id",
 					ReferencedFieldName:  "calendar.txt",
@@ -145,7 +145,7 @@ func TestValidateTrips(t *testing.T) {
 					OffendingValue:       "SERVICE_1",
 					ReferencedAtRow:      0,
 				},
-				ForeignKeyViolationResult{
+				ForeignKeyViolationNotice{
 					ReferencingFileName:  "trips.txt",
 					ReferencingFieldName: "shape_id",
 					ReferencedFieldName:  "shapes.txt",
