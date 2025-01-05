@@ -9,35 +9,59 @@ import (
 const GtfsEnvKey = "JOURNEYS_GTFS_PATH"
 
 func NewContext(gtfsPath string) model.Context {
-	g := NewGTFSContextForDirectory(gtfsPath)
+	ctx := NewGTFSContextForDirectory(gtfsPath)
 
-	municipalities := buildMunicipalities(*g.Municipalities)
-	stopPoints := buildStopPoints(*g, municipalities)
-	lines := buildLines(*g)
-	routes := buildRoutes(*g)
-	journeys, journeyPatterns := buildJourneys(*g, lines, routes, stopPoints)
+	municipalities := buildMunicipalities(*ctx.Municipalities)
+	stopPoints := buildStopPoints(*ctx, municipalities)
+	lines := buildLines(*ctx)
+	routes := buildRoutes(*ctx)
+	journeys, journeyPatterns := buildJourneys(*ctx, lines, routes, stopPoints)
+
+	var errs []string
+	for i, e := range ctx.Errors {
+		errs[i] = e.Error()
+	}
+
+	var violations []string
+	var recommendations []string
+	var infos []string
+
+	for i, v := range ctx.ValidationNotices {
+		switch v.Severity() {
+		case ggtfs.SeverityViolation:
+			violations[i] = fmt.Sprintf("[%v] %s", v.Severity(), v.Code())
+		case ggtfs.SeverityRecommendation:
+			recommendations[i] = fmt.Sprintf("[%v] %s", v.Severity(), v.Code())
+		case ggtfs.SeverityInfo:
+			infos[i] = fmt.Sprintf("[%v] %s", v.Severity(), v.Code())
+		}
+	}
 
 	return Context{
-		lines:             lines,
-		journeyPatterns:   journeyPatterns,
-		stopPoints:        stopPoints,
-		municipalities:    municipalities,
-		journeys:          journeys,
-		routes:            routes,
-		parseErrors:       g.Errors,
-		validationNotices: g.ValidationNotices,
+		lines:           lines,
+		journeyPatterns: journeyPatterns,
+		stopPoints:      stopPoints,
+		municipalities:  municipalities,
+		journeys:        journeys,
+		routes:          routes,
+		parseErrors:     errs,
+		violations:      violations,
+		recommendations: recommendations,
+		infos:           infos,
 	}
 }
 
 type Context struct {
-	lines             Lines
-	journeyPatterns   JourneyPatterns
-	stopPoints        StopPoints
-	municipalities    Municipalities
-	journeys          Journeys
-	routes            Routes
-	parseErrors       []error
-	validationNotices []ggtfs.ValidationNotice
+	lines           Lines
+	journeyPatterns JourneyPatterns
+	stopPoints      StopPoints
+	municipalities  Municipalities
+	journeys        Journeys
+	routes          Routes
+	parseErrors     []string
+	violations      []string
+	recommendations []string
+	infos           []string
 }
 
 func (context Context) Lines() model.Lines {
@@ -62,55 +86,23 @@ func (context Context) GetParseErrors() []string {
 	if len(context.parseErrors) == 0 {
 		return []string{}
 	}
-
-	errs := make([]string, len(context.parseErrors))
-	for i, e := range context.parseErrors {
-
-		errs[i] = e.Error()
-	}
-
-	return errs
+	return context.parseErrors
 }
 func (context Context) GetViolations() []string {
-	if len(context.validationNotices) == 0 {
+	if len(context.violations) == 0 {
 		return []string{}
 	}
-
-	var violations []string
-	for i, v := range context.validationNotices {
-		if v.Severity() == ggtfs.SeverityViolation {
-			violations[i] = fmt.Sprintf("[%v] %s", v.Severity(), v.Code())
-		}
-	}
-
-	return violations
+	return context.violations
 }
 func (context Context) GetRecommendations() []string {
-	if len(context.validationNotices) == 0 {
+	if len(context.recommendations) == 0 {
 		return []string{}
 	}
-
-	var recommendations []string
-	for i, v := range context.validationNotices {
-		if v.Severity() == ggtfs.SeverityRecommendation {
-			recommendations[i] = fmt.Sprintf("[%v] %s", v.Severity(), v.Code())
-		}
-	}
-
-	return recommendations
+	return context.recommendations
 }
-
 func (context Context) GetInfos() []string {
-	if len(context.validationNotices) == 0 {
+	if len(context.infos) == 0 {
 		return []string{}
 	}
-
-	var infos []string
-	for i, v := range context.validationNotices {
-		if v.Severity() == ggtfs.SeverityInfo {
-			infos[i] = fmt.Sprintf("[%v] %s", v.Severity(), v.Code())
-		}
-	}
-
-	return infos
+	return context.infos
 }
