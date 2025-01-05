@@ -96,16 +96,16 @@ func TestCreateRoute(t *testing.T) {
 func TestValidateRoutes(t *testing.T) {
 	tests := map[string]struct {
 		actualEntities  []*Route
-		expectedResults []Result
+		expectedResults []ValidationNotice
 		agencies        []*Agency
 	}{
 		"nil-slice": {
 			actualEntities:  nil,
-			expectedResults: []Result{},
+			expectedResults: []ValidationNotice{},
 		},
 		"nil-slice-items": {
 			actualEntities:  []*Route{nil},
-			expectedResults: []Result{},
+			expectedResults: []ValidationNotice{},
 		},
 		"invalid-fields": {
 			actualEntities: []*Route{
@@ -125,12 +125,12 @@ func TestValidateRoutes(t *testing.T) {
 					NetworkId:         stringPtr("network"),
 				},
 			},
-			expectedResults: []Result{
-				InvalidURLResult{SingleLineResult{FileName: "routes.txt", FieldName: "route_url", Line: 0}},
-				InvalidColorResult{SingleLineResult{FileName: "routes.txt", FieldName: "route_color", Line: 0}},
-				InvalidColorResult{SingleLineResult{FileName: "routes.txt", FieldName: "route_text_color", Line: 0}},
-				InvalidIntegerResult{SingleLineResult{FileName: "routes.txt", FieldName: "route_sort_order", Line: 0}},
-				TooLongRouteShortNameResult{SingleLineResult{FileName: "routes.txt", FieldName: "route_short_name", Line: 0}},
+			expectedResults: []ValidationNotice{
+				InvalidURLNotice{SingleLineNotice{FileName: "routes.txt", FieldName: "route_url", Line: 0}},
+				InvalidColorNotice{SingleLineNotice{FileName: "routes.txt", FieldName: "route_color", Line: 0}},
+				InvalidColorNotice{SingleLineNotice{FileName: "routes.txt", FieldName: "route_text_color", Line: 0}},
+				InvalidIntegerNotice{SingleLineNotice{FileName: "routes.txt", FieldName: "route_sort_order", Line: 0}},
+				TooLongRouteShortNameNotice{SingleLineNotice{FileName: "routes.txt", FieldName: "route_short_name", Line: 0}},
 			},
 		},
 		"empty-short-and-long-name": {
@@ -151,9 +151,9 @@ func TestValidateRoutes(t *testing.T) {
 					NetworkId:         stringPtr("network"),
 				},
 			},
-			expectedResults: []Result{
-				MissingRouteShortNameWhenLongNameIsNotPresentResult{SingleLineResult{FileName: "routes.txt", FieldName: "route_short_name", Line: 0}},
-				MissingRouteLongNameWhenShortNameIsNotPresentResult{SingleLineResult{FileName: "routes.txt", FieldName: "route_long_name", Line: 0}},
+			expectedResults: []ValidationNotice{
+				MissingRouteShortNameWhenLongNameIsNotPresentNotice{SingleLineNotice{FileName: "routes.txt", FieldName: "route_short_name", Line: 0}},
+				MissingRouteLongNameWhenShortNameIsNotPresentNotice{SingleLineNotice{FileName: "routes.txt", FieldName: "route_long_name", Line: 0}},
 			},
 		},
 		"desc-duplicates-route-names": {
@@ -174,9 +174,9 @@ func TestValidateRoutes(t *testing.T) {
 					NetworkId:         stringPtr("network"),
 				},
 			},
-			expectedResults: []Result{
-				DescriptionDuplicatesRouteNameResult{SingleLineResult{FileName: "routes.txt", FieldName: "route_desc", Line: 0}, "route_short_name"},
-				DescriptionDuplicatesRouteNameResult{SingleLineResult{FileName: "routes.txt", FieldName: "route_desc", Line: 0}, "route_long_name"},
+			expectedResults: []ValidationNotice{
+				RouteDescriptionDuplicatesNameNotice{SingleLineNotice{FileName: "routes.txt", FieldName: "route_desc", Line: 0}, "route_short_name"},
+				RouteDescriptionDuplicatesNameNotice{SingleLineNotice{FileName: "routes.txt", FieldName: "route_desc", Line: 0}, "route_long_name"},
 			},
 		},
 		"agency-id-required-when-multiple-agencies": {
@@ -195,8 +195,8 @@ func TestValidateRoutes(t *testing.T) {
 				{Id: stringPtr("")}, // Do not crash on empty agency ID
 				{Id: nil},           // Do not crash on nil agency ID
 			},
-			expectedResults: []Result{
-				AgencyIdRequiredForRouteWhenMultipleAgenciesResult{SingleLineResult{FileName: "routes.txt", FieldName: "agency_id", Line: 0}},
+			expectedResults: []ValidationNotice{
+				AgencyIdRequiredForRouteWhenMultipleAgenciesNotice{SingleLineNotice{FileName: "routes.txt", FieldName: "agency_id", Line: 0}},
 			},
 		},
 		"recommend-agency-id": {
@@ -209,8 +209,8 @@ func TestValidateRoutes(t *testing.T) {
 					Type:      stringPtr("3"),
 				},
 			},
-			expectedResults: []Result{
-				AgencyIdRecommendedForRouteResult{SingleLineResult{FileName: "routes.txt", FieldName: "agency_id", Line: 0}},
+			expectedResults: []ValidationNotice{
+				AgencyIdRecommendedForRouteNotice{SingleLineNotice{FileName: "routes.txt", FieldName: "agency_id", Line: 0}},
 			},
 		},
 		"unique-route-id": {
@@ -230,8 +230,8 @@ func TestValidateRoutes(t *testing.T) {
 					Type:      stringPtr("3"),
 				},
 			},
-			expectedResults: []Result{
-				FieldIsNotUniqueResult{SingleLineResult{FileName: "routes.txt", FieldName: "route_id", Line: 0}},
+			expectedResults: []ValidationNotice{
+				FieldIsNotUniqueNotice{SingleLineNotice{FileName: "routes.txt", FieldName: "route_id", Line: 0}},
 			},
 		},
 		"foreign-key-failure": {
@@ -250,8 +250,8 @@ func TestValidateRoutes(t *testing.T) {
 				{Id: stringPtr("")}, // Do not crash on empty agency ID
 				{Id: nil},           // Do not crash on nil agency ID
 			},
-			expectedResults: []Result{
-				ForeignKeyViolationResult{
+			expectedResults: []ValidationNotice{
+				ForeignKeyViolationNotice{
 					ReferencingFileName:  "routes.txt",
 					ReferencingFieldName: "agency_id",
 					ReferencedFieldName:  "agency.txt",
@@ -275,7 +275,7 @@ func TestValidateRoutes(t *testing.T) {
 				{Id: stringPtr("113")},
 				{Id: stringPtr("112")},
 			},
-			expectedResults: []Result{},
+			expectedResults: []ValidationNotice{},
 		},
 	}
 

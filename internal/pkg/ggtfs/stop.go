@@ -72,8 +72,8 @@ func CreateStop(row []string, headers map[string]int, lineNumber int) *Stop {
 	return &stop
 }
 
-func ValidateStop(s Stop) []Result {
-	var validationResults []Result
+func ValidateStop(s Stop) []ValidationNotice {
+	var validationResults []ValidationNotice
 
 	fields := []struct {
 		fieldType FieldType
@@ -113,7 +113,7 @@ func ValidateStop(s Stop) []Result {
 		if StringIsNilOrEmpty(field.fieldValue) && IsLocationTypeValid(s.LocationType) {
 			locationType := *s.LocationType
 			if locationType == "0" || locationType == "1" || locationType == "2" {
-				validationResults = append(validationResults, FieldRequiredForLocationTypeResult{
+				validationResults = append(validationResults, FieldRequiredForStopLocationTypeNotice{
 					RequiredField: field.fieldName,
 					LocationType:  locationType,
 					FileName:      FileNameStops,
@@ -126,7 +126,7 @@ func ValidateStop(s Stop) []Result {
 	if StringIsNilOrEmpty(s.ParentStation) && IsLocationTypeValid(s.LocationType) {
 		locationType := *s.LocationType
 		if locationType == "2" || locationType == "3" || locationType == "4" {
-			validationResults = append(validationResults, FieldRequiredForLocationTypeResult{
+			validationResults = append(validationResults, FieldRequiredForStopLocationTypeNotice{
 				RequiredField: "parent_station",
 				LocationType:  locationType,
 				FileName:      FileNameStops,
@@ -138,8 +138,8 @@ func ValidateStop(s Stop) []Result {
 	return validationResults
 }
 
-func ValidateStops(stops []*Stop) []Result {
-	var validationResults []Result
+func ValidateStops(stops []*Stop) []ValidationNotice {
+	var validationResults []ValidationNotice
 
 	if stops == nil {
 		return validationResults
@@ -162,7 +162,7 @@ func ValidateStops(stops []*Stop) []Result {
 		}
 
 		if usedIds[*stop.Id] {
-			validationResults = append(validationResults, FieldIsNotUniqueResult{SingleLineResult{
+			validationResults = append(validationResults, FieldIsNotUniqueNotice{SingleLineNotice{
 				FileName:  FileNameStops,
 				FieldName: "stop_id",
 				Line:      stop.LineNumber,

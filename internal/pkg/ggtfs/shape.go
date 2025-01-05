@@ -34,9 +34,9 @@ func CreateShape(row []string, headers map[string]int, lineNumber int) *Shape {
 	return &shape
 }
 
-func ValidateShape(s Shape) []Result {
+func ValidateShape(s Shape) []ValidationNotice {
 
-	var validationResults []Result
+	var validationResults []ValidationNotice
 
 	fields := []struct {
 		fieldType FieldType
@@ -58,8 +58,8 @@ func ValidateShape(s Shape) []Result {
 	return validationResults
 }
 
-func ValidateShapes(shapes []*Shape) []Result {
-	var validationResults []Result
+func ValidateShapes(shapes []*Shape) []ValidationNotice {
+	var validationResults []ValidationNotice
 
 	if shapes == nil {
 		return validationResults
@@ -82,7 +82,7 @@ func ValidateShapes(shapes []*Shape) []Result {
 	// Check that each shape has at least two points.
 	for shapeId, pointCount := range shapeIdToPointCount {
 		if pointCount < 2 {
-			validationResults = append(validationResults, TooFewShapePointsResult{
+			validationResults = append(validationResults, TooFewShapePointsNotice{
 				FileName: FileNameShapes,
 				ShapeId:  shapeId,
 			})

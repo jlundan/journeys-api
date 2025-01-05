@@ -92,22 +92,22 @@ func TestCreateAgency(t *testing.T) {
 func TestValidateAgency(t *testing.T) {
 	tests := map[string]struct {
 		agencies        []*Agency
-		expectedResults []Result
+		expectedResults []ValidationNotice
 	}{
 		"nil-agency-slice": {
 			agencies:        nil,
-			expectedResults: []Result{},
+			expectedResults: []ValidationNotice{},
 		},
 		"nil-agency-slice-items": {
 			agencies:        []*Agency{nil},
-			expectedResults: []Result{},
+			expectedResults: []ValidationNotice{},
 		},
 		"recommend-agency-id": {
 			agencies: []*Agency{
 				{Name: stringPtr("acme"), URL: stringPtr("http://acme.inc"), Timezone: stringPtr("Europe/Helsinki")},
 			},
-			expectedResults: []Result{
-				SingleAgencyRecommendedResult{FileName: "agency.txt"},
+			expectedResults: []ValidationNotice{
+				SingleAgencyRecommendedNotice{FileName: "agency.txt"},
 			},
 		},
 		"unique-agencies": {
@@ -115,8 +115,8 @@ func TestValidateAgency(t *testing.T) {
 				{Id: stringPtr("1"), Name: stringPtr("acme"), URL: stringPtr("http://acme.inc"), Timezone: stringPtr("Europe/Helsinki")},
 				{Id: stringPtr("1"), Name: stringPtr("acme"), URL: stringPtr("http://acme.inc"), Timezone: stringPtr("Europe/Helsinki")},
 			},
-			expectedResults: []Result{
-				FieldIsNotUniqueResult{SingleLineResult{
+			expectedResults: []ValidationNotice{
+				FieldIsNotUniqueNotice{SingleLineNotice{
 					FileName:  "agency.txt",
 					FieldName: "agency_id",
 				},
@@ -127,9 +127,9 @@ func TestValidateAgency(t *testing.T) {
 				{Name: stringPtr("acme"), URL: stringPtr("http://acme.inc"), Timezone: stringPtr("Europe/Helsinki"), LineNumber: 0},
 				{Name: stringPtr("acme"), URL: stringPtr("http://acme.inc"), Timezone: stringPtr("Europe/Helsinki"), LineNumber: 1},
 			},
-			expectedResults: []Result{
-				ValidAgencyIdRequiredWhenMultipleAgenciesResult{FileName: "agency.txt", Line: 0},
-				ValidAgencyIdRequiredWhenMultipleAgenciesResult{FileName: "agency.txt", Line: 1},
+			expectedResults: []ValidationNotice{
+				ValidAgencyIdRequiredWhenMultipleAgenciesNotice{FileName: "agency.txt", Line: 0},
+				ValidAgencyIdRequiredWhenMultipleAgenciesNotice{FileName: "agency.txt", Line: 1},
 			},
 		},
 		"invalid-fields": {
@@ -145,13 +145,13 @@ func TestValidateAgency(t *testing.T) {
 					Email:    stringPtr("Not an email"),
 				},
 			},
-			expectedResults: []Result{
-				InvalidURLResult{SingleLineResult{FileName: "agency.txt", FieldName: "agency_url"}},
-				InvalidTimezoneResult{SingleLineResult{FileName: "agency.txt", FieldName: "agency_timezone"}},
-				InvalidLanguageCodeResult{SingleLineResult{FileName: "agency.txt", FieldName: "agency_lang"}},
-				InvalidPhoneNumberResult{SingleLineResult{FileName: "agency.txt", FieldName: "agency_phone"}},
-				InvalidURLResult{SingleLineResult{FileName: "agency.txt", FieldName: "agency_fare_url"}},
-				InvalidEmailResult{SingleLineResult{FileName: "agency.txt", FieldName: "agency_email"}},
+			expectedResults: []ValidationNotice{
+				InvalidURLNotice{SingleLineNotice{FileName: "agency.txt", FieldName: "agency_url"}},
+				InvalidTimezoneNotice{SingleLineNotice{FileName: "agency.txt", FieldName: "agency_timezone"}},
+				InvalidLanguageCodeNotice{SingleLineNotice{FileName: "agency.txt", FieldName: "agency_lang"}},
+				InvalidPhoneNumberNotice{SingleLineNotice{FileName: "agency.txt", FieldName: "agency_phone"}},
+				InvalidURLNotice{SingleLineNotice{FileName: "agency.txt", FieldName: "agency_fare_url"}},
+				InvalidEmailNotice{SingleLineNotice{FileName: "agency.txt", FieldName: "agency_email"}},
 			},
 		},
 	}

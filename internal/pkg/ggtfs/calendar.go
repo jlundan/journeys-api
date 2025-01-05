@@ -48,8 +48,8 @@ func CreateCalendarItem(row []string, headers map[string]int, lineNumber int) *C
 	return calendarItem
 }
 
-func ValidateCalendarItem(c CalendarItem) []Result {
-	var validationResults []Result
+func ValidateCalendarItem(c CalendarItem) []ValidationNotice {
+	var validationResults []ValidationNotice
 
 	fields := []struct {
 		fieldType FieldType
@@ -76,8 +76,8 @@ func ValidateCalendarItem(c CalendarItem) []Result {
 	return validationResults
 }
 
-func ValidateCalendarItems(calendarItems []*CalendarItem) []Result {
-	var results []Result
+func ValidateCalendarItems(calendarItems []*CalendarItem) []ValidationNotice {
+	var results []ValidationNotice
 
 	for _, calendarItem := range calendarItems {
 		if calendarItem == nil {

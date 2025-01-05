@@ -74,8 +74,8 @@ func CreateStopTime(row []string, headers map[string]int, lineNumber int) *StopT
 	return &stopTime
 }
 
-func ValidateStopTime(st StopTime) []Result {
-	var validationResults []Result
+func ValidateStopTime(st StopTime) []ValidationNotice {
+	var validationResults []ValidationNotice
 
 	fields := []struct {
 		fieldType FieldType
@@ -110,8 +110,8 @@ func ValidateStopTime(st StopTime) []Result {
 	return validationResults
 }
 
-func ValidateStopTimes(stopTimes []*StopTime, stops []*Stop) []Result {
-	var validationResults []Result
+func ValidateStopTimes(stopTimes []*StopTime, stops []*Stop) []ValidationNotice {
+	var validationResults []ValidationNotice
 
 	if stopTimes == nil {
 		return validationResults
@@ -141,7 +141,7 @@ func ValidateStopTimes(stopTimes []*StopTime, stops []*Stop) []Result {
 			}
 		}
 		if !stopFound {
-			validationResults = append(validationResults, ForeignKeyViolationResult{
+			validationResults = append(validationResults, ForeignKeyViolationNotice{
 				ReferencingFileName:  FileNameStopTimes,
 				ReferencingFieldName: "stop_id",
 				ReferencedFieldName:  FileNameStops,

@@ -54,8 +54,8 @@ func CreateTrip(row []string, headers map[string]int, lineNumber int) *Trip {
 	return &trip
 }
 
-func ValidateTrip(t Trip) []Result {
-	var validationResults []Result
+func ValidateTrip(t Trip) []ValidationNotice {
+	var validationResults []ValidationNotice
 
 	fields := []struct {
 		fieldType FieldType
@@ -82,8 +82,8 @@ func ValidateTrip(t Trip) []Result {
 	return validationResults
 }
 
-func ValidateTrips(trips []*Trip, routes []*Route, calendarItems []*CalendarItem, shapes []*Shape) []Result {
-	var validationResults []Result
+func ValidateTrips(trips []*Trip, routes []*Route, calendarItems []*CalendarItem, shapes []*Shape) []ValidationNotice {
+	var validationResults []ValidationNotice
 
 	if trips == nil {
 		return validationResults
@@ -108,7 +108,7 @@ func ValidateTrips(trips []*Trip, routes []*Route, calendarItems []*CalendarItem
 				}
 			}
 			if !routeFound {
-				validationResults = append(validationResults, ForeignKeyViolationResult{
+				validationResults = append(validationResults, ForeignKeyViolationNotice{
 					ReferencingFileName:  FileNameTrips,
 					ReferencingFieldName: "route_id",
 					ReferencedFieldName:  FileNameRoutes,
@@ -131,7 +131,7 @@ func ValidateTrips(trips []*Trip, routes []*Route, calendarItems []*CalendarItem
 				}
 			}
 			if !serviceFound {
-				validationResults = append(validationResults, ForeignKeyViolationResult{
+				validationResults = append(validationResults, ForeignKeyViolationNotice{
 					ReferencingFileName:  FileNameTrips,
 					ReferencingFieldName: "service_id",
 					ReferencedFieldName:  FileNameCalendar,
@@ -156,7 +156,7 @@ func ValidateTrips(trips []*Trip, routes []*Route, calendarItems []*CalendarItem
 					}
 				}
 				if !shapeFound {
-					validationResults = append(validationResults, ForeignKeyViolationResult{
+					validationResults = append(validationResults, ForeignKeyViolationNotice{
 						ReferencingFileName:  FileNameTrips,
 						ReferencingFieldName: "shape_id",
 						ReferencedFieldName:  FileNameShapes,

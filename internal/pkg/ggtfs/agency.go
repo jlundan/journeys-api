@@ -43,8 +43,8 @@ func CreateAgency(row []string, headers map[string]int, lineNumber int) *Agency 
 	return &agency
 }
 
-func ValidateAgency(a Agency) []Result {
-	var validationResults []Result
+func ValidateAgency(a Agency) []ValidationNotice {
+	var validationResults []ValidationNotice
 
 	fields := []struct {
 		fieldType FieldType
@@ -69,8 +69,8 @@ func ValidateAgency(a Agency) []Result {
 	return validationResults
 }
 
-func ValidateAgencies(agencies []*Agency) []Result {
-	var results []Result
+func ValidateAgencies(agencies []*Agency) []ValidationNotice {
+	var results []ValidationNotice
 
 	var filteredAgencies []*Agency
 
@@ -83,11 +83,11 @@ func ValidateAgencies(agencies []*Agency) []Result {
 	aLength := len(filteredAgencies)
 
 	if aLength == 0 {
-		return []Result{}
+		return []ValidationNotice{}
 	}
 
 	if aLength == 1 && StringIsNilOrEmpty(filteredAgencies[0].Id) {
-		return []Result{SingleAgencyRecommendedResult{
+		return []ValidationNotice{SingleAgencyRecommendedNotice{
 			FileName: FileNameAgency,
 		}}
 	}
@@ -101,7 +101,7 @@ func ValidateAgencies(agencies []*Agency) []Result {
 		results = append(results, ValidateAgency(*a)...)
 
 		if StringIsNilOrEmpty(a.Id) {
-			results = append(results, ValidAgencyIdRequiredWhenMultipleAgenciesResult{
+			results = append(results, ValidAgencyIdRequiredWhenMultipleAgenciesNotice{
 				FileName: FileNameAgency,
 				Line:     a.LineNumber,
 			})
@@ -109,7 +109,7 @@ func ValidateAgencies(agencies []*Agency) []Result {
 		}
 
 		if usedIds[*a.Id] {
-			results = append(results, FieldIsNotUniqueResult{SingleLineResult{
+			results = append(results, FieldIsNotUniqueNotice{SingleLineNotice{
 				FileName:  FileNameAgency,
 				FieldName: "agency_id",
 				Line:      a.LineNumber,

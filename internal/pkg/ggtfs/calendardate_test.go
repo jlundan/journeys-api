@@ -70,16 +70,16 @@ func TestCreateCalendarDate(t *testing.T) {
 func TestValidateCalendarDates(t *testing.T) {
 	tests := map[string]struct {
 		actualEntities  []*CalendarDate
-		expectedResults []Result
+		expectedResults []ValidationNotice
 		calendarItems   []*CalendarItem
 	}{
 		"nil-slice": {
 			actualEntities:  nil,
-			expectedResults: []Result{},
+			expectedResults: []ValidationNotice{},
 		},
 		"nil-slice-items": {
 			actualEntities:  []*CalendarDate{nil},
-			expectedResults: []Result{},
+			expectedResults: []ValidationNotice{},
 		},
 		"invalid-fields": {
 			actualEntities: []*CalendarDate{
@@ -89,9 +89,9 @@ func TestValidateCalendarDates(t *testing.T) {
 					ExceptionType: stringPtr("3"),
 				},
 			},
-			expectedResults: []Result{
-				InvalidDateResult{SingleLineResult{FileName: "calendar_dates.txt", FieldName: "date"}},
-				InvalidCalendarExceptionResult{SingleLineResult{FileName: "calendar_dates.txt", FieldName: "exception_type"}},
+			expectedResults: []ValidationNotice{
+				InvalidDateNotice{SingleLineNotice{FileName: "calendar_dates.txt", FieldName: "date"}},
+				InvalidCalendarExceptionNotice{SingleLineNotice{FileName: "calendar_dates.txt", FieldName: "exception_type"}},
 			},
 		},
 		"empty-calendar-item-slice": {
@@ -103,8 +103,8 @@ func TestValidateCalendarDates(t *testing.T) {
 				},
 			},
 			calendarItems: []*CalendarItem{},
-			expectedResults: []Result{
-				ForeignKeyViolationResult{
+			expectedResults: []ValidationNotice{
+				ForeignKeyViolationNotice{
 					ReferencingFileName:  "calendar_dates.txt",
 					ReferencingFieldName: "service_id",
 					ReferencedFieldName:  "calendar.txt",
@@ -123,8 +123,8 @@ func TestValidateCalendarDates(t *testing.T) {
 				},
 			},
 			calendarItems: []*CalendarItem{nil},
-			expectedResults: []Result{
-				ForeignKeyViolationResult{
+			expectedResults: []ValidationNotice{
+				ForeignKeyViolationNotice{
 					ReferencingFileName:  "calendar_dates.txt",
 					ReferencingFieldName: "service_id",
 					ReferencedFieldName:  "calendar.txt",
@@ -143,8 +143,8 @@ func TestValidateCalendarDates(t *testing.T) {
 				},
 			},
 			calendarItems: []*CalendarItem{{ServiceId: stringPtr("112")}},
-			expectedResults: []Result{
-				ForeignKeyViolationResult{
+			expectedResults: []ValidationNotice{
+				ForeignKeyViolationNotice{
 					ReferencingFileName:  "calendar_dates.txt",
 					ReferencingFieldName: "service_id",
 					ReferencedFieldName:  "calendar.txt",
@@ -157,7 +157,7 @@ func TestValidateCalendarDates(t *testing.T) {
 		"missing-calendar-date-with-calendar-items": {
 			actualEntities:  []*CalendarDate{nil},
 			calendarItems:   []*CalendarItem{{ServiceId: stringPtr("112")}},
-			expectedResults: []Result{},
+			expectedResults: []ValidationNotice{},
 		},
 	}
 

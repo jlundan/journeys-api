@@ -77,15 +77,15 @@ func TestCreateShape(t *testing.T) {
 func TestValidateShapes(t *testing.T) {
 	tests := map[string]struct {
 		actualEntities  []*Shape
-		expectedResults []Result
+		expectedResults []ValidationNotice
 	}{
 		"nil-slice": {
 			actualEntities:  nil,
-			expectedResults: []Result{},
+			expectedResults: []ValidationNotice{},
 		},
 		"nil-slice-items": {
 			actualEntities:  []*Shape{nil},
-			expectedResults: []Result{},
+			expectedResults: []ValidationNotice{},
 		},
 		"invalid-fields": {
 			actualEntities: []*Shape{
@@ -97,12 +97,12 @@ func TestValidateShapes(t *testing.T) {
 					DistTraveled: stringPtr("Not a distance"),
 				},
 			},
-			expectedResults: []Result{
-				InvalidLatitudeResult{SingleLineResult{FileName: "shapes.txt", FieldName: "shape_pt_lat"}},
-				InvalidLongitudeResult{SingleLineResult{FileName: "shapes.txt", FieldName: "shape_pt_lon"}},
-				InvalidIntegerResult{SingleLineResult{FileName: "shapes.txt", FieldName: "shape_pt_sequence"}},
-				InvalidFloatResult{SingleLineResult{FileName: "shapes.txt", FieldName: "shape_dist_traveled"}},
-				TooFewShapePointsResult{
+			expectedResults: []ValidationNotice{
+				InvalidLatitudeNotice{SingleLineNotice{FileName: "shapes.txt", FieldName: "shape_pt_lat"}},
+				InvalidLongitudeNotice{SingleLineNotice{FileName: "shapes.txt", FieldName: "shape_pt_lon"}},
+				InvalidIntegerNotice{SingleLineNotice{FileName: "shapes.txt", FieldName: "shape_pt_sequence"}},
+				InvalidFloatNotice{SingleLineNotice{FileName: "shapes.txt", FieldName: "shape_dist_traveled"}},
+				TooFewShapePointsNotice{
 					FileName: "shapes.txt",
 					ShapeId:  "1",
 				},
