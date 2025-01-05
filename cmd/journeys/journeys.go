@@ -59,9 +59,8 @@ var MainCommand = &cobra.Command{
 			log.Println(r)
 		}
 
-		infos := ctx.GetInfos()
-		for infos := range infos {
-			log.Println(infos)
+		for _, i := range ctx.GetInfos() {
+			log.Println(i)
 		}
 
 		if dryRun && len(parseErrors) > 0 && len(violations) > 0 && len(recommendations) > 0 {
