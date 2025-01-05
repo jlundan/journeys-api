@@ -79,9 +79,9 @@ func TestSendResponseFail(t *testing.T) {
 }
 
 func initializeTest(t *testing.T) (*mux.Router, *httptest.ResponseRecorder, model.Context) {
-	ctx, err, _, _ := tre.NewContext()
-	if err != nil {
-		t.Error(err)
+	ctx := tre.NewContext("testdata/tre/gtfs")
+	if ctx.GetParseErrors() != nil && len(ctx.GetParseErrors()) > 0 {
+		t.Error("Failed to parse GTFS data")
 	}
 
 	w := httptest.NewRecorder()
