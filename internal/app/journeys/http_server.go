@@ -5,14 +5,13 @@ import (
 	"fmt"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
 )
 
-func startServer(r *mux.Router, port string) {
+func StartServer(r *mux.Router, port int, onStartupSuccess func(port int), onStartupError func(err error), onShutdown func()) {
 	srv := &http.Server{
 		Addr: fmt.Sprintf("0.0.0.0:%v", port),
 		// Avoid Slow loris attacks
@@ -23,9 +22,13 @@ func startServer(r *mux.Router, port string) {
 	}
 
 	go func() {
-		log.Println(fmt.Sprintf("listening on port %v", port))
+		if onStartupSuccess != nil {
+			onStartupSuccess(port)
+		}
 		if err := srv.ListenAndServe(); err != nil {
-			log.Println(err)
+			if onStartupError != nil {
+				onStartupError(err)
+			}
 		}
 	}()
 
@@ -35,6 +38,10 @@ func startServer(r *mux.Router, port string) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
 	defer cancel()
 	_ = srv.Shutdown(ctx)
-	log.Println("shutting down")
+
+	if onShutdown != nil {
+		onShutdown()
+	}
+
 	os.Exit(0)
 }

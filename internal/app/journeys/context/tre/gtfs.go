@@ -4,65 +4,46 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/csv"
+	"errors"
+	"fmt"
 	"github.com/dimchansky/utfbom"
 	"github.com/jlundan/journeys-api/internal/pkg/ggtfs"
+	"golang.org/x/text/encoding"
 	"io"
 	"os"
 	"path"
+	"regexp"
 	"strings"
 )
 
 type GTFSContext struct {
-	Agencies      []*ggtfs.Agency
-	Routes        []*ggtfs.Route
-	Stops         []*ggtfs.Stop
-	Trips         []*ggtfs.Trip
-	StopTimes     []*ggtfs.StopTime
-	CalendarItems []*ggtfs.CalendarItem
-	CalendarDates []*ggtfs.CalendarDate
-	Shapes        []*ggtfs.Shape
+	Agencies          []*ggtfs.Agency
+	Routes            []*ggtfs.Route
+	Stops             []*ggtfs.Stop
+	Trips             []*ggtfs.Trip
+	StopTimes         []*ggtfs.StopTime
+	CalendarItems     []*ggtfs.CalendarItem
+	CalendarDates     []*ggtfs.CalendarDate
+	Shapes            []*ggtfs.Shape
+	Municipalities    *municipalityData
+	ValidationNotices []ggtfs.ValidationNotice
+	Errors            []error
 }
 
-func Validate(ctx *GTFSContext) ([]error, []string) {
-	var warnings []error
-	var recommendations []string
-
-	//tripWarnings, tripRecommendations := ggtfs.ValidateTrips(ctx.Trips, ctx.Routes, ctx.CalendarItems, ctx.Shapes)
-	//warnings = append(warnings, tripWarnings...)
-	//recommendations = append(recommendations, tripRecommendations...)
-	//
-	//shapeWarnings, shapeRecommendations := ggtfs.ValidateShapes(ctx.Shapes)
-	//warnings = append(warnings, shapeWarnings...)
-	//recommendations = append(recommendations, shapeRecommendations...)
-	//
-	//calendarDateWarnings, calendarDateRecommendations := ggtfs.ValidateCalendarDates(ctx.CalendarDates, ctx.CalendarItems)
-	//warnings = append(warnings, calendarDateWarnings...)
-	//recommendations = append(recommendations, calendarDateRecommendations...)
-	//
-	//routeWarnings, routeRecommendations := ggtfs.ValidateRoutes(ctx.Routes, ctx.Agencies)
-	//warnings = append(warnings, routeWarnings...)
-	//recommendations = append(recommendations, routeRecommendations...)
-	//
-	//stopTimeWarnings, stopTimeRecommendations := ggtfs.ValidateStopTimes(ctx.StopTimes, ctx.Stops)
-	//warnings = append(warnings, stopTimeWarnings...)
-	//recommendations = append(recommendations, stopTimeRecommendations...)
-
-	return warnings, recommendations
-}
-
-func NewGTFSContextForDirectory(gtfsPath string) (*GTFSContext, []error) {
-	errs := make([]error, 0)
+func NewGTFSContextForDirectory(gtfsPath string) *GTFSContext {
 	context := GTFSContext{}
-	var gtfsErrors []error
 
 	files := []string{ggtfs.FileNameAgency, ggtfs.FileNameRoutes, ggtfs.FileNameStops, ggtfs.FileNameTrips, ggtfs.FileNameStopTimes,
-		ggtfs.FileNameCalendar, ggtfs.FileNameCalendarDate, ggtfs.FileNameShapes}
+		ggtfs.FileNameCalendar, ggtfs.FileNameCalendarDate, ggtfs.FileNameShapes, "municipalities.txt"}
 
 	for _, file := range files {
-		reader, err := CreateCSVReaderForFile(path.Join(gtfsPath, file))
+		reader, err := createCSVReaderForFile(path.Join(gtfsPath, file))
 		if err != nil {
-			errs = append(errs, err)
+			context.Errors = append(context.Errors, err)
 		}
+
+		var gtfsErrors []error
+		var municipalityError error
 
 		switch file {
 		case ggtfs.FileNameAgency:
@@ -81,17 +62,26 @@ func NewGTFSContextForDirectory(gtfsPath string) (*GTFSContext, []error) {
 			context.CalendarDates, gtfsErrors = ggtfs.LoadCalendarDates(ggtfs.NewReader(reader))
 		case ggtfs.FileNameShapes:
 			context.Shapes, gtfsErrors = ggtfs.LoadShapes(ggtfs.NewReader(reader))
+		case "municipalities.txt":
+			context.Municipalities, municipalityError = readMunicipalities()
 		}
 
-		if len(gtfsErrors) > 0 {
-			errs = append(errs, gtfsErrors...)
+		context.Errors = append(context.Errors, gtfsErrors...)
+		if municipalityError != nil {
+			context.Errors = append(context.Errors, municipalityError)
 		}
 	}
 
-	return &context, errs
+	context.ValidationNotices = append(context.ValidationNotices, ggtfs.ValidateTrips(context.Trips, context.Routes, context.CalendarItems, context.Shapes)...)
+	context.ValidationNotices = append(context.ValidationNotices, ggtfs.ValidateShapes(context.Shapes)...)
+	context.ValidationNotices = append(context.ValidationNotices, ggtfs.ValidateCalendarDates(context.CalendarDates, context.CalendarItems)...)
+	context.ValidationNotices = append(context.ValidationNotices, ggtfs.ValidateRoutes(context.Routes, context.Agencies)...)
+	context.ValidationNotices = append(context.ValidationNotices, ggtfs.ValidateStopTimes(context.StopTimes, context.Stops)...)
+
+	return &context
 }
 
-func CreateCSVReaderForFile(path string) (*csv.Reader, error) {
+func createCSVReaderForFile(path string) (*csv.Reader, error) {
 	csvFile, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -99,12 +89,12 @@ func CreateCSVReaderForFile(path string) (*csv.Reader, error) {
 
 	sr, _ := utfbom.Skip(csvFile)
 
-	filteredReader := NewSkippingReader(sr)
+	filteredReader := newSkippingReader(sr)
 
 	return csv.NewReader(filteredReader), nil
 }
 
-func NewSkippingReader(r io.Reader) io.Reader {
+func newSkippingReader(r io.Reader) io.Reader {
 	var buf bytes.Buffer
 
 	// Use a bufio.Scanner to read through the input line by line.
@@ -121,4 +111,89 @@ func NewSkippingReader(r io.Reader) io.Reader {
 
 	// Return a new reader that reads from the buffer.
 	return &buf
+}
+
+const MunicipalityFileName = "municipalities.txt"
+
+type municipalityData struct {
+	municipalityHeaders map[string]uint8
+	municipalityRows    [][]string
+}
+
+func readMunicipalities() (*municipalityData, error) {
+	var err error
+	m := &municipalityData{}
+	m.municipalityHeaders, m.municipalityRows, err = parseFile(fmt.Sprintf("%v/%v", os.Getenv(GtfsEnvKey), MunicipalityFileName), true)
+	if err != nil && !os.IsNotExist(err) {
+		return nil, err
+	}
+
+	return m, nil
+}
+
+func parseFile(path string, firstLineAsHeaders bool) (map[string]uint8, [][]string, error) {
+	return parseFileWithDecoderAndDelimiter(path, firstLineAsHeaders, nil, ',')
+}
+
+func parseFileWithDecoderAndDelimiter(path string, firstLineAsHeaders bool, decoder *encoding.Decoder, delimiter rune) (map[string]uint8, [][]string, error) {
+	csvFile, err := os.Open(path)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	var r *csv.Reader
+	if decoder != nil {
+		r = csv.NewReader(decoder.Reader(trimReader{csvFile}))
+	} else {
+		r = csv.NewReader(trimReader{csvFile})
+	}
+
+	if delimiter != ',' {
+		r.Comma = delimiter
+	}
+
+	var headers = map[string]uint8{}
+	var data = make([][]string, 0)
+
+	headersRead := false
+	for {
+		record, err := r.Read()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return nil, nil, errors.New(fmt.Sprintf("%v: %v", path, err.Error()))
+		}
+
+		if firstLineAsHeaders && !headersRead {
+			for i, v := range record {
+				headers[v] = uint8(i)
+			}
+			headersRead = true
+		} else {
+			var row []string
+			for _, v := range record {
+				row = append(row, strings.TrimSpace(v))
+			}
+			data = append(data, row)
+		}
+
+	}
+	return headers, data, nil
+}
+
+var trailingWs = regexp.MustCompile(`\s\n`)
+
+type trimReader struct{ io.Reader }
+
+func (tr trimReader) Read(bs []byte) (int, error) {
+	n, err := tr.Reader.Read(bs)
+	if err != nil {
+		return n, err
+	}
+
+	lines := string(bs[:n])
+	trimmed := []byte(trailingWs.ReplaceAllString(lines, "\n"))
+	copy(bs, trimmed)
+	return len(trimmed), nil
 }

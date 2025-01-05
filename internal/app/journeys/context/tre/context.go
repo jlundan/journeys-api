@@ -1,89 +1,43 @@
 package tre
 
 import (
-	"errors"
 	"fmt"
 	"github.com/jlundan/journeys-api/internal/app/journeys/model"
-	"github.com/jlundan/journeys-api/internal/pkg/csv"
-	"os"
+	"github.com/jlundan/journeys-api/internal/pkg/ggtfs"
 )
 
-const MunicipalityFileName = "municipalities.txt"
 const GtfsEnvKey = "JOURNEYS_GTFS_PATH"
 
-type municipalityData struct {
-	municipalityHeaders map[string]uint8
-	municipalityRows    [][]string
-}
+func NewContext(gtfsPath string) model.Context {
+	g := NewGTFSContextForDirectory(gtfsPath)
 
-func NewContext() (model.Context, []error, []error, []string) {
-	var (
-		errs            []error
-		warnings        []error
-		recommendations []string
-	)
-
-	if os.Getenv(GtfsEnvKey) == "" {
-		errs = append(errs, errors.New(fmt.Sprintf("%v not set in environment", GtfsEnvKey)))
-	}
-
-	if len(errs) > 0 {
-		return Context{}, errs, warnings, recommendations
-	}
-
-	g, gtfsErrors := NewGTFSContextForDirectory(os.Getenv(GtfsEnvKey))
-	errs = append(errs, gtfsErrors...)
-
-	gtfsWarnings, gtfsRecommendations := Validate(g)
-	warnings = append(warnings, gtfsWarnings...)
-	recommendations = append(recommendations, gtfsRecommendations...)
-
-	m, err := readMunicipalities()
-	if err != nil {
-		errs = append(errs, err)
-	}
-
-	if m == nil && g == nil {
-		return Context{}, errs, warnings, recommendations
-	}
-
-	if m == nil {
-		return Context{
-			lines:  buildLines(*g),
-			routes: buildRoutes(*g),
-		}, errs, warnings, recommendations
-	}
-
-	municipalities := buildMunicipalities(*m)
-
-	if g == nil {
-		return Context{
-			municipalities: municipalities,
-		}, errs, warnings, recommendations
-	}
-
+	municipalities := buildMunicipalities(*g.Municipalities)
 	stopPoints := buildStopPoints(*g, municipalities)
 	lines := buildLines(*g)
 	routes := buildRoutes(*g)
 	journeys, journeyPatterns := buildJourneys(*g, lines, routes, stopPoints)
 
 	return Context{
-		lines:           lines,
-		journeyPatterns: journeyPatterns,
-		stopPoints:      stopPoints,
-		municipalities:  municipalities,
-		journeys:        journeys,
-		routes:          routes,
-	}, errs, warnings, recommendations
+		lines:             lines,
+		journeyPatterns:   journeyPatterns,
+		stopPoints:        stopPoints,
+		municipalities:    municipalities,
+		journeys:          journeys,
+		routes:            routes,
+		parseErrors:       g.Errors,
+		validationNotices: g.ValidationNotices,
+	}
 }
 
 type Context struct {
-	lines           Lines
-	journeyPatterns JourneyPatterns
-	stopPoints      StopPoints
-	municipalities  Municipalities
-	journeys        Journeys
-	routes          Routes
+	lines             Lines
+	journeyPatterns   JourneyPatterns
+	stopPoints        StopPoints
+	municipalities    Municipalities
+	journeys          Journeys
+	routes            Routes
+	parseErrors       []error
+	validationNotices []ggtfs.ValidationNotice
 }
 
 func (context Context) Lines() model.Lines {
@@ -104,14 +58,59 @@ func (context Context) Journeys() model.Journeys {
 func (context Context) Routes() model.Routes {
 	return context.routes
 }
-
-func readMunicipalities() (*municipalityData, error) {
-	var err error
-	m := &municipalityData{}
-	m.municipalityHeaders, m.municipalityRows, err = csv.ParseFile(fmt.Sprintf("%v/%v", os.Getenv(GtfsEnvKey), MunicipalityFileName), true)
-	if err != nil && !os.IsNotExist(err) {
-		return nil, err
+func (context Context) GetParseErrors() []string {
+	if len(context.parseErrors) == 0 {
+		return []string{}
 	}
 
-	return m, nil
+	errs := make([]string, len(context.parseErrors))
+	for i, e := range context.parseErrors {
+
+		errs[i] = e.Error()
+	}
+
+	return errs
+}
+func (context Context) GetViolations() []string {
+	if len(context.validationNotices) == 0 {
+		return []string{}
+	}
+
+	var violations []string
+	for i, v := range context.validationNotices {
+		if v.Severity() == ggtfs.SeverityViolation {
+			violations[i] = fmt.Sprintf("[%v] %s", v.Severity(), v.Code())
+		}
+	}
+
+	return violations
+}
+func (context Context) GetRecommendations() []string {
+	if len(context.validationNotices) == 0 {
+		return []string{}
+	}
+
+	var recommendations []string
+	for i, v := range context.validationNotices {
+		if v.Severity() == ggtfs.SeverityRecommendation {
+			recommendations[i] = fmt.Sprintf("[%v] %s", v.Severity(), v.Code())
+		}
+	}
+
+	return recommendations
+}
+
+func (context Context) GetInfos() []string {
+	if len(context.validationNotices) == 0 {
+		return []string{}
+	}
+
+	var infos []string
+	for i, v := range context.validationNotices {
+		if v.Severity() == ggtfs.SeverityInfo {
+			infos[i] = fmt.Sprintf("[%v] %s", v.Severity(), v.Code())
+		}
+	}
+
+	return infos
 }

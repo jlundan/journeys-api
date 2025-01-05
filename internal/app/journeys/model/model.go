@@ -7,6 +7,10 @@ type Context interface {
 	Municipalities() Municipalities
 	Journeys() Journeys
 	Routes() Routes
+	GetParseErrors() []string
+	GetViolations() []string
+	GetRecommendations() []string
+	GetInfos() []string
 }
 
 type Lines interface {
