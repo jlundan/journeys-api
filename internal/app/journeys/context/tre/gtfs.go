@@ -7,7 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/dimchansky/utfbom"
-	"github.com/jlundan/journeys-api/internal/pkg/ggtfs"
+	"github.com/jlundan/journeys-api/pkg/ggtfs"
 	"golang.org/x/text/encoding"
 	"io"
 	"os"

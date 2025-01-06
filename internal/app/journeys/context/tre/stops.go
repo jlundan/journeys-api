@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/jlundan/journeys-api/internal/app/journeys/model"
-	"github.com/jlundan/journeys-api/internal/pkg/ggtfs"
+	"github.com/jlundan/journeys-api/pkg/ggtfs"
 	"math"
 	"sort"
 	"strconv"
