@@ -3,7 +3,7 @@ package tre
 import (
 	"fmt"
 	"github.com/jlundan/journeys-api/internal/app/journeys/model"
-	"github.com/jlundan/journeys-api/internal/pkg/ggtfs"
+	"github.com/jlundan/journeys-api/pkg/ggtfs"
 )
 
 const GtfsEnvKey = "JOURNEYS_GTFS_PATH"
@@ -26,14 +26,14 @@ func NewContext(gtfsPath string) model.Context {
 	var recommendations []string
 	var infos []string
 
-	for i, v := range ctx.ValidationNotices {
+	for _, v := range ctx.ValidationNotices {
 		switch v.Severity() {
 		case ggtfs.SeverityViolation:
-			violations[i] = fmt.Sprintf("[%v] %s", v.Severity(), v.Code())
+			violations = append(violations, fmt.Sprintf("[%v] %s", v.Severity(), v.Code()))
 		case ggtfs.SeverityRecommendation:
-			recommendations[i] = fmt.Sprintf("[%v] %s", v.Severity(), v.Code())
+			recommendations = append(recommendations, fmt.Sprintf("[%v] %s", v.Severity(), v.Code()))
 		case ggtfs.SeverityInfo:
-			infos[i] = fmt.Sprintf("[%v] %s", v.Severity(), v.Code())
+			infos = append(infos, fmt.Sprintf("[%v] %s", v.Severity(), v.Code()))
 		}
 	}
 

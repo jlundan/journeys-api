@@ -3,7 +3,7 @@ package routes
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/jlundan/journeys-api/internal/pkg/utils"
+	"github.com/jlundan/journeys-api/internal/app/journeys/utils"
 	"log"
 	"net/http"
 )

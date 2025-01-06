@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/jlundan/journeys-api/internal/app/journeys/model"
-	"github.com/jlundan/journeys-api/internal/pkg/utils"
+	"github.com/jlundan/journeys-api/internal/app/journeys/utils"
 	"net/http"
 	"os"
 )
