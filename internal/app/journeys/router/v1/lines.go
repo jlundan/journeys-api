@@ -25,8 +25,8 @@ func HandleGetAllLines(service service.DataService, baseUrl string) func(http.Re
 func HandleGetOneLine(service service.DataService, baseUrl string) func(http.ResponseWriter, *http.Request) {
 	return func(rw http.ResponseWriter, req *http.Request) {
 
-		line := service.GetOneLineByName(mux.Vars(req)["name"])
-		if line == nil {
+		line, err := service.GetOneLineById(mux.Vars(req)["name"])
+		if err != nil {
 			sendError("no such element", rw)
 			return
 		}

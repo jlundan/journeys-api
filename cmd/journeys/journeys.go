@@ -3,10 +3,10 @@ package main
 import (
 	"fmt"
 	"github.com/bradfitz/gomemcache/memcache"
-	"github.com/jlundan/journeys-api/internal/app/journeys/context/tre"
 	"github.com/jlundan/journeys-api/internal/app/journeys/router"
 	"github.com/jlundan/journeys-api/internal/app/journeys/server"
 	"github.com/jlundan/journeys-api/internal/app/journeys/service"
+	"github.com/jlundan/journeys-api/internal/app/repository"
 	"github.com/spf13/cobra"
 	"log"
 	"os"
@@ -48,26 +48,26 @@ var MainCommand = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		ctx := tre.NewContext(gtfsPath, skipValidation)
+		//ctx := tre.NewContext(gtfsPath, skipValidation)
+		//
+		//for _, parseErrors := range ctx.GetParseErrors() {
+		//	log.Println(parseErrors)
+		//}
+		//for _, v := range ctx.GetViolations() {
+		//	log.Println(v)
+		//}
+		//for _, r := range ctx.GetRecommendations() {
+		//	log.Println(r)
+		//}
+		//for _, i := range ctx.GetInfos() {
+		//	log.Println(i)
+		//}
+		//
+		//if dryRun {
+		//	os.Exit(0)
+		//}
 
-		for _, parseErrors := range ctx.GetParseErrors() {
-			log.Println(parseErrors)
-		}
-		for _, v := range ctx.GetViolations() {
-			log.Println(v)
-		}
-		for _, r := range ctx.GetRecommendations() {
-			log.Println(r)
-		}
-		for _, i := range ctx.GetInfos() {
-			log.Println(i)
-		}
-
-		if dryRun {
-			os.Exit(0)
-		}
-
-		dataService := service.DataService{Context: ctx}
+		dataService := service.DataService{DataStore: repository.NewJourneysDataStore(gtfsPath, skipValidation)}
 
 		r := router.New(dataService, baseUrl)
 
