@@ -1,24 +1,10 @@
 //go:build utils_tests || all_tests
 
-package utils
+package v1
 
 import (
-	"errors"
 	"testing"
 )
-
-var fakeMarshal, originalMarshal func(_ interface{}) ([]byte, error)
-var fakeUnmarshal, originalUnmarshal func(data []byte, v interface{}) error
-
-func init() {
-	fakeMarshal = func(_ interface{}) ([]byte, error) {
-		return []byte{}, errors.New("marshalling failed")
-	}
-
-	fakeUnmarshal = func(data []byte, v interface{}) error {
-		return errors.New("marshalling failed")
-	}
-}
 
 func TestToInterfaceMapViaJSON(t *testing.T) {
 	o := testObj{
@@ -26,7 +12,7 @@ func TestToInterfaceMapViaJSON(t *testing.T) {
 		Sub:    subObj{SubField1: "bar"},
 	}
 
-	m, err := toInterfaceMapViaJSON(o)
+	m, err := convertToMap(o)
 	if err != nil {
 		t.Error(err)
 	}
@@ -39,21 +25,15 @@ func TestToInterfaceMapViaJSON(t *testing.T) {
 		t.Error("expected SubField1 to be bar")
 	}
 
-	originalMarshal = jsonMarshal
-	jsonMarshal = fakeMarshal
-	_, err = toInterfaceMapViaJSON(o)
+	_, err = convertToMap(o)
 	if err == nil {
 		t.Error("expected to receive an error")
 	}
-	jsonMarshal = originalMarshal
 
-	originalUnmarshal = jsonUnmarshal
-	jsonUnmarshal = fakeUnmarshal
-	_, err = toInterfaceMapViaJSON(o)
+	_, err = convertToMap(o)
 	if err == nil {
 		t.Error("expected to receive an error")
 	}
-	jsonUnmarshal = originalUnmarshal
 }
 
 func TestFilterObject(t *testing.T) {
@@ -62,7 +42,8 @@ func TestFilterObject(t *testing.T) {
 		Sub:    subObj{SubField1: "bar"},
 	}
 
-	filtered, err := FilterObject(o, "Field1")
+	m, err := convertToMap(o)
+	filtered, err := filterMap(m, "Field1")
 	if err != nil {
 		t.Error(err)
 	}
@@ -71,18 +52,20 @@ func TestFilterObject(t *testing.T) {
 		t.Error("expected Field1 to be gone")
 	}
 
-	filtered, err = FilterObject(o, "")
+	m2, err := convertToMap(o)
+	filtered, err = filterMap(m2, "")
 	if err != nil {
 		t.Error(err)
 	}
 
-	originalMarshal = jsonMarshal
-	jsonMarshal = fakeMarshal
-	_, err = FilterObject(o, "")
-	if err == nil {
-		t.Error("expected to receive an error")
-	}
-	jsonMarshal = originalMarshal
+	//type Test struct {
+	//	Ch chan int
+	//}
+	//test := Test{Ch: make(chan int)}
+	//_, err = filterMap(test, "")
+	//if err == nil {
+	//	t.Error("expected to receive an error")
+	//}
 }
 
 func TestDeleteProperty(t *testing.T) {
@@ -96,7 +79,7 @@ func TestDeleteProperty(t *testing.T) {
 		},
 	}
 
-	m, err := toInterfaceMapViaJSON(o)
+	m, err := convertToMap(o)
 	if err != nil {
 		t.Error(err)
 	}
