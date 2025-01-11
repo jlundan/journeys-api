@@ -30,7 +30,7 @@ type GTFSContext struct {
 	Errors            []error
 }
 
-func NewGTFSContextForDirectory(gtfsPath string) *GTFSContext {
+func NewGTFSContextForDirectory(gtfsPath string, skipValidation bool) *GTFSContext {
 	context := GTFSContext{}
 
 	files := []string{ggtfs.FileNameAgency, ggtfs.FileNameRoutes, ggtfs.FileNameStops, ggtfs.FileNameTrips, ggtfs.FileNameStopTimes,
@@ -72,11 +72,13 @@ func NewGTFSContextForDirectory(gtfsPath string) *GTFSContext {
 		}
 	}
 
-	context.ValidationNotices = append(context.ValidationNotices, ggtfs.ValidateTrips(context.Trips, context.Routes, context.CalendarItems, context.Shapes)...)
-	context.ValidationNotices = append(context.ValidationNotices, ggtfs.ValidateShapes(context.Shapes)...)
-	context.ValidationNotices = append(context.ValidationNotices, ggtfs.ValidateCalendarDates(context.CalendarDates, context.CalendarItems)...)
-	context.ValidationNotices = append(context.ValidationNotices, ggtfs.ValidateRoutes(context.Routes, context.Agencies)...)
-	context.ValidationNotices = append(context.ValidationNotices, ggtfs.ValidateStopTimes(context.StopTimes, context.Stops)...)
+	if !skipValidation {
+		context.ValidationNotices = append(context.ValidationNotices, ggtfs.ValidateTrips(context.Trips, context.Routes, context.CalendarItems, context.Shapes)...)
+		context.ValidationNotices = append(context.ValidationNotices, ggtfs.ValidateShapes(context.Shapes)...)
+		context.ValidationNotices = append(context.ValidationNotices, ggtfs.ValidateCalendarDates(context.CalendarDates, context.CalendarItems)...)
+		context.ValidationNotices = append(context.ValidationNotices, ggtfs.ValidateRoutes(context.Routes, context.Agencies)...)
+		context.ValidationNotices = append(context.ValidationNotices, ggtfs.ValidateStopTimes(context.StopTimes, context.Stops)...)
+	}
 
 	return &context
 }

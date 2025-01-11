@@ -28,6 +28,8 @@ tre:
 tre-dry:
 	MEMCACHED_URL="localhost:11211" JOURNEYS_GTFS_PATH=.gtfs JOURNEYS_BASE_URL="https://data.itsfactory.fi/journeys/api/1" JOURNEYS_VA_BASE_URL="https://data.itsfactory.fi/journeys/api/1" go run cmd/journeys/journeys.go --dry-run
 tre-dev:
-	JOURNEYS_GTFS_PATH=.gtfs JOURNEYS_BASE_URL=http://localhost:5678 JOURNEYS_VA_BASE_URL="https://data.itsfactory.fi/journeys/api/1" go run cmd/journeys/journeys.go
+	JOURNEYS_GTFS_PATH=.gtfs JOURNEYS_BASE_URL=http://localhost:5678 JOURNEYS_VA_BASE_URL="https://data.itsfactory.fi/journeys/api/1" go run -race cmd/journeys/journeys.go --disable-cache
+tre-dev-no-val:
+	JOURNEYS_GTFS_PATH=.gtfs JOURNEYS_BASE_URL=http://localhost:5678 JOURNEYS_VA_BASE_URL="https://data.itsfactory.fi/journeys/api/1" go run -race cmd/journeys/journeys.go --disable-cache --skip-validation
 vet:
 	go vet ./...

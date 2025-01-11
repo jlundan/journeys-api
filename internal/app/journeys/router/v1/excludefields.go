@@ -1,47 +1,53 @@
-package utils
+package v1
 
 import (
 	"encoding/json"
 	"strings"
 )
 
-// TODO: move these to FilterObject callback functions
-var (
-	jsonMarshal   func(_ interface{}) ([]byte, error)
-	jsonUnmarshal func(data []byte, v interface{}) error
-)
-
-func init() {
-	jsonMarshal = json.Marshal
-	jsonUnmarshal = json.Unmarshal
-}
-
-func FilterObject(obj interface{}, propertyPaths string) (interface{}, error) {
-	im, err := toInterfaceMapViaJSON(obj)
-	if err != nil {
-		return nil, err
+func removeExcludedFields[T APIEntity](bodyElements []T, propertyPaths string) ([]any, error) {
+	if len(bodyElements) == 0 {
+		return []any{}, nil
 	}
 
-	ppArr := strings.Split(propertyPaths, ",")
-	for _, pp := range ppArr {
-		deleteProperty(im, pp)
-	}
+	var filteredBodyElements []any
+	for _, be := range bodyElements {
+		m, err := convertToMap(be)
+		if err != nil {
+			return filteredBodyElements, err
+		}
 
-	return im, nil
+		fm, err := filterMap(m, propertyPaths)
+		if err != nil {
+			return filteredBodyElements, err
+		}
+
+		filteredBodyElements = append(filteredBodyElements, fm)
+	}
+	return filteredBodyElements, nil
 }
 
-func toInterfaceMapViaJSON(obj interface{}) (map[string]interface{}, error) {
-	jsonStr, err := jsonMarshal(obj)
+func convertToMap(obj interface{}) (map[string]any, error) {
+	jsonStr, err := json.Marshal(obj)
 	if err != nil {
 		return nil, err
 	}
 	objectData := make(map[string]interface{})
-	err = jsonUnmarshal(jsonStr, &objectData)
+	err = json.Unmarshal(jsonStr, &objectData)
 	if err != nil {
 		return nil, err
 	}
 
 	return objectData, nil
+}
+
+func filterMap(obj map[string]any, propertyPaths string) (interface{}, error) {
+	ppArr := strings.Split(propertyPaths, ",")
+	for _, pp := range ppArr {
+		deleteProperty(obj, pp)
+	}
+
+	return obj, nil
 }
 
 func deleteProperty(obj any, propertyPath string) {
@@ -67,7 +73,7 @@ func deleteProperty(obj any, propertyPath string) {
 				for _, a := range arr {
 					deleteProperty(a, strings.Join(pathFragments[i+1:], "."))
 				}
-			} else if _, isMap := objectAsMap[f].(map[string]interface{}); isMap {
+			} else if _, isMap2 := objectAsMap[f].(map[string]interface{}); isMap2 {
 				// Finally, if the fragment was not the last one, or wasn't an array, we "drill down" to the next level
 				// (in our example, we would go from "municipality" to "name"). The for loop will move on to the next
 				// path fragment, which will be checked against the new objectAsMap. For example if the obj was initially

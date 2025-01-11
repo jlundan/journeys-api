@@ -1,4 +1,4 @@
-package journeys
+package server
 
 import (
 	"context"
@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-func StartServer(r *mux.Router, port int, onStartupSuccess func(port int), onStartupError func(err error), onShutdown func()) {
+func Start(r *mux.Router, port int, onStartupSuccess func(port int), onStartupError func(err error), onShutdown func()) {
 	srv := &http.Server{
 		Addr: fmt.Sprintf("0.0.0.0:%v", port),
 		// Avoid Slow loris attacks

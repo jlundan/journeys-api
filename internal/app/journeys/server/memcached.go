@@ -1,4 +1,4 @@
-package journeys
+package server
 
 import (
 	"bytes"

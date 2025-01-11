@@ -3,22 +3,25 @@ package main
 import (
 	"fmt"
 	"github.com/bradfitz/gomemcache/memcache"
-	"github.com/gorilla/mux"
-	"github.com/jlundan/journeys-api/internal/app/journeys"
 	"github.com/jlundan/journeys-api/internal/app/journeys/context/tre"
-	"github.com/jlundan/journeys-api/internal/app/journeys/routes"
+	"github.com/jlundan/journeys-api/internal/app/journeys/router"
+	"github.com/jlundan/journeys-api/internal/app/journeys/server"
+	"github.com/jlundan/journeys-api/internal/app/journeys/service"
 	"github.com/spf13/cobra"
 	"log"
 	"os"
+	"strconv"
 )
 
 const defaultPort = 8080
 
 var dryRun bool
 var disableCache bool
+var skipValidation bool
 
 func main() {
 	MainCommand.Flags().BoolVar(&disableCache, "disable-cache", false, "Do not use cache")
+	MainCommand.Flags().BoolVar(&skipValidation, "skip-validation", false, "Skip all validations")
 	MainCommand.Flags().BoolVar(&dryRun, "dry-run", false, "Perform a dry run without starting the server")
 	_ = MainCommand.Execute()
 }
@@ -29,66 +32,58 @@ var MainCommand = &cobra.Command{
 	Long:  "Start Journey API server",
 	Args:  cobra.MinimumNArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
-		if os.Getenv("JOURNEYS_BASE_URL") == "" {
+		baseUrl := os.Getenv("JOURNEYS_BASE_URL")
+		gtfsPath := os.Getenv("JOURNEYS_GTFS_PATH")
+
+		if baseUrl == "" {
 			log.Fatal("JOURNEYS_BASE_URL not set in environment. Cannot proceed.")
 		}
 
-		if os.Getenv("JOURNEYS_GTFS_PATH") == "" {
+		if gtfsPath == "" {
 			log.Fatal("JOURNEYS_GTFS_PATH not set in environment. Cannot proceed.")
 		}
 
-		serverPort, err := journeys.ParsePort(os.Getenv("JOURNEYS_PORT"), defaultPort)
+		serverPort, err := parsePort(os.Getenv("JOURNEYS_PORT"), defaultPort)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		ctx := tre.NewContext(os.Getenv("JOURNEYS_GTFS_PATH"))
+		ctx := tre.NewContext(gtfsPath, skipValidation)
 
-		parseErrors := ctx.GetParseErrors()
-		for _, err := range parseErrors {
-			log.Println(err)
+		for _, parseErrors := range ctx.GetParseErrors() {
+			log.Println(parseErrors)
 		}
-
-		violations := ctx.GetViolations()
-		for _, v := range violations {
+		for _, v := range ctx.GetViolations() {
 			log.Println(v)
 		}
-
-		recommendations := ctx.GetRecommendations()
-		for _, r := range recommendations {
+		for _, r := range ctx.GetRecommendations() {
 			log.Println(r)
 		}
-
 		for _, i := range ctx.GetInfos() {
 			log.Println(i)
 		}
 
-		if dryRun && len(parseErrors) > 0 && len(violations) > 0 && len(recommendations) > 0 {
-			os.Exit(1)
+		if dryRun {
+			os.Exit(0)
 		}
 
-		router := mux.NewRouter()
+		dataService := service.DataService{Context: ctx}
 
-		routes.InjectMunicipalityRoutes(router, ctx)
-		routes.InjectLineRoutes(router, ctx)
-		routes.InjectJourneyPatternRoutes(router, ctx)
-		routes.InjectStopPointRoutes(router, ctx)
-		routes.InjectJourneyRoutes(router, ctx)
-		routes.InjectRouteRoutes(router, ctx)
+		r := router.New(dataService, baseUrl)
 
 		if !disableCache {
-			cmw, err := journeys.NewMemcachedCacheMiddleware(memcache.New(os.Getenv("MEMCACHED_URL")))
+			memcached, err := server.NewMemcachedCacheMiddleware(memcache.New(os.Getenv("MEMCACHED_URL")))
 			if err != nil {
 				log.Fatal(err)
 			}
-			router.Use(cmw.Middleware)
+			r.Use(memcached.Middleware)
 
 			log.Println("Using cache")
 		}
 
-		router.Use(journeys.CorsMiddleware)
+		r.Use(server.CorsMiddleware)
 
-		journeys.StartServer(router, serverPort, onServerStartupSuccess, onServerStartupFailure, onServerShutdown)
+		server.Start(r, serverPort, onServerStartupSuccess, onServerStartupFailure, onServerShutdown)
 	},
 }
 
@@ -103,3 +98,26 @@ func onServerStartupFailure(err error) {
 func onServerShutdown() {
 	log.Println("shutting down")
 }
+
+func parsePort(envPort string, defaultPort int) (int, error) {
+	var serverPort int
+
+	if envPort == "" {
+		serverPort = defaultPort
+	} else {
+		p, err := strconv.Atoi(envPort)
+		if err != nil {
+			return 0, err
+		}
+		serverPort = p
+	}
+
+	return serverPort, nil
+}
+
+//routes.InjectMunicipalityRoutes(router, ctx)
+//routes.InjectLineRoutes(router, ctx)
+//routes.InjectJourneyPatternRoutes(router, ctx)
+//routes.InjectStopPointRoutes(router, ctx)
+//routes.InjectJourneyRoutes(router, ctx)
+//routes.InjectRouteRoutes(router, ctx)
