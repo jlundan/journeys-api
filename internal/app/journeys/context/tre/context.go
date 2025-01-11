@@ -8,7 +8,7 @@ import (
 
 const GtfsEnvKey = "JOURNEYS_GTFS_PATH"
 
-func NewContext(gtfsPath string, skipValidation bool) model.Context {
+func NewContext(gtfsPath string, skipValidation bool) Context {
 	ctx := NewGTFSContextForDirectory(gtfsPath, skipValidation)
 
 	municipalities := buildMunicipalities(*ctx.Municipalities)
