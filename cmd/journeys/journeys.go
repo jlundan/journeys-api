@@ -3,10 +3,10 @@ package main
 import (
 	"fmt"
 	"github.com/bradfitz/gomemcache/memcache"
+	"github.com/jlundan/journeys-api/internal/app/journeys/repository"
 	"github.com/jlundan/journeys-api/internal/app/journeys/router"
 	"github.com/jlundan/journeys-api/internal/app/journeys/server"
 	"github.com/jlundan/journeys-api/internal/app/journeys/service"
-	"github.com/jlundan/journeys-api/internal/app/repository"
 	"github.com/spf13/cobra"
 	"log"
 	"os"

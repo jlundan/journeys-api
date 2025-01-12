@@ -1,3 +1,0 @@
-service_id,date,exception_type
-KEV_AR_HU_9000_2021,20210405,1
-KEV_AR_HU_9000_2021,20210513,2
