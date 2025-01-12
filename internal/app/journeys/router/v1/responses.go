@@ -8,7 +8,7 @@ import (
 )
 
 type APIEntity interface {
-	Line
+	Line | Journey | JourneyPattern | Route | StopPoint | Municipality
 }
 
 func sendJson(data any, w http.ResponseWriter) {

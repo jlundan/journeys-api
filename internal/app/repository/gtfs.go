@@ -30,7 +30,7 @@ type GTFSBundle struct {
 	Errors            []error
 }
 
-func NewGTFSBundle(gtfsPath string, skipValidation bool) *GTFSBundle {
+func newGTFSBundle(gtfsPath string, skipValidation bool) *GTFSBundle {
 	context := GTFSBundle{}
 
 	files := []string{ggtfs.FileNameAgency, ggtfs.FileNameRoutes, ggtfs.FileNameStops, ggtfs.FileNameTrips, ggtfs.FileNameStopTimes,
