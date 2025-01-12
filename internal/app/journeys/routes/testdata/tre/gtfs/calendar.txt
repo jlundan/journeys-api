@@ -1,3 +1,0 @@
-service_id,monday,tuesday,wednesday,thursday,friday,saturday,sunday,start_date,end_date
-KEV_AR_HU_9000_2021,1,1,1,1,1,0,0,20000101,20990101
-IN_THE_PAST,1,1,1,1,1,0,0,20000101,20000102
