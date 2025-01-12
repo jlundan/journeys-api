@@ -2,7 +2,7 @@ package router
 
 import (
 	"github.com/gorilla/mux"
-	"github.com/jlundan/journeys-api/internal/app/journeys/router/v1"
+	v1 "github.com/jlundan/journeys-api/internal/app/journeys/handlers/v1"
 	"github.com/jlundan/journeys-api/internal/app/journeys/service"
 )
 

@@ -15,6 +15,9 @@ test-v:
 test-v-ggtfs:
 	go test --count=1 -v -tags=ggtfs_tests ./internal/pkg/ggtfs
 
+test-v-journeys:
+	go test --count=1 -v -tags=journeys_tests ./internal/app/journeys/...
+
 test-v-ggtfs-common:
 	go test --count=1 -v -tags=ggtfs_tests_common ./internal/pkg/ggtfs
 

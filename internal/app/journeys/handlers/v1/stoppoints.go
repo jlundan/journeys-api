@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-func HandleGetAllStopPoints(service service.DataService, baseUrl string) func(http.ResponseWriter, *http.Request) {
+func HandleGetAllStopPoints(service service.DataService, baseUrl string) http.HandlerFunc {
 	return func(rw http.ResponseWriter, req *http.Request) {
 		modelStopPoints := service.SearchStopPoints(getQueryParameters(req))
 
@@ -26,11 +26,11 @@ func HandleGetAllStopPoints(service service.DataService, baseUrl string) func(ht
 	}
 }
 
-func HandleGetOneStopPoint(service service.DataService, baseUrl string) func(http.ResponseWriter, *http.Request) {
+func HandleGetOneStopPoint(service service.DataService, baseUrl string) http.HandlerFunc {
 	return func(rw http.ResponseWriter, req *http.Request) {
 		msp, err := service.GetOneStopPointById(mux.Vars(req)["name"])
 		if err != nil {
-			sendError("no such element", rw)
+			sendJson(newSuccessResponse(arrayToAnyArray(make([]StopPoint, 0))), rw)
 			return
 		}
 
