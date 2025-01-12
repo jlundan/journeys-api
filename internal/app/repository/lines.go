@@ -7,7 +7,12 @@ import (
 	"sort"
 )
 
-func buildLineIndexes(routes []*ggtfs.Route) ([]*model.Line, map[string]*model.Line) {
+type JourneysLineDataStore struct {
+	All  []*model.Line
+	ById map[string]*model.Line
+}
+
+func newLineDataStore(routes []*ggtfs.Route) *JourneysLineDataStore {
 	var all = make([]*model.Line, 0)
 	var byId = make(map[string]*model.Line)
 
@@ -48,5 +53,8 @@ func buildLineIndexes(routes []*ggtfs.Route) ([]*model.Line, map[string]*model.L
 		return all[x].Name < all[y].Name
 	})
 
-	return all, byId
+	return &JourneysLineDataStore{
+		All:  all,
+		ById: byId,
+	}
 }

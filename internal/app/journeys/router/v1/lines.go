@@ -10,8 +10,12 @@ import (
 
 func HandleGetAllLines(service service.DataService, baseUrl string) func(http.ResponseWriter, *http.Request) {
 	return func(rw http.ResponseWriter, req *http.Request) {
-		qp := getQueryParameters(req)
-		lines := convertLines(service.SearchLines(qp), baseUrl)
+		modelLines := service.SearchLines(getQueryParameters(req))
+
+		var lines []Line
+		for _, ml := range modelLines {
+			lines = append(lines, convertLine(ml, baseUrl))
+		}
 
 		lex, err := removeExcludedFields(lines, getExcludeFieldsQueryParameter(req))
 		if err != nil {
@@ -24,14 +28,13 @@ func HandleGetAllLines(service service.DataService, baseUrl string) func(http.Re
 
 func HandleGetOneLine(service service.DataService, baseUrl string) func(http.ResponseWriter, *http.Request) {
 	return func(rw http.ResponseWriter, req *http.Request) {
-
-		line, err := service.GetOneLineById(mux.Vars(req)["name"])
+		ml, err := service.GetOneLineById(mux.Vars(req)["name"])
 		if err != nil {
 			sendError("no such element", rw)
 			return
 		}
 
-		lines := convertLines([]*model.Line{line}, baseUrl)
+		lines := []Line{convertLine(ml, baseUrl)}
 
 		lex, err := removeExcludedFields(lines, getExcludeFieldsQueryParameter(req))
 		if err != nil {
@@ -42,20 +45,12 @@ func HandleGetOneLine(service service.DataService, baseUrl string) func(http.Res
 	}
 }
 
-func convertLines(lines []*model.Line, baseUrl string) []Line {
-	if len(lines) == 0 {
-		return []Line{}
+func convertLine(line *model.Line, baseUrl string) Line {
+	return Line{
+		Url:         fmt.Sprintf("%v%v/%v", baseUrl, linePrefix, line.Name),
+		Name:        line.Name,
+		Description: line.Description,
 	}
-
-	var converted []Line
-	for _, line := range lines {
-		converted = append(converted, Line{
-			Url:         fmt.Sprintf("%v%v/%v", baseUrl, "/lines", line.Name),
-			Name:        line.Name,
-			Description: line.Description,
-		})
-	}
-	return converted
 }
 
 type Line struct {
