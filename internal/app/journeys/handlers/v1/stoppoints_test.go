@@ -63,7 +63,7 @@ func TestStopPointRoutes(t *testing.T) {
 				"61.47561,23.97756",
 				"B",
 				StopPointMunicipality{
-					Url:  municipalityUrl("211"),
+					Url:  stopPointMunicipalityUrl("211"),
 					Name: "Kangasala",
 				},
 			},
@@ -88,14 +88,19 @@ func TestStopPointRoutes(t *testing.T) {
 		router.ServeHTTP(rec, req)
 
 		if tc.errorExpected {
-			_, err := getStopPointErrorResponse(rec)
+			var response apiFailResponse
+			err := json.Unmarshal(rec.Body.Bytes(), &response)
 			if err != nil {
 				t.Error(err)
 			}
 			continue
 		}
 
-		gotResponse := getStopPointSuccessResponse(t, rec)
+		var gotResponse stopPointSuccessResponse
+		err := json.Unmarshal(rec.Body.Bytes(), &gotResponse)
+		if err != nil {
+			t.Error(err)
+		}
 
 		expectedResponse := stopPointSuccessResponse{
 			Status: "success",
@@ -113,7 +118,7 @@ func TestStopPointRoutes(t *testing.T) {
 
 		var diffs []FieldDiff
 		initialTag := fmt.Sprintf("%v:Response", tc.target)
-		err := compareVariables(expectedResponse, gotResponse, initialTag, &diffs, false)
+		err = compareVariables(expectedResponse, gotResponse, initialTag, &diffs, false)
 		if err != nil {
 			t.Error(err)
 			break
@@ -159,28 +164,37 @@ func getStopPointMap() map[string]StopPoint {
 	return result
 }
 
+func getStopPointMunicipalityMap() map[string]StopPointMunicipality {
+	municipalities := make(map[string]StopPointMunicipality)
+	municipalities["211"] = StopPointMunicipality{
+		Url:       stopPointMunicipalityUrl("211"),
+		ShortName: "211",
+		Name:      "Kangasala",
+	}
+
+	municipalities["604"] = StopPointMunicipality{
+		Url:       stopPointMunicipalityUrl("604"),
+		ShortName: "604",
+		Name:      "Pirkkala",
+	}
+
+	municipalities["837"] = StopPointMunicipality{
+		Url:       stopPointMunicipalityUrl("837"),
+		ShortName: "837",
+		Name:      "Tampere",
+	}
+	return municipalities
+}
+
 type stopPointSuccessResponse struct {
 	Status string         `json:"status"`
 	Data   apiSuccessData `json:"data"`
 	Body   []StopPoint    `json:"body"`
 }
 
-func getStopPointSuccessResponse(t *testing.T, w *httptest.ResponseRecorder) stopPointSuccessResponse {
-	var response stopPointSuccessResponse
-	err := json.Unmarshal(w.Body.Bytes(), &response)
-	if err != nil {
-		t.Error(err)
-	}
-
-	return response
+func stopPointUrl(name string) string {
+	return fmt.Sprintf("%v/stop-points/%v", "", name)
 }
-
-func getStopPointErrorResponse(w *httptest.ResponseRecorder) (apiFailResponse, error) {
-	var response apiFailResponse
-	err := json.Unmarshal(w.Body.Bytes(), &response)
-	if err != nil {
-		return apiFailResponse{}, err
-	}
-
-	return response, nil
+func stopPointMunicipalityUrl(name string) string {
+	return fmt.Sprintf("%v/municipalities/%v", "", name)
 }
