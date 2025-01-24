@@ -30,7 +30,7 @@ func HandleGetOneJourneyPattern(service service.DataService, baseUrl string) fun
 	return func(rw http.ResponseWriter, req *http.Request) {
 		mj, err := service.GetOneJourneyPatternById(mux.Vars(req)["name"])
 		if err != nil {
-			sendError("no such element", rw)
+			sendJson(newSuccessResponse(arrayToAnyArray(make([]JourneyPattern, 0))), rw)
 			return
 		}
 
