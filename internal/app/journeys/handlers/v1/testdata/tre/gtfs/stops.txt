@@ -1,0 +1,8 @@
+stop_id,stop_code,stop_name,stop_lat,stop_lon,zone_id,municipality_id
+4600,4600,Vatiala,61.47561,23.97756,B,211
+8171,8171,Vällintie,61.48067,23.97002,B,211
+8149,8149,Sudenkorennontie,61.47979,23.96166,C,211
+7017,7017,Suupantori,61.46546,23.64219,B,604
+7015,7015,Pirkkala,61.46590,23.64734,B,604
+3615,3615,Näyttelijänkatu,61.44450,23.87235,B,837
+3607,3607,Lavastajanpolku,61.44173,23.86961,B,837

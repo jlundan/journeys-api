@@ -69,7 +69,7 @@ func deleteProperty(obj any, propertyPath string) {
 			} else if arr, isArray := objectAsMap[f].([]interface{}); isArray {
 				// If the field is an array, for example journeys/<journey-id>?exclude-fields=calls.arrivalTime (and
 				// it is not the last item in the pathFragments), then we want to delete the arrivalTime from all
-				// calls in the array. Call deleteProperty recursively for all items in the array.
+				// calls in the array. Call deleteProperty recursively for all expectedEntities in the array.
 				for _, a := range arr {
 					deleteProperty(a, strings.Join(pathFragments[i+1:], "."))
 				}
