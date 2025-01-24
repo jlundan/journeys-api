@@ -14,7 +14,7 @@ func HandleGetAllJourneys(service service.DataService, baseUrl string, vehicleAc
 
 		var journeys []Journey
 		for _, mj := range modelJourneys {
-			journeys = append(journeys, convertJourney(mj, baseUrl))
+			journeys = append(journeys, convertJourney(mj, baseUrl, vehicleActivityBaseUrl))
 		}
 
 		jex, err := removeExcludedFields(journeys, getExcludeFieldsQueryParameter(req))
