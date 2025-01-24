@@ -6,7 +6,6 @@ import (
 	"github.com/jlundan/journeys-api/internal/app/journeys/model"
 	"github.com/jlundan/journeys-api/internal/app/journeys/service"
 	"net/http"
-	"os"
 )
 
 func HandleGetAllJourneyPatterns(service service.DataService, baseUrl string) func(http.ResponseWriter, *http.Request) {
@@ -61,23 +60,23 @@ func convertJourneyPattern(jp *model.JourneyPattern, baseUrl string) JourneyPatt
 	}
 
 	converted := JourneyPattern{
-		Url:             fmt.Sprintf("%v%v/%v", os.Getenv("JOURNEYS_BASE_URL"), journeyPatternPrefix, jp.Id),
-		RouteUrl:        fmt.Sprintf("%v%v/%v", os.Getenv("JOURNEYS_BASE_URL"), routePrefix, jp.Route.Id),
-		LineUrl:         fmt.Sprintf("%v%v/%v", os.Getenv("JOURNEYS_BASE_URL"), linePrefix, jp.Route.Line.Name),
+		Url:             fmt.Sprintf("%v%v/%v", baseUrl, journeyPatternPrefix, jp.Id),
+		RouteUrl:        fmt.Sprintf("%v%v/%v", baseUrl, routePrefix, jp.Route.Id),
+		LineUrl:         fmt.Sprintf("%v%v/%v", baseUrl, linePrefix, jp.Route.Line.Name),
 		Name:            name,
-		OriginStop:      fmt.Sprintf("%v%v/%v", os.Getenv("JOURNEYS_BASE_URL"), stopPointPrefix, jp.StopPoints[0].ShortName),
-		DestinationStop: fmt.Sprintf("%v%v/%v", os.Getenv("JOURNEYS_BASE_URL"), stopPointPrefix, jp.StopPoints[len(jp.StopPoints)-1].ShortName),
+		OriginStop:      fmt.Sprintf("%v%v/%v", baseUrl, stopPointPrefix, jp.StopPoints[0].ShortName),
+		DestinationStop: fmt.Sprintf("%v%v/%v", baseUrl, stopPointPrefix, jp.StopPoints[len(jp.StopPoints)-1].ShortName),
 		Direction:       direction,
 	}
 
 	for _, v := range jp.StopPoints {
-		converted.StopPoints = append(converted.StopPoints, convertJourneyPatternStopPoint(v))
+		converted.StopPoints = append(converted.StopPoints, convertJourneyPatternStopPoint(v, baseUrl))
 	}
 
 	for _, v := range jp.Journeys {
 		converted.Journeys = append(converted.Journeys, JourneyPatternJourney{
-			Url:               fmt.Sprintf("%v%v/%v", os.Getenv("JOURNEYS_BASE_URL"), journeysPrefix, v.Id),
-			JourneyPatternUrl: fmt.Sprintf("%v%v/%v", os.Getenv("JOURNEYS_BASE_URL"), journeyPatternPrefix, v.JourneyPattern.Id),
+			Url:               fmt.Sprintf("%v%v/%v", baseUrl, journeysPrefix, v.Id),
+			JourneyPatternUrl: fmt.Sprintf("%v%v/%v", baseUrl, journeyPatternPrefix, v.JourneyPattern.Id),
 			DepartureTime:     v.DepartureTime,
 			ArrivalTime:       v.ArrivalTime,
 			HeadSign:          v.HeadSign,
@@ -88,20 +87,20 @@ func convertJourneyPattern(jp *model.JourneyPattern, baseUrl string) JourneyPatt
 	return converted
 }
 
-func convertJourneyPatternStopPoint(stopPoint *model.StopPoint) JourneyPatternStopPoint {
+func convertJourneyPatternStopPoint(stopPoint *model.StopPoint, baseUrl string) JourneyPatternStopPoint {
 	return JourneyPatternStopPoint{
-		Url:          fmt.Sprintf("%v%v/%v", os.Getenv("JOURNEYS_BASE_URL"), stopPointPrefix, stopPoint.ShortName),
+		Url:          fmt.Sprintf("%v%v/%v", baseUrl, stopPointPrefix, stopPoint.ShortName),
 		ShortName:    stopPoint.ShortName,
 		Name:         stopPoint.Name,
 		Location:     fmt.Sprintf("%v,%v", stopPoint.Latitude, stopPoint.Longitude),
 		TariffZone:   stopPoint.TariffZone,
-		Municipality: convertJourneyPatternMunicipality(stopPoint.Municipality),
+		Municipality: convertJourneyPatternMunicipality(stopPoint.Municipality, baseUrl),
 	}
 }
 
-func convertJourneyPatternMunicipality(municipality *model.Municipality) JourneyPatternMunicipality {
+func convertJourneyPatternMunicipality(municipality *model.Municipality, baseUrl string) JourneyPatternMunicipality {
 	return JourneyPatternMunicipality{
-		Url:       fmt.Sprintf("%v%v/%v", os.Getenv("JOURNEYS_BASE_URL"), municipalitiesPrefix, municipality.PublicCode),
+		Url:       fmt.Sprintf("%v%v/%v", baseUrl, municipalitiesPrefix, municipality.PublicCode),
 		ShortName: municipality.PublicCode,
 		Name:      municipality.Name,
 	}

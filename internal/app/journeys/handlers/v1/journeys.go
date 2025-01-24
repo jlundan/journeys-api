@@ -6,10 +6,9 @@ import (
 	"github.com/jlundan/journeys-api/internal/app/journeys/model"
 	"github.com/jlundan/journeys-api/internal/app/journeys/service"
 	"net/http"
-	"os"
 )
 
-func HandleGetAllJourneys(service service.DataService, baseUrl string) func(http.ResponseWriter, *http.Request) {
+func HandleGetAllJourneys(service service.DataService, baseUrl string, vehicleActivityBaseUrl string) func(http.ResponseWriter, *http.Request) {
 	return func(rw http.ResponseWriter, req *http.Request) {
 		modelJourneys := service.SearchJourneys(getQueryParameters(req))
 
@@ -27,15 +26,15 @@ func HandleGetAllJourneys(service service.DataService, baseUrl string) func(http
 	}
 }
 
-func HandleGetOneJourney(service service.DataService, baseUrl string) func(http.ResponseWriter, *http.Request) {
+func HandleGetOneJourney(service service.DataService, baseUrl string, vehicleActivityBaseUrl string) func(http.ResponseWriter, *http.Request) {
 	return func(rw http.ResponseWriter, req *http.Request) {
 		mj, err := service.GetOneJourneyById(mux.Vars(req)["name"])
 		if err != nil {
-			sendError("no such element", rw)
+			sendJson(newSuccessResponse(arrayToAnyArray(make([]Journey, 0))), rw)
 			return
 		}
 
-		journeys := []Journey{convertJourney(mj, baseUrl)}
+		journeys := []Journey{convertJourney(mj, baseUrl, vehicleActivityBaseUrl)}
 
 		jex, err := removeExcludedFields(journeys, getExcludeFieldsQueryParameter(req))
 		if err != nil {
@@ -46,13 +45,13 @@ func HandleGetOneJourney(service service.DataService, baseUrl string) func(http.
 	}
 }
 
-func convertJourney(j *model.Journey, baseUrl string) Journey {
+func convertJourney(j *model.Journey, baseUrl string, vehicleActivityBaseUrl string) Journey {
 	calls := make([]JourneyCall, 0)
 	for _, c := range j.Calls {
 		calls = append(calls, JourneyCall{
 			DepartureTime: c.DepartureTime,
 			ArrivalTime:   c.ArrivalTime,
-			StopPoint:     convertJourneyStopPoint(c.StopPoint),
+			StopPoint:     convertJourneyStopPoint(c.StopPoint, baseUrl),
 		})
 	}
 
@@ -77,15 +76,15 @@ func convertJourney(j *model.Journey, baseUrl string) Journey {
 	}
 
 	return Journey{
-		Url:                  fmt.Sprintf("%v%v/%v", os.Getenv("JOURNEYS_BASE_URL"), journeysPrefix, j.Id),
-		ActivityUrl:          fmt.Sprintf("%v%v/%v", os.Getenv("JOURNEYS_VA_BASE_URL"), "/vehicle-activity", j.ActivityId),
+		Url:                  fmt.Sprintf("%v%v/%v", baseUrl, journeysPrefix, j.Id),
+		ActivityUrl:          fmt.Sprintf("%v%v/%v", vehicleActivityBaseUrl, "/vehicle-activity", j.ActivityId),
 		HeadSign:             j.HeadSign,
 		Direction:            j.Direction,
 		WheelchairAccessible: j.WheelchairAccessible,
 		GtfsInfo:             gtfsInfo,
-		JourneyPatternUrl:    fmt.Sprintf("%v%v/%v", os.Getenv("JOURNEYS_BASE_URL"), journeyPatternPrefix, journeyPatternId),
-		LineUrl:              fmt.Sprintf("%v%v/%v", os.Getenv("JOURNEYS_BASE_URL"), linePrefix, lineId),
-		RouteUrl:             fmt.Sprintf("%v%v/%v", os.Getenv("JOURNEYS_BASE_URL"), routePrefix, routeId),
+		JourneyPatternUrl:    fmt.Sprintf("%v%v/%v", baseUrl, journeyPatternPrefix, journeyPatternId),
+		LineUrl:              fmt.Sprintf("%v%v/%v", baseUrl, linePrefix, lineId),
+		RouteUrl:             fmt.Sprintf("%v%v/%v", baseUrl, routePrefix, routeId),
 		Calls:                calls,
 		DayTypes:             j.DayTypes,
 		DayTypeExceptions:    dayTypeExceptions,
@@ -94,20 +93,20 @@ func convertJourney(j *model.Journey, baseUrl string) Journey {
 	}
 }
 
-func convertJourneyStopPoint(stopPoint *model.StopPoint) JourneyStopPoint {
+func convertJourneyStopPoint(stopPoint *model.StopPoint, baseUrl string) JourneyStopPoint {
 	return JourneyStopPoint{
-		Url:          fmt.Sprintf("%v%v/%v", os.Getenv("JOURNEYS_BASE_URL"), stopPointPrefix, stopPoint.ShortName),
+		Url:          fmt.Sprintf("%v%v/%v", baseUrl, stopPointPrefix, stopPoint.ShortName),
 		ShortName:    stopPoint.ShortName,
 		Name:         stopPoint.Name,
 		Location:     fmt.Sprintf("%v,%v", stopPoint.Latitude, stopPoint.Longitude),
 		TariffZone:   stopPoint.TariffZone,
-		Municipality: convertJourneyMunicipality(stopPoint.Municipality),
+		Municipality: convertJourneyMunicipality(stopPoint.Municipality, baseUrl),
 	}
 }
 
-func convertJourneyMunicipality(municipality *model.Municipality) JourneyMunicipality {
+func convertJourneyMunicipality(municipality *model.Municipality, baseUrl string) JourneyMunicipality {
 	return JourneyMunicipality{
-		Url:       fmt.Sprintf("%v%v/%v", os.Getenv("JOURNEYS_BASE_URL"), municipalitiesPrefix, municipality.PublicCode),
+		Url:       fmt.Sprintf("%v%v/%v", baseUrl, municipalitiesPrefix, municipality.PublicCode),
 		ShortName: municipality.PublicCode,
 		Name:      municipality.Name,
 	}
