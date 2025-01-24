@@ -8,9 +8,20 @@ import (
 )
 
 func (ds DataService) GetOneJourneyById(id string) (*model.Journey, error) {
+	var journey *model.Journey
+
 	if j, ok := ds.DataStore.Journeys.ById[id]; ok {
-		return j, nil
+		journey = j
 	}
+
+	if j, ok := ds.DataStore.Journeys.ByActivityId[id]; ok {
+		journey = j
+	}
+
+	if journey != nil {
+		return journey, nil
+	}
+
 	return nil, model.ErrNoSuchElement
 }
 
