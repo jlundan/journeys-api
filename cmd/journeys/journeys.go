@@ -33,6 +33,7 @@ var MainCommand = &cobra.Command{
 	Args:  cobra.MinimumNArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
 		baseUrl := os.Getenv("JOURNEYS_BASE_URL")
+		vehicleActivityBaseUrl := os.Getenv("JOURNEYS_VA_BASE_URL")
 		gtfsPath := os.Getenv("JOURNEYS_GTFS_PATH")
 
 		if baseUrl == "" {
@@ -69,7 +70,7 @@ var MainCommand = &cobra.Command{
 
 		dataService := service.DataService{DataStore: repository.NewJourneysDataStore(gtfsPath, skipValidation)}
 
-		r := router.New(dataService, baseUrl)
+		r := router.New(dataService, baseUrl, vehicleActivityBaseUrl)
 
 		if !disableCache {
 			memcached, err := server.NewMemcachedCacheMiddleware(memcache.New(os.Getenv("MEMCACHED_URL")))
