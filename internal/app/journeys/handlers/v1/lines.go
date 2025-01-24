@@ -30,7 +30,7 @@ func HandleGetOneLine(service service.DataService, baseUrl string) func(http.Res
 	return func(rw http.ResponseWriter, req *http.Request) {
 		ml, err := service.GetOneLineById(mux.Vars(req)["name"])
 		if err != nil {
-			sendError("no such element", rw)
+			sendJson(newSuccessResponse(arrayToAnyArray(make([]Line, 0))), rw)
 			return
 		}
 
