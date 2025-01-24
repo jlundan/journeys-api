@@ -30,7 +30,7 @@ func HandleGetOneRoute(service service.DataService, baseUrl string) func(http.Re
 	return func(rw http.ResponseWriter, req *http.Request) {
 		mr, err := service.GetOneRouteById(mux.Vars(req)["name"])
 		if err != nil {
-			sendError("no such element", rw)
+			sendJson(newSuccessResponse(arrayToAnyArray(make([]Route, 0))), rw)
 			return
 		}
 
@@ -61,12 +61,6 @@ func convertRoute(route *model.Route, baseUrl string) Route {
 		Url:        fmt.Sprintf("%v%v/%v", baseUrl, routePrefix, route.Id),
 		LineUrl:    fmt.Sprintf("%v%v/%v", baseUrl, linePrefix, route.Line.Name),
 		Name:       name,
-		//Links: map[string]string{
-		//	"self":             fmt.Sprintf("%v%v/%v", baseUrl, routePrefix, route.Id),
-		//	"line":             lineUrl,
-		//	"journey-patterns": fmt.Sprintf("%v%v?routeId=%v", baseUrl, journeyPatternPrefix, route.Id),
-		//	"journeys":         fmt.Sprintf("%v%v?routeId=%v", baseUrl, journeysPrefix, route.Id),
-		//},
 	}
 
 	for _, v := range route.Journeys {
