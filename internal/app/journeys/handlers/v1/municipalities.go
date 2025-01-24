@@ -30,7 +30,7 @@ func HandleGetOneMunicipality(service service.DataService, baseUrl string) func(
 	return func(rw http.ResponseWriter, req *http.Request) {
 		mm, err := service.GetOneMunicipalityById(mux.Vars(req)["name"])
 		if err != nil {
-			sendError("no such element", rw)
+			sendJson(newSuccessResponse(arrayToAnyArray(make([]Municipality, 0))), rw)
 			return
 		}
 
