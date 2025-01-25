@@ -58,6 +58,14 @@ func TestConvertToStringAnyMap(t *testing.T) {
 			}
 		})
 	}
+
+	// Test that non-structs cannot be serialized
+	// This is sort of unnecessary since convertToStringAnyMap is only used with APIEntities which are structs,
+	// but the test is here for completeness
+	_, err := convertToStringAnyMap("foo-bar")
+	if err == nil {
+		t.Error("expected error")
+	}
 }
 
 func equalMaps(a, b map[string]any) bool {
