@@ -11,6 +11,31 @@ type APIEntity interface {
 	Line | Journey | JourneyPattern | Route | StopPoint | Municipality
 }
 
+func sendSuccessResponse[T APIEntity](body []T, fieldExclusions string, w http.ResponseWriter) {
+	sendJson(newSuccessResponse(filterBodyElements(apiEntitiesToArrayOfAnyMaps(body), fieldExclusions)), w)
+}
+
+func filterBodyElements(bodyElementsAsArrayOfAnyMaps []map[string]any, fieldExclusions string) []map[string]any {
+	if len(fieldExclusions) > 0 {
+		bodyElementsAsArrayOfAnyMaps = removeExcludedFields(bodyElementsAsArrayOfAnyMaps, fieldExclusions)
+	}
+
+	return bodyElementsAsArrayOfAnyMaps
+}
+
+func apiEntitiesToArrayOfAnyMaps[T APIEntity](entities []T) []map[string]any {
+	var entitiesAsArrayOfAnyMaps []map[string]any
+	for _, be := range entities {
+		rAnyMap, err := convertToStringAnyMap(be)
+		if err != nil {
+			continue
+		}
+		entitiesAsArrayOfAnyMaps = append(entitiesAsArrayOfAnyMaps, rAnyMap)
+	}
+
+	return entitiesAsArrayOfAnyMaps
+}
+
 func sendJson(data any, w http.ResponseWriter) {
 	response, err := json.Marshal(data)
 	if err != nil {
@@ -46,7 +71,7 @@ func sendError(errMsg string, w http.ResponseWriter) {
 	}
 }
 
-func newSuccessResponse(body []any) apiSuccessResponse {
+func newSuccessResponse(body []map[string]any) apiSuccessResponse {
 	return apiSuccessResponse{
 		Status: "success",
 		Data: apiSuccessData{Headers: apiHeaders{Paging: apiHeadersPaging{
@@ -59,9 +84,9 @@ func newSuccessResponse(body []any) apiSuccessResponse {
 }
 
 type apiSuccessResponse struct {
-	Status string         `json:"status"`
-	Data   apiSuccessData `json:"data"`
-	Body   []any          `json:"body"`
+	Status string           `json:"status"`
+	Data   apiSuccessData   `json:"data"`
+	Body   []map[string]any `json:"body"`
 }
 
 type apiSuccessData struct {

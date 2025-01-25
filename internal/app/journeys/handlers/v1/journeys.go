@@ -17,12 +17,7 @@ func HandleGetAllJourneys(service service.DataService, baseUrl string, vehicleAc
 			journeys = append(journeys, convertJourney(mj, baseUrl, vehicleActivityBaseUrl))
 		}
 
-		jex, err := removeExcludedFields(journeys, getExcludeFieldsQueryParameter(req))
-		if err != nil {
-			sendJson(newSuccessResponse(arrayToAnyArray(journeys)), rw)
-		}
-
-		sendJson(newSuccessResponse(jex), rw)
+		sendSuccessResponse(journeys, getExcludeFieldsQueryParameter(req), rw)
 	}
 }
 
@@ -30,18 +25,12 @@ func HandleGetOneJourney(service service.DataService, baseUrl string, vehicleAct
 	return func(rw http.ResponseWriter, req *http.Request) {
 		mj, err := service.GetOneJourneyById(mux.Vars(req)["name"])
 		if err != nil {
-			sendJson(newSuccessResponse(arrayToAnyArray(make([]Journey, 0))), rw)
+			sendSuccessResponse([]Journey{}, getExcludeFieldsQueryParameter(req), rw)
 			return
 		}
 
 		journeys := []Journey{convertJourney(mj, baseUrl, vehicleActivityBaseUrl)}
-
-		jex, err := removeExcludedFields(journeys, getExcludeFieldsQueryParameter(req))
-		if err != nil {
-			sendJson(newSuccessResponse(arrayToAnyArray(journeys)), rw)
-		}
-
-		sendJson(newSuccessResponse(jex), rw)
+		sendSuccessResponse(journeys, getExcludeFieldsQueryParameter(req), rw)
 	}
 }
 

@@ -17,12 +17,7 @@ func HandleGetAllLines(service service.DataService, baseUrl string) func(http.Re
 			lines = append(lines, convertLine(ml, baseUrl))
 		}
 
-		lex, err := removeExcludedFields(lines, getExcludeFieldsQueryParameter(req))
-		if err != nil {
-			sendJson(newSuccessResponse(arrayToAnyArray(lines)), rw)
-		}
-
-		sendJson(newSuccessResponse(lex), rw)
+		sendSuccessResponse(lines, getExcludeFieldsQueryParameter(req), rw)
 	}
 }
 
@@ -30,18 +25,12 @@ func HandleGetOneLine(service service.DataService, baseUrl string) func(http.Res
 	return func(rw http.ResponseWriter, req *http.Request) {
 		ml, err := service.GetOneLineById(mux.Vars(req)["name"])
 		if err != nil {
-			sendJson(newSuccessResponse(arrayToAnyArray(make([]Line, 0))), rw)
+			sendSuccessResponse([]Line{}, getExcludeFieldsQueryParameter(req), rw)
 			return
 		}
 
 		lines := []Line{convertLine(ml, baseUrl)}
-
-		lex, err := removeExcludedFields(lines, getExcludeFieldsQueryParameter(req))
-		if err != nil {
-			sendJson(newSuccessResponse(arrayToAnyArray(lines)), rw)
-		}
-
-		sendJson(newSuccessResponse(lex), rw)
+		sendSuccessResponse(lines, getExcludeFieldsQueryParameter(req), rw)
 	}
 }
 

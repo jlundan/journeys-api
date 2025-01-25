@@ -17,12 +17,7 @@ func HandleGetAllMunicipalities(service service.DataService, baseUrl string) fun
 			municipalities = append(municipalities, convertMunicipality(mm, baseUrl))
 		}
 
-		lem, err := removeExcludedFields(municipalities, getExcludeFieldsQueryParameter(req))
-		if err != nil {
-			sendJson(newSuccessResponse(arrayToAnyArray(municipalities)), rw)
-		}
-
-		sendJson(newSuccessResponse(lem), rw)
+		sendSuccessResponse(municipalities, getExcludeFieldsQueryParameter(req), rw)
 	}
 }
 
@@ -30,18 +25,12 @@ func HandleGetOneMunicipality(service service.DataService, baseUrl string) func(
 	return func(rw http.ResponseWriter, req *http.Request) {
 		mm, err := service.GetOneMunicipalityById(mux.Vars(req)["name"])
 		if err != nil {
-			sendJson(newSuccessResponse(arrayToAnyArray(make([]Municipality, 0))), rw)
+			sendSuccessResponse([]Municipality{}, getExcludeFieldsQueryParameter(req), rw)
 			return
 		}
 
 		municipalities := []Municipality{convertMunicipality(mm, baseUrl)}
-
-		mex, err := removeExcludedFields(municipalities, getExcludeFieldsQueryParameter(req))
-		if err != nil {
-			sendJson(newSuccessResponse(arrayToAnyArray(municipalities)), rw)
-		}
-
-		sendJson(newSuccessResponse(mex), rw)
+		sendSuccessResponse(municipalities, getExcludeFieldsQueryParameter(req), rw)
 	}
 }
 

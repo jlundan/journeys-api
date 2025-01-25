@@ -2,14 +2,6 @@ package v1
 
 import "net/http"
 
-func arrayToAnyArray[T any](input []T) []any {
-	output := make([]any, len(input))
-	for i, v := range input {
-		output[i] = v
-	}
-	return output
-}
-
 func getQueryParameters(r *http.Request) map[string]string {
 	result := make(map[string]string)
 	for k, v := range r.URL.Query() {

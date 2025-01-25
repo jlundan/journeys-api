@@ -17,12 +17,7 @@ func HandleGetAllJourneyPatterns(service service.DataService, baseUrl string) fu
 			journeyPatterns = append(journeyPatterns, convertJourneyPattern(mjp, baseUrl))
 		}
 
-		jpe, err := removeExcludedFields(journeyPatterns, getExcludeFieldsQueryParameter(req))
-		if err != nil {
-			sendJson(newSuccessResponse(arrayToAnyArray(journeyPatterns)), rw)
-		}
-
-		sendJson(newSuccessResponse(jpe), rw)
+		sendSuccessResponse(journeyPatterns, getExcludeFieldsQueryParameter(req), rw)
 	}
 }
 
@@ -30,18 +25,12 @@ func HandleGetOneJourneyPattern(service service.DataService, baseUrl string) fun
 	return func(rw http.ResponseWriter, req *http.Request) {
 		mj, err := service.GetOneJourneyPatternById(mux.Vars(req)["name"])
 		if err != nil {
-			sendJson(newSuccessResponse(arrayToAnyArray(make([]JourneyPattern, 0))), rw)
+			sendSuccessResponse([]JourneyPattern{}, getExcludeFieldsQueryParameter(req), rw)
 			return
 		}
 
 		journeyPatterns := []JourneyPattern{convertJourneyPattern(mj, baseUrl)}
-
-		jex, err := removeExcludedFields(journeyPatterns, getExcludeFieldsQueryParameter(req))
-		if err != nil {
-			sendJson(newSuccessResponse(arrayToAnyArray(journeyPatterns)), rw)
-		}
-
-		sendJson(newSuccessResponse(jex), rw)
+		sendSuccessResponse(journeyPatterns, getExcludeFieldsQueryParameter(req), rw)
 	}
 }
 
@@ -55,8 +44,6 @@ func convertJourneyPattern(jp *model.JourneyPattern, baseUrl string) JourneyPatt
 	var name string
 	if len(jp.StopPoints) > 0 {
 		name = fmt.Sprintf("%v - %v", jp.StopPoints[0].Name, jp.StopPoints[len(jp.StopPoints)-1].Name)
-	} else {
-		name = ""
 	}
 
 	converted := JourneyPattern{
