@@ -1,4 +1,4 @@
-//go:build utils_tests || all_tests
+//go:build utils_tests || journeys_tests || all_tests
 
 package v1
 
@@ -6,66 +6,70 @@ import (
 	"testing"
 )
 
-//func TestToInterfaceMapViaJSON(t *testing.T) {
-//	o := testObj{
-//		Field1: "foo",
-//		Sub:    subObj{SubField1: "bar"},
-//	}
-//
-//	m, err := convertToMap(o)
-//	if err != nil {
-//		t.Error(err)
-//	}
-//
-//	if m["Field1"] != "foo" || m["Sub"] == nil {
-//		t.Error("expected field1 to be foo and sub not to be nil")
-//	}
-//
-//	if m["Sub"].(map[string]interface{})["SubField1"] != "bar" {
-//		t.Error("expected SubField1 to be bar")
-//	}
-//
-//	_, err = convertToMap(o)
-//	if err == nil {
-//		t.Error("expected to receive an error")
-//	}
-//
-//	_, err = convertToMap(o)
-//	if err == nil {
-//		t.Error("expected to receive an error")
-//	}
-//}
+func TestRemoveExcludedFields(t *testing.T) {
+	m := removeExcludedFields([]map[string]interface{}{}, "")
 
-func TestFilterObject(t *testing.T) {
-	//o := testObj{
-	//	Field1: "foo",
-	//	Sub:    subObj{SubField1: "bar"},
-	//}
-	//
-	//m, err := convertToMap(o)
-	//filtered, err := filterMap(m, "Field1")
-	//if err != nil {
-	//	t.Error(err)
-	//}
-	//
-	//if _, ok := filtered.(map[string]interface{})["Field1"]; ok {
-	//	t.Error("expected Field1 to be gone")
-	//}
-	//
-	//m2, err := convertToMap(o)
-	//filtered, err = filterMap(m2, "")
-	//if err != nil {
-	//	t.Error(err)
-	//}
+	if len(m) != 0 {
+		t.Error("expected empty map")
+	}
+}
 
-	//type Test struct {
-	//	Ch chan int
-	//}
-	//test := Test{Ch: make(chan int)}
-	//_, err = filterMap(test, "")
-	//if err == nil {
-	//	t.Error("expected to receive an error")
-	//}
+func TestConvertToStringAnyMap(t *testing.T) {
+	type testStruct struct {
+		Field1 string
+		Field2 bool
+	}
+
+	tests := []struct {
+		name    string
+		input   any
+		want    map[string]any
+		wantErr bool
+	}{
+		{
+			name: "Valid struct",
+			input: testStruct{
+				Field1: "value1",
+				Field2: true,
+			},
+			want: map[string]any{
+				"Field1": "value1",
+				"Field2": true,
+			},
+			wantErr: false,
+		},
+		{
+			name:    "Invalid input",
+			input:   make(chan int),
+			want:    nil,
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := convertToStringAnyMap(tt.input)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("convertToStringAnyMap() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !tt.wantErr && !equalMaps(got, tt.want) {
+				t.Errorf("convertToStringAnyMap() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func equalMaps(a, b map[string]any) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for k, v := range a {
+		if b[k] != v {
+			return false
+		}
+	}
+	return true
 }
 
 func TestDeleteProperty(t *testing.T) {
