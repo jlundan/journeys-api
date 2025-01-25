@@ -5,34 +5,26 @@ import (
 	"strings"
 )
 
-func removeExcludedFields[T APIEntity](bodyElements []T, propertyPaths string) ([]any, error) {
+func removeExcludedFields(bodyElements []map[string]any, propertyPaths string) []map[string]any {
 	if len(bodyElements) == 0 {
-		return []any{}, nil
+		return bodyElements
 	}
 
-	var filteredBodyElements []any
+	var filteredBodyElements []map[string]any
 	for _, be := range bodyElements {
-		m, err := convertToMap(be)
-		if err != nil {
-			return filteredBodyElements, err
-		}
-
-		fm, err := filterMap(m, propertyPaths)
-		if err != nil {
-			return filteredBodyElements, err
-		}
-
-		filteredBodyElements = append(filteredBodyElements, fm)
+		filteredBodyElements = append(filteredBodyElements, filterMap(be, propertyPaths))
 	}
-	return filteredBodyElements, nil
+	return filteredBodyElements
 }
 
-func convertToMap(obj interface{}) (map[string]any, error) {
+func convertToStringAnyMap(obj any) (map[string]any, error) {
 	jsonStr, err := json.Marshal(obj)
 	if err != nil {
 		return nil, err
 	}
-	objectData := make(map[string]interface{})
+
+	objectData := make(map[string]any)
+
 	err = json.Unmarshal(jsonStr, &objectData)
 	if err != nil {
 		return nil, err
@@ -41,13 +33,13 @@ func convertToMap(obj interface{}) (map[string]any, error) {
 	return objectData, nil
 }
 
-func filterMap(obj map[string]any, propertyPaths string) (interface{}, error) {
+func filterMap(obj map[string]any, propertyPaths string) map[string]any {
 	ppArr := strings.Split(propertyPaths, ",")
 	for _, pp := range ppArr {
 		deleteProperty(obj, pp)
 	}
 
-	return obj, nil
+	return obj
 }
 
 func deleteProperty(obj any, propertyPath string) {

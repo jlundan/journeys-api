@@ -17,12 +17,7 @@ func HandleGetAllRoutes(service service.DataService, baseUrl string) func(http.R
 			routes = append(routes, convertRoute(ml, baseUrl))
 		}
 
-		lex, err := removeExcludedFields(routes, getExcludeFieldsQueryParameter(req))
-		if err != nil {
-			sendJson(newSuccessResponse(arrayToAnyArray(routes)), rw)
-		}
-
-		sendJson(newSuccessResponse(lex), rw)
+		sendSuccessResponse(routes, getExcludeFieldsQueryParameter(req), rw)
 	}
 }
 
@@ -30,18 +25,12 @@ func HandleGetOneRoute(service service.DataService, baseUrl string) func(http.Re
 	return func(rw http.ResponseWriter, req *http.Request) {
 		mr, err := service.GetOneRouteById(mux.Vars(req)["name"])
 		if err != nil {
-			sendJson(newSuccessResponse(arrayToAnyArray(make([]Route, 0))), rw)
+			sendSuccessResponse([]Route{}, getExcludeFieldsQueryParameter(req), rw)
 			return
 		}
 
-		lines := []Route{convertRoute(mr, baseUrl)}
-
-		rex, err := removeExcludedFields(lines, getExcludeFieldsQueryParameter(req))
-		if err != nil {
-			sendJson(newSuccessResponse(arrayToAnyArray(lines)), rw)
-		}
-
-		sendJson(newSuccessResponse(rex), rw)
+		routes := []Route{convertRoute(mr, baseUrl)}
+		sendSuccessResponse(routes, getExcludeFieldsQueryParameter(req), rw)
 	}
 }
 
@@ -52,8 +41,6 @@ func convertRoute(route *model.Route, baseUrl string) Route {
 		var firstStopPoint = route.JourneyPatterns[0].StopPoints[0]
 		var lastStopPoint = route.JourneyPatterns[0].StopPoints[len(route.JourneyPatterns[0].StopPoints)-1]
 		name = fmt.Sprintf("%v - %v", firstStopPoint.Name, lastStopPoint.Name)
-	} else {
-		name = ""
 	}
 
 	converted := Route{

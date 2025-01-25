@@ -17,12 +17,7 @@ func HandleGetAllStopPoints(service service.DataService, baseUrl string) http.Ha
 			stopPoints = append(stopPoints, convertStopPoint(msp, baseUrl))
 		}
 
-		spEx, err := removeExcludedFields(stopPoints, getExcludeFieldsQueryParameter(req))
-		if err != nil {
-			sendJson(newSuccessResponse(arrayToAnyArray(stopPoints)), rw)
-		}
-
-		sendJson(newSuccessResponse(spEx), rw)
+		sendSuccessResponse(stopPoints, getExcludeFieldsQueryParameter(req), rw)
 	}
 }
 
@@ -30,18 +25,12 @@ func HandleGetOneStopPoint(service service.DataService, baseUrl string) http.Han
 	return func(rw http.ResponseWriter, req *http.Request) {
 		msp, err := service.GetOneStopPointById(mux.Vars(req)["name"])
 		if err != nil {
-			sendJson(newSuccessResponse(arrayToAnyArray(make([]StopPoint, 0))), rw)
+			sendSuccessResponse([]StopPoint{}, getExcludeFieldsQueryParameter(req), rw)
 			return
 		}
 
 		stopPoints := []StopPoint{convertStopPoint(msp, baseUrl)}
-
-		spEx, err := removeExcludedFields(stopPoints, getExcludeFieldsQueryParameter(req))
-		if err != nil {
-			sendJson(newSuccessResponse(arrayToAnyArray(stopPoints)), rw)
-		}
-
-		sendJson(newSuccessResponse(spEx), rw)
+		sendSuccessResponse(stopPoints, getExcludeFieldsQueryParameter(req), rw)
 	}
 }
 
