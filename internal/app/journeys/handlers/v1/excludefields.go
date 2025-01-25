@@ -2,6 +2,7 @@ package v1
 
 import (
 	"encoding/json"
+	"log"
 	"strings"
 )
 
@@ -17,20 +18,22 @@ func removeExcludedFields(bodyElements []map[string]any, propertyPaths string) [
 	return filteredBodyElements
 }
 
-func convertToStringAnyMap(obj any) (map[string]any, error) {
+func convertToStringAnyMap(obj any) map[string]any {
 	jsonStr, err := json.Marshal(obj)
 	if err != nil {
-		return nil, err
+		log.Println(err)
+		return nil
 	}
 
 	objectData := make(map[string]any)
 
 	err = json.Unmarshal(jsonStr, &objectData)
 	if err != nil {
-		return nil, err
+		log.Println(err)
+		return nil
 	}
 
-	return objectData, nil
+	return objectData
 }
 
 func filterMap(obj map[string]any, propertyPaths string) map[string]any {

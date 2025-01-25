@@ -48,11 +48,7 @@ func TestConvertToStringAnyMap(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := convertToStringAnyMap(tt.input)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("convertToStringAnyMap() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
+			got := convertToStringAnyMap(tt.input)
 			if !tt.wantErr && !equalMaps(got, tt.want) {
 				t.Errorf("convertToStringAnyMap() = %v, want %v", got, tt.want)
 			}
@@ -61,10 +57,10 @@ func TestConvertToStringAnyMap(t *testing.T) {
 
 	// Test that non-structs cannot be serialized
 	// This is sort of unnecessary since convertToStringAnyMap is only used with APIEntities which are structs,
-	// but the test is here for completeness
-	_, err := convertToStringAnyMap("foo-bar")
-	if err == nil {
-		t.Error("expected error")
+	// but it's here for completeness
+	c := convertToStringAnyMap("foo-bar")
+	if c != nil {
+		t.Error("expected nil")
 	}
 }
 
@@ -91,10 +87,7 @@ func TestDeleteProperty(t *testing.T) {
 		},
 	}
 
-	m, err := convertToStringAnyMap(o)
-	if err != nil {
-		t.Error(err)
-	}
+	m := convertToStringAnyMap(o)
 
 	deleteProperty(m, "Sub.SubField1")
 	if _, ok := m["Sub"].(map[string]interface{})["SubField1"]; ok {

@@ -2,7 +2,6 @@ package v1
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 )
@@ -26,10 +25,7 @@ func filterBodyElements(bodyElementsAsArrayOfAnyMaps []map[string]any, fieldExcl
 func apiEntitiesToArrayOfAnyMaps[T APIEntity](entities []T) []map[string]any {
 	var entitiesAsArrayOfAnyMaps []map[string]any
 	for _, be := range entities {
-		rAnyMap, err := convertToStringAnyMap(be)
-		if err != nil {
-			continue
-		}
+		rAnyMap := convertToStringAnyMap(be)
 		entitiesAsArrayOfAnyMaps = append(entitiesAsArrayOfAnyMaps, rAnyMap)
 	}
 
@@ -39,35 +35,19 @@ func apiEntitiesToArrayOfAnyMaps[T APIEntity](entities []T) []map[string]any {
 func sendJson(data any, w http.ResponseWriter) {
 	response, err := json.Marshal(data)
 	if err != nil {
-		sendError(err.Error(), w)
+		log.Println(err)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
 
-	_, err = w.Write(response)
-	if err != nil {
-		sendError(err.Error(), w)
-		return
-	}
+	sendResponse(response, w)
 }
 
-func sendError(errMsg string, w http.ResponseWriter) {
-	afr := apiFailResponse{
-		Status: "fail",
-		Data: apiFailData{
-			Message: fmt.Sprintf("%s", errMsg),
-		},
-	}
-	response, jErr := json.Marshal(afr)
-	if jErr != nil {
-		log.Println(jErr)
-		http.Error(w, jErr.Error(), http.StatusInternalServerError)
-		return
-	}
-
+func sendResponse(response []byte, w http.ResponseWriter) {
 	_, err := w.Write(response)
 	if err != nil {
 		log.Println(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
 	}
 }
 
