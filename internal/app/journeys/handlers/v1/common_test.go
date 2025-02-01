@@ -30,8 +30,12 @@ type routerTestCase[T APIEntity] struct {
 	handlerConfig    handlerConfig
 }
 
-func newJourneysTestDataService() *service.JourneysDataService {
-	return service.NewJourneysDataService(repository.NewJourneysRepository("testdata/tre/gtfs", true))
+func newJourneysTestDataService(t *testing.T) *service.JourneysDataService {
+	repo, errs := repository.NewJourneysRepository("testdata/tre/gtfs", true)
+	if len(errs) > 0 {
+		t.Error(errs)
+	}
+	return service.NewJourneysDataService(repo)
 }
 
 func runRouterTestCases[E APIEntity](t *testing.T, testCases []routerTestCase[E]) {
