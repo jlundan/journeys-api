@@ -116,10 +116,3 @@ func parsePort(envPort string, defaultPort int) (int, error) {
 
 	return serverPort, nil
 }
-
-//routes.InjectMunicipalityRoutes(router, ctx)
-//routes.InjectLineRoutes(router, ctx)
-//routes.InjectJourneyPatternRoutes(router, ctx)
-//routes.InjectStopPointRoutes(router, ctx)
-//routes.InjectJourneyRoutes(router, ctx)
-//routes.InjectRouteRoutes(router, ctx)
