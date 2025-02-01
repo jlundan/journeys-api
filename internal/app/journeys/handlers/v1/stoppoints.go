@@ -8,9 +8,9 @@ import (
 	"net/http"
 )
 
-func HandleGetAllStopPoints(service service.DataService, baseUrl string) http.HandlerFunc {
+func HandleGetAllStopPoints(service *service.JourneysDataService, baseUrl string) http.HandlerFunc {
 	return func(rw http.ResponseWriter, req *http.Request) {
-		modelStopPoints := service.SearchStopPoints(getQueryParameters(req))
+		modelStopPoints := service.StopPoints.Search(getQueryParameters(req))
 
 		var stopPoints []StopPoint
 		for _, msp := range modelStopPoints {
@@ -21,9 +21,9 @@ func HandleGetAllStopPoints(service service.DataService, baseUrl string) http.Ha
 	}
 }
 
-func HandleGetOneStopPoint(service service.DataService, baseUrl string) http.HandlerFunc {
+func HandleGetOneStopPoint(service *service.JourneysDataService, baseUrl string) http.HandlerFunc {
 	return func(rw http.ResponseWriter, req *http.Request) {
-		msp, err := service.GetOneStopPointById(mux.Vars(req)["name"])
+		msp, err := service.StopPoints.GetOneById(mux.Vars(req)["name"])
 		if err != nil {
 			sendSuccessResponse([]StopPoint{}, getExcludeFieldsQueryParameter(req), rw)
 			return

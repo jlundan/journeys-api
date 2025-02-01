@@ -8,9 +8,9 @@ import (
 	"net/http"
 )
 
-func HandleGetAllRoutes(service service.DataService, baseUrl string) func(http.ResponseWriter, *http.Request) {
+func HandleGetAllRoutes(service *service.JourneysDataService, baseUrl string) func(http.ResponseWriter, *http.Request) {
 	return func(rw http.ResponseWriter, req *http.Request) {
-		modelRoutes := service.SearchRoutes(getQueryParameters(req))
+		modelRoutes := service.Routes.Search(getQueryParameters(req))
 
 		var routes []Route
 		for _, ml := range modelRoutes {
@@ -21,9 +21,9 @@ func HandleGetAllRoutes(service service.DataService, baseUrl string) func(http.R
 	}
 }
 
-func HandleGetOneRoute(service service.DataService, baseUrl string) func(http.ResponseWriter, *http.Request) {
+func HandleGetOneRoute(service *service.JourneysDataService, baseUrl string) func(http.ResponseWriter, *http.Request) {
 	return func(rw http.ResponseWriter, req *http.Request) {
-		mr, err := service.GetOneRouteById(mux.Vars(req)["name"])
+		mr, err := service.Routes.GetOneById(mux.Vars(req)["name"])
 		if err != nil {
 			sendSuccessResponse([]Route{}, getExcludeFieldsQueryParameter(req), rw)
 			return

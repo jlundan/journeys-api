@@ -2,26 +2,31 @@ package service
 
 import (
 	"github.com/jlundan/journeys-api/internal/app/journeys/model"
+	"github.com/jlundan/journeys-api/internal/app/journeys/repository"
 	"github.com/jlundan/journeys-api/internal/app/journeys/utils"
 )
 
-func (ds DataService) GetOneJourneyPatternById(id string) (*model.JourneyPattern, error) {
-	if jp, ok := ds.DataStore.JourneyPatterns.ById[id]; ok {
-		return jp, nil
-	}
-	return nil, model.ErrNoSuchElement
+type JourneyPatternsService struct {
+	DataStore *repository.JourneysDataStore
 }
 
-func (ds DataService) SearchJourneyPatterns(params map[string]string) []*model.JourneyPattern {
+func (s JourneyPatternsService) Search(params map[string]string) []*model.JourneyPattern {
 	result := make([]*model.JourneyPattern, 0)
 
-	for _, jp := range ds.DataStore.JourneyPatterns.All {
+	for _, jp := range s.DataStore.JourneyPatterns.All {
 		if journeyPatternMatchesConditions(jp, params) {
 			result = append(result, jp)
 		}
 	}
 
 	return result
+}
+
+func (s JourneyPatternsService) GetOneById(id string) (*model.JourneyPattern, error) {
+	if jp, ok := s.DataStore.JourneyPatterns.ById[id]; ok {
+		return jp, nil
+	}
+	return nil, model.ErrNoSuchElement
 }
 
 func journeyPatternMatchesConditions(journeyPattern *model.JourneyPattern, conditions map[string]string) bool {

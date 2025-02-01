@@ -8,9 +8,9 @@ import (
 	"net/http"
 )
 
-func HandleGetAllMunicipalities(service service.DataService, baseUrl string) func(http.ResponseWriter, *http.Request) {
+func HandleGetAllMunicipalities(service *service.JourneysDataService, baseUrl string) func(http.ResponseWriter, *http.Request) {
 	return func(rw http.ResponseWriter, req *http.Request) {
-		modelMunicipalities := service.SearchMunicipalities(getQueryParameters(req))
+		modelMunicipalities := service.Municipalities.Search(getQueryParameters(req))
 
 		var municipalities []Municipality
 		for _, mm := range modelMunicipalities {
@@ -21,9 +21,9 @@ func HandleGetAllMunicipalities(service service.DataService, baseUrl string) fun
 	}
 }
 
-func HandleGetOneMunicipality(service service.DataService, baseUrl string) func(http.ResponseWriter, *http.Request) {
+func HandleGetOneMunicipality(service *service.JourneysDataService, baseUrl string) func(http.ResponseWriter, *http.Request) {
 	return func(rw http.ResponseWriter, req *http.Request) {
-		mm, err := service.GetOneMunicipalityById(mux.Vars(req)["name"])
+		mm, err := service.Municipalities.GetOneById(mux.Vars(req)["name"])
 		if err != nil {
 			sendSuccessResponse([]Municipality{}, getExcludeFieldsQueryParameter(req), rw)
 			return

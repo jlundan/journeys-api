@@ -2,13 +2,18 @@ package service
 
 import (
 	"github.com/jlundan/journeys-api/internal/app/journeys/model"
+	"github.com/jlundan/journeys-api/internal/app/journeys/repository"
 	"github.com/jlundan/journeys-api/internal/app/journeys/utils"
 )
 
-func (ds DataService) SearchLines(params map[string]string) []*model.Line {
+type LinesService struct {
+	DataStore *repository.JourneysDataStore
+}
+
+func (s LinesService) Search(params map[string]string) []*model.Line {
 	result := make([]*model.Line, 0)
 
-	for _, line := range ds.DataStore.Lines.All {
+	for _, line := range s.DataStore.Lines.All {
 		if lineMatchesConditions(line, params) {
 			result = append(result, line)
 		}
@@ -17,8 +22,8 @@ func (ds DataService) SearchLines(params map[string]string) []*model.Line {
 	return result
 }
 
-func (ds DataService) GetOneLineById(id string) (*model.Line, error) {
-	if l, ok := ds.DataStore.Lines.ById[id]; ok {
+func (s LinesService) GetOneById(id string) (*model.Line, error) {
+	if l, ok := s.DataStore.Lines.ById[id]; ok {
 		return l, nil
 	}
 	return nil, model.ErrNoSuchElement

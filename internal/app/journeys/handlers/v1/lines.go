@@ -8,9 +8,9 @@ import (
 	"net/http"
 )
 
-func HandleGetAllLines(service service.DataService, baseUrl string) func(http.ResponseWriter, *http.Request) {
+func HandleGetAllLines(service *service.JourneysDataService, baseUrl string) func(http.ResponseWriter, *http.Request) {
 	return func(rw http.ResponseWriter, req *http.Request) {
-		modelLines := service.SearchLines(getQueryParameters(req))
+		modelLines := service.Lines.Search(getQueryParameters(req))
 
 		var lines []Line
 		for _, ml := range modelLines {
@@ -21,9 +21,9 @@ func HandleGetAllLines(service service.DataService, baseUrl string) func(http.Re
 	}
 }
 
-func HandleGetOneLine(service service.DataService, baseUrl string) func(http.ResponseWriter, *http.Request) {
+func HandleGetOneLine(service *service.JourneysDataService, baseUrl string) func(http.ResponseWriter, *http.Request) {
 	return func(rw http.ResponseWriter, req *http.Request) {
-		ml, err := service.GetOneLineById(mux.Vars(req)["name"])
+		ml, err := service.Lines.GetOneById(mux.Vars(req)["name"])
 		if err != nil {
 			sendSuccessResponse([]Line{}, getExcludeFieldsQueryParameter(req), rw)
 			return
