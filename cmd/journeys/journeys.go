@@ -49,26 +49,16 @@ var MainCommand = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		//ctx := tre.NewContext(gtfsPath, skipValidation)
-		//
-		//for _, parseErrors := range ctx.GetParseErrors() {
-		//	log.Println(parseErrors)
-		//}
-		//for _, v := range ctx.GetViolations() {
-		//	log.Println(v)
-		//}
-		//for _, r := range ctx.GetRecommendations() {
-		//	log.Println(r)
-		//}
-		//for _, i := range ctx.GetInfos() {
-		//	log.Println(i)
-		//}
-		//
-		//if dryRun {
-		//	os.Exit(0)
-		//}
+		dataStore, errs := repository.NewJourneysRepository(gtfsPath, skipValidation)
 
-		dataStore := repository.NewJourneysRepository(gtfsPath, skipValidation)
+		for _, e := range errs {
+			log.Println(e)
+		}
+
+		if dryRun {
+			os.Exit(0)
+		}
+
 		dataService := service.NewJourneysDataService(dataStore)
 
 		r := router.New(dataService, baseUrl, vehicleActivityBaseUrl)
