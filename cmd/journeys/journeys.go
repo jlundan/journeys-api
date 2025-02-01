@@ -15,21 +15,23 @@ import (
 
 const defaultPort = 8080
 
+// This variable is set at build time
+//
+//goland:noinspection GoUnusedGlobalVariable
+var version = "dev"
+
 var dryRun bool
 var disableCache bool
 var skipValidation bool
 
-func main() {
-	MainCommand.Flags().BoolVar(&disableCache, "disable-cache", false, "Do not use cache")
-	MainCommand.Flags().BoolVar(&skipValidation, "skip-validation", false, "Skip all validations")
-	MainCommand.Flags().BoolVar(&dryRun, "dry-run", false, "Perform a dry run without starting the server")
-	_ = MainCommand.Execute()
+var MainCommand = &cobra.Command{
+	Use: "journeys",
 }
 
-var MainCommand = &cobra.Command{
-	Use:   "journeys",
-	Short: "journeys",
-	Long:  "Start Journey API server",
+var StartCommand = &cobra.Command{
+	Use:   "start",
+	Short: "Start the API server",
+	Long:  "Start the API server",
 	Args:  cobra.MinimumNArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
 		baseUrl := os.Getenv("JOURNEYS_BASE_URL")
@@ -105,4 +107,20 @@ func parsePort(envPort string, defaultPort int) (int, error) {
 	}
 
 	return serverPort, nil
+}
+
+func main() {
+	StartCommand.Flags().BoolVar(&disableCache, "disable-cache", false, "Do not use cache")
+	StartCommand.Flags().BoolVar(&skipValidation, "skip-validation", false, "Skip all validations")
+	StartCommand.Flags().BoolVar(&dryRun, "dry-run", false, "Perform a dry run without starting the server")
+
+	MainCommand.AddCommand(StartCommand)
+	MainCommand.AddCommand(&cobra.Command{
+		Use:   "version",
+		Short: "Print the version number",
+		Run: func(cmd *cobra.Command, args []string) {
+			fmt.Println("Version:", version)
+		},
+	})
+	_ = MainCommand.Execute()
 }
