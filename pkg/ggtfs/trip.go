@@ -111,8 +111,8 @@ func ValidateTrips(trips []*Trip, routes []*Route, calendarItems []*CalendarItem
 				validationResults = append(validationResults, ForeignKeyViolationNotice{
 					ReferencingFileName:  FileNameTrips,
 					ReferencingFieldName: "route_id",
-					ReferencedFieldName:  FileNameRoutes,
-					ReferencedFileName:   "route_id",
+					ReferencedFileName:   FileNameRoutes,
+					ReferencedFieldName:  "route_id",
 					OffendingValue:       *trip.RouteId,
 					ReferencedAtRow:      trip.LineNumber,
 				})
@@ -134,8 +134,8 @@ func ValidateTrips(trips []*Trip, routes []*Route, calendarItems []*CalendarItem
 				validationResults = append(validationResults, ForeignKeyViolationNotice{
 					ReferencingFileName:  FileNameTrips,
 					ReferencingFieldName: "service_id",
-					ReferencedFieldName:  FileNameCalendar,
-					ReferencedFileName:   "service_id",
+					ReferencedFileName:   FileNameCalendar,
+					ReferencedFieldName:  "service_id",
 					OffendingValue:       *trip.ServiceId,
 					ReferencedAtRow:      trip.LineNumber,
 				})
@@ -159,8 +159,8 @@ func ValidateTrips(trips []*Trip, routes []*Route, calendarItems []*CalendarItem
 					validationResults = append(validationResults, ForeignKeyViolationNotice{
 						ReferencingFileName:  FileNameTrips,
 						ReferencingFieldName: "shape_id",
-						ReferencedFieldName:  FileNameShapes,
-						ReferencedFileName:   "shape_id",
+						ReferencedFileName:   FileNameShapes,
+						ReferencedFieldName:  "shape_id",
 						OffendingValue:       *trip.ShapeId,
 						ReferencedAtRow:      trip.LineNumber,
 					})
