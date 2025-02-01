@@ -7,11 +7,6 @@ import (
 	"sort"
 )
 
-type JourneysLineDataStore struct {
-	All  []*model.Line
-	ById map[string]*model.Line
-}
-
 func newLineDataStore(routes []*ggtfs.Route) *JourneysLineDataStore {
 	var all = make([]*model.Line, 0)
 	var byId = make(map[string]*model.Line)
@@ -57,4 +52,9 @@ func newLineDataStore(routes []*ggtfs.Route) *JourneysLineDataStore {
 		All:  all,
 		ById: byId,
 	}
+}
+
+type JourneysLineDataStore struct {
+	All  []*model.Line
+	ById map[string]*model.Line
 }

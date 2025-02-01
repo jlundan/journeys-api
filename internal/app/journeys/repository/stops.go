@@ -9,11 +9,6 @@ import (
 	"strconv"
 )
 
-type JourneysStopPointDataStore struct {
-	All  []*model.StopPoint
-	ById map[string]*model.StopPoint
-}
-
 func newStopPointDataStore(stops []*ggtfs.Stop, municipalityDataStore *JourneysMunicipalityDataStore) *JourneysStopPointDataStore {
 	var all = make([]*model.StopPoint, 0)
 	var byId = make(map[string]*model.StopPoint)
@@ -62,4 +57,9 @@ func newStopPointDataStore(stops []*ggtfs.Stop, municipalityDataStore *JourneysM
 		All:  all,
 		ById: byId,
 	}
+}
+
+type JourneysStopPointDataStore struct {
+	All  []*model.StopPoint
+	ById map[string]*model.StopPoint
 }

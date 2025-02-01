@@ -13,17 +13,6 @@ import (
 	"time"
 )
 
-type JourneysJourneyDataStore struct {
-	All          []*model.Journey
-	ById         map[string]*model.Journey
-	ByActivityId map[string]*model.Journey
-}
-
-type JourneysJourneyPatternDataStore struct {
-	All  []*model.JourneyPattern
-	ById map[string]*model.JourneyPattern
-}
-
 func newJourneyAndJourneyPatternDatastore(stopTimes []*ggtfs.StopTime, trips []*ggtfs.Trip, calendarItems []*ggtfs.CalendarItem,
 	calendarDates []*ggtfs.CalendarDate, stopPointDataStore JourneysStopPointDataStore, lineDataStore JourneysLineDataStore,
 	routeDataStore JourneysRouteDataStore) (*JourneysJourneyDataStore, *JourneysJourneyPatternDataStore) {
@@ -226,6 +215,17 @@ func routeContainsJourneyPattern(route *model.Route, journeyPattern *model.Journ
 	}
 
 	return false
+}
+
+type JourneysJourneyDataStore struct {
+	All          []*model.Journey
+	ById         map[string]*model.Journey
+	ByActivityId map[string]*model.Journey
+}
+
+type JourneysJourneyPatternDataStore struct {
+	All  []*model.JourneyPattern
+	ById map[string]*model.JourneyPattern
 }
 
 type calendarFileRow struct {
