@@ -8,9 +8,9 @@ import (
 	"net/http"
 )
 
-func HandleGetAllJourneyPatterns(service service.DataService, baseUrl string) func(http.ResponseWriter, *http.Request) {
+func HandleGetAllJourneyPatterns(service *service.JourneysDataService, baseUrl string) func(http.ResponseWriter, *http.Request) {
 	return func(rw http.ResponseWriter, req *http.Request) {
-		modelJourneyPatterns := service.SearchJourneyPatterns(getQueryParameters(req))
+		modelJourneyPatterns := service.JourneyPatterns.Search(getQueryParameters(req))
 
 		var journeyPatterns []JourneyPattern
 		for _, mjp := range modelJourneyPatterns {
@@ -21,9 +21,9 @@ func HandleGetAllJourneyPatterns(service service.DataService, baseUrl string) fu
 	}
 }
 
-func HandleGetOneJourneyPattern(service service.DataService, baseUrl string) func(http.ResponseWriter, *http.Request) {
+func HandleGetOneJourneyPattern(service *service.JourneysDataService, baseUrl string) func(http.ResponseWriter, *http.Request) {
 	return func(rw http.ResponseWriter, req *http.Request) {
-		mj, err := service.GetOneJourneyPatternById(mux.Vars(req)["name"])
+		mj, err := service.JourneyPatterns.GetOneById(mux.Vars(req)["name"])
 		if err != nil {
 			sendSuccessResponse([]JourneyPattern{}, getExcludeFieldsQueryParameter(req), rw)
 			return

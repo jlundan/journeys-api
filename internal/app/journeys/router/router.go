@@ -6,7 +6,7 @@ import (
 	"github.com/jlundan/journeys-api/internal/app/journeys/service"
 )
 
-func New(dataService service.DataService, baseUrl string, vehicleActivityBaseUrl string) *mux.Router {
+func New(dataService *service.JourneysDataService, baseUrl string, vehicleActivityBaseUrl string) *mux.Router {
 	router := mux.NewRouter()
 
 	router.HandleFunc("/v1/lines", v1.HandleGetAllLines(dataService, baseUrl)).Methods("GET")

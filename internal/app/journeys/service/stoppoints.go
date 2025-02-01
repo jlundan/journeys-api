@@ -3,15 +3,20 @@ package service
 import (
 	"fmt"
 	"github.com/jlundan/journeys-api/internal/app/journeys/model"
+	"github.com/jlundan/journeys-api/internal/app/journeys/repository"
 	"github.com/jlundan/journeys-api/internal/app/journeys/utils"
 	"strconv"
 	"strings"
 )
 
-func (ds DataService) SearchStopPoints(params map[string]string) []*model.StopPoint {
+type StopPointsService struct {
+	DataStore *repository.JourneysDataStore
+}
+
+func (s StopPointsService) Search(params map[string]string) []*model.StopPoint {
 	result := make([]*model.StopPoint, 0)
 
-	for _, sp := range ds.DataStore.StopPoints.All {
+	for _, sp := range s.DataStore.StopPoints.All {
 		if stopPointMatchesConditions(sp, params) {
 			result = append(result, sp)
 		}
@@ -20,8 +25,8 @@ func (ds DataService) SearchStopPoints(params map[string]string) []*model.StopPo
 	return result
 }
 
-func (ds DataService) GetOneStopPointById(id string) (*model.StopPoint, error) {
-	if sp, ok := ds.DataStore.StopPoints.ById[id]; ok {
+func (s StopPointsService) GetOneById(id string) (*model.StopPoint, error) {
+	if sp, ok := s.DataStore.StopPoints.ById[id]; ok {
 		return sp, nil
 	}
 	return nil, model.ErrNoSuchElement

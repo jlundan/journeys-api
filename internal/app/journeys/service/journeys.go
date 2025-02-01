@@ -3,18 +3,35 @@ package service
 import (
 	"fmt"
 	"github.com/jlundan/journeys-api/internal/app/journeys/model"
+	"github.com/jlundan/journeys-api/internal/app/journeys/repository"
 	"strings"
 	"time"
 )
 
-func (ds DataService) GetOneJourneyById(id string) (*model.Journey, error) {
+type JourneysService struct {
+	DataStore *repository.JourneysDataStore
+}
+
+func (s JourneysService) Search(params map[string]string) []*model.Journey {
+	result := make([]*model.Journey, 0)
+
+	for _, journey := range s.DataStore.Journeys.All {
+		if journeyMatchesConditions(journey, params) {
+			result = append(result, journey)
+		}
+	}
+
+	return result
+}
+
+func (s JourneysService) GetOneById(id string) (*model.Journey, error) {
 	var journey *model.Journey
 
-	if j, ok := ds.DataStore.Journeys.ById[id]; ok {
+	if j, ok := s.DataStore.Journeys.ById[id]; ok {
 		journey = j
 	}
 
-	if j, ok := ds.DataStore.Journeys.ByActivityId[id]; ok {
+	if j, ok := s.DataStore.Journeys.ByActivityId[id]; ok {
 		journey = j
 	}
 
@@ -23,18 +40,6 @@ func (ds DataService) GetOneJourneyById(id string) (*model.Journey, error) {
 	}
 
 	return nil, model.ErrNoSuchElement
-}
-
-func (ds DataService) SearchJourneys(params map[string]string) []*model.Journey {
-	result := make([]*model.Journey, 0)
-
-	for _, journey := range ds.DataStore.Journeys.All {
-		if journeyMatchesConditions(journey, params) {
-			result = append(result, journey)
-		}
-	}
-
-	return result
 }
 
 func journeyMatchesConditions(journey *model.Journey, conditions map[string]string) bool {

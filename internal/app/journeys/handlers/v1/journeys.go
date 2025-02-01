@@ -8,9 +8,9 @@ import (
 	"net/http"
 )
 
-func HandleGetAllJourneys(service service.DataService, baseUrl string, vehicleActivityBaseUrl string) func(http.ResponseWriter, *http.Request) {
+func HandleGetAllJourneys(service *service.JourneysDataService, baseUrl string, vehicleActivityBaseUrl string) func(http.ResponseWriter, *http.Request) {
 	return func(rw http.ResponseWriter, req *http.Request) {
-		modelJourneys := service.SearchJourneys(getQueryParameters(req))
+		modelJourneys := service.Journeys.Search(getQueryParameters(req))
 
 		var journeys []Journey
 		for _, mj := range modelJourneys {
@@ -21,9 +21,9 @@ func HandleGetAllJourneys(service service.DataService, baseUrl string, vehicleAc
 	}
 }
 
-func HandleGetOneJourney(service service.DataService, baseUrl string, vehicleActivityBaseUrl string) func(http.ResponseWriter, *http.Request) {
+func HandleGetOneJourney(service *service.JourneysDataService, baseUrl string, vehicleActivityBaseUrl string) func(http.ResponseWriter, *http.Request) {
 	return func(rw http.ResponseWriter, req *http.Request) {
-		mj, err := service.GetOneJourneyById(mux.Vars(req)["name"])
+		mj, err := service.Journeys.GetOneById(mux.Vars(req)["name"])
 		if err != nil {
 			sendSuccessResponse([]Journey{}, getExcludeFieldsQueryParameter(req), rw)
 			return
