@@ -16,20 +16,6 @@ import (
 	"strings"
 )
 
-type GTFSBundle struct {
-	Agencies          []*ggtfs.Agency
-	Routes            []*ggtfs.Route
-	Stops             []*ggtfs.Stop
-	Trips             []*ggtfs.Trip
-	StopTimes         []*ggtfs.StopTime
-	CalendarItems     []*ggtfs.CalendarItem
-	CalendarDates     []*ggtfs.CalendarDate
-	Shapes            []*ggtfs.Shape
-	Municipalities    *municipalityData
-	ValidationNotices []ggtfs.ValidationNotice
-	Errors            []error
-}
-
 func newGTFSBundle(gtfsPath string, skipValidation bool) *GTFSBundle {
 	context := GTFSBundle{}
 
@@ -113,6 +99,20 @@ func newSkippingReader(r io.Reader) io.Reader {
 
 	// Return a new reader that reads from the buffer.
 	return &buf
+}
+
+type GTFSBundle struct {
+	Agencies          []*ggtfs.Agency
+	Routes            []*ggtfs.Route
+	Stops             []*ggtfs.Stop
+	Trips             []*ggtfs.Trip
+	StopTimes         []*ggtfs.StopTime
+	CalendarItems     []*ggtfs.CalendarItem
+	CalendarDates     []*ggtfs.CalendarDate
+	Shapes            []*ggtfs.Shape
+	Municipalities    *municipalityData
+	ValidationNotices []ggtfs.ValidationNotice
+	Errors            []error
 }
 
 const MunicipalityFileName = "municipalities.txt"

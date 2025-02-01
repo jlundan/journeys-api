@@ -5,11 +5,6 @@ import (
 	"sort"
 )
 
-type JourneysMunicipalityDataStore struct {
-	All  []*model.Municipality
-	ById map[string]*model.Municipality
-}
-
 func newMunicipalityDataStore(m municipalityData) *JourneysMunicipalityDataStore {
 	var all = make([]*model.Municipality, 0)
 	var byId = make(map[string]*model.Municipality)
@@ -31,4 +26,9 @@ func newMunicipalityDataStore(m municipalityData) *JourneysMunicipalityDataStore
 		All:  all,
 		ById: byId,
 	}
+}
+
+type JourneysMunicipalityDataStore struct {
+	All  []*model.Municipality
+	ById map[string]*model.Municipality
 }

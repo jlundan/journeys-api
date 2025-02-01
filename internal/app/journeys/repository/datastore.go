@@ -1,14 +1,5 @@
 package repository
 
-type JourneysDataStore struct {
-	Lines           *JourneysLineDataStore
-	StopPoints      *JourneysStopPointDataStore
-	Municipalities  *JourneysMunicipalityDataStore
-	Routes          *JourneysRouteDataStore
-	Journeys        *JourneysJourneyDataStore
-	JourneyPatterns *JourneysJourneyPatternDataStore
-}
-
 func NewJourneysDataStore(gtfsPath string, skipValidation bool) *JourneysDataStore {
 	bundle := newGTFSBundle(gtfsPath, skipValidation)
 
@@ -26,4 +17,13 @@ func NewJourneysDataStore(gtfsPath string, skipValidation bool) *JourneysDataSto
 		Journeys:        journeyDataStore,
 		JourneyPatterns: journeyPatternDataStore,
 	}
+}
+
+type JourneysDataStore struct {
+	Lines           *JourneysLineDataStore
+	StopPoints      *JourneysStopPointDataStore
+	Municipalities  *JourneysMunicipalityDataStore
+	Routes          *JourneysRouteDataStore
+	Journeys        *JourneysJourneyDataStore
+	JourneyPatterns *JourneysJourneyPatternDataStore
 }
