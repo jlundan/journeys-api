@@ -22,11 +22,14 @@ jobs:
           go-version: '>=1.22'
 
       - name: Build Binary
-        run: go build -ldflags "-X main.version=${{ github.ref_name }}" -o ./bin/journeys.api cmd/journeys/journeys.go
+        run: |
+          GOOS=linux GOARCH=amd64 go build -ldflags "-X main.version=${{ github.ref_name }}" -o ./journeys.api-linux-amd64 cmd/journeys/journeys.go
+          tar -czf journeys.api-linux-amd64.tar.gz ./journeys.api-linux-amd64
 
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
           files: |
-            ./bin/journeys.api
+            ./journeys.api-linux-amd64
+            ./journeys.api-linux-amd64.tar.gz
