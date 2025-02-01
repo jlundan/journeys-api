@@ -13,9 +13,9 @@ import (
 	"time"
 )
 
-func newJourneyAndJourneyPatternDatastore(stopTimes []*ggtfs.StopTime, trips []*ggtfs.Trip, calendarItems []*ggtfs.CalendarItem,
-	calendarDates []*ggtfs.CalendarDate, stopPointDataStore JourneysStopPointDataStore, lineDataStore JourneysLineDataStore,
-	routeDataStore JourneysRouteDataStore) (*JourneysJourneyDataStore, *JourneysJourneyPatternDataStore) {
+func newJourneysAndJourneyPatternsRepository(stopTimes []*ggtfs.StopTime, trips []*ggtfs.Trip, calendarItems []*ggtfs.CalendarItem,
+	calendarDates []*ggtfs.CalendarDate, stopPointDataStore JourneysStopPointsRepository, lineDataStore JourneysLinesRepository,
+	routeDataStore JourneysRoutesRepository) (*JourneysJourneyRepository, *JourneysJourneyPatternRepository) {
 
 	var all = make([]*model.Journey, 0)
 	var byId = make(map[string]*model.Journey)
@@ -196,12 +196,12 @@ func newJourneyAndJourneyPatternDatastore(stopTimes []*ggtfs.StopTime, trips []*
 		return allJourneyPatterns[x].Id < allJourneyPatterns[y].Id
 	})
 
-	return &JourneysJourneyDataStore{
+	return &JourneysJourneyRepository{
 			All:          all,
 			ById:         byId,
 			ByActivityId: byActivityId,
 		},
-		&JourneysJourneyPatternDataStore{
+		&JourneysJourneyPatternRepository{
 			All:  allJourneyPatterns,
 			ById: journeyPatternsById,
 		}
@@ -217,13 +217,13 @@ func routeContainsJourneyPattern(route *model.Route, journeyPattern *model.Journ
 	return false
 }
 
-type JourneysJourneyDataStore struct {
+type JourneysJourneyRepository struct {
 	All          []*model.Journey
 	ById         map[string]*model.Journey
 	ByActivityId map[string]*model.Journey
 }
 
-type JourneysJourneyPatternDataStore struct {
+type JourneysJourneyPatternRepository struct {
 	All  []*model.JourneyPattern
 	ById map[string]*model.JourneyPattern
 }

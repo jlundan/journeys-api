@@ -7,7 +7,7 @@ import (
 )
 
 type LinesService struct {
-	DataStore *repository.JourneysDataStore
+	DataStore *repository.JourneysRepository
 }
 
 func (s LinesService) Search(params map[string]string) []*model.Line {

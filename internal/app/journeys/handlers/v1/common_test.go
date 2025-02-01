@@ -31,7 +31,7 @@ type routerTestCase[T APIEntity] struct {
 }
 
 func newJourneysTestDataService() *service.JourneysDataService {
-	return service.NewJourneysDataService(repository.NewJourneysDataStore("testdata/tre/gtfs", true))
+	return service.NewJourneysDataService(repository.NewJourneysRepository("testdata/tre/gtfs", true))
 }
 
 func runRouterTestCases[E APIEntity](t *testing.T, testCases []routerTestCase[E]) {

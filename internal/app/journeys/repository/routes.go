@@ -8,7 +8,7 @@ import (
 	"strconv"
 )
 
-func newRouteDataStore(shapes []*ggtfs.Shape) *JourneysRouteDataStore {
+func newRoutesRepository(shapes []*ggtfs.Shape) *JourneysRoutesRepository {
 	var all = make([]*model.Route, 0)
 	var byId = make(map[string]*model.Route)
 
@@ -49,7 +49,7 @@ func newRouteDataStore(shapes []*ggtfs.Shape) *JourneysRouteDataStore {
 		return all[x].Id < all[y].Id
 	})
 
-	return &JourneysRouteDataStore{
+	return &JourneysRoutesRepository{
 		All:  all,
 		ById: byId,
 	}
@@ -75,7 +75,7 @@ func createCoordinateProjection(coords [][]float64) (string, error) {
 	return projection, nil
 }
 
-type JourneysRouteDataStore struct {
+type JourneysRoutesRepository struct {
 	All  []*model.Route
 	ById map[string]*model.Route
 }

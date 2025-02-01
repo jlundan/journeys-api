@@ -17,7 +17,7 @@ import (
 )
 
 func newGTFSBundle(gtfsPath string, skipValidation bool) *GTFSBundle {
-	context := GTFSBundle{}
+	bundle := GTFSBundle{}
 
 	files := []string{ggtfs.FileNameAgency, ggtfs.FileNameRoutes, ggtfs.FileNameStops, ggtfs.FileNameTrips, ggtfs.FileNameStopTimes,
 		ggtfs.FileNameCalendar, ggtfs.FileNameCalendarDate, ggtfs.FileNameShapes, "municipalities.txt"}
@@ -25,7 +25,7 @@ func newGTFSBundle(gtfsPath string, skipValidation bool) *GTFSBundle {
 	for _, file := range files {
 		reader, err := createCSVReaderForFile(path.Join(gtfsPath, file))
 		if err != nil {
-			context.Errors = append(context.Errors, err)
+			bundle.Errors = append(bundle.Errors, err)
 		}
 
 		var gtfsErrors []error
@@ -33,40 +33,40 @@ func newGTFSBundle(gtfsPath string, skipValidation bool) *GTFSBundle {
 
 		switch file {
 		case ggtfs.FileNameAgency:
-			context.Agencies, gtfsErrors = ggtfs.LoadAgencies(ggtfs.NewReader(reader))
+			bundle.Agencies, gtfsErrors = ggtfs.LoadAgencies(ggtfs.NewReader(reader))
 		case ggtfs.FileNameRoutes:
-			context.Routes, gtfsErrors = ggtfs.LoadRoutes(ggtfs.NewReader(reader))
+			bundle.Routes, gtfsErrors = ggtfs.LoadRoutes(ggtfs.NewReader(reader))
 		case ggtfs.FileNameStops:
-			context.Stops, gtfsErrors = ggtfs.LoadStops(ggtfs.NewReader(reader))
+			bundle.Stops, gtfsErrors = ggtfs.LoadStops(ggtfs.NewReader(reader))
 		case ggtfs.FileNameTrips:
-			context.Trips, gtfsErrors = ggtfs.LoadTrips(ggtfs.NewReader(reader))
+			bundle.Trips, gtfsErrors = ggtfs.LoadTrips(ggtfs.NewReader(reader))
 		case ggtfs.FileNameStopTimes:
-			context.StopTimes, gtfsErrors = ggtfs.LoadStopTimes(ggtfs.NewReader(reader))
+			bundle.StopTimes, gtfsErrors = ggtfs.LoadStopTimes(ggtfs.NewReader(reader))
 		case ggtfs.FileNameCalendar:
-			context.CalendarItems, gtfsErrors = ggtfs.LoadCalendar(ggtfs.NewReader(reader))
+			bundle.CalendarItems, gtfsErrors = ggtfs.LoadCalendar(ggtfs.NewReader(reader))
 		case ggtfs.FileNameCalendarDate:
-			context.CalendarDates, gtfsErrors = ggtfs.LoadCalendarDates(ggtfs.NewReader(reader))
+			bundle.CalendarDates, gtfsErrors = ggtfs.LoadCalendarDates(ggtfs.NewReader(reader))
 		case ggtfs.FileNameShapes:
-			context.Shapes, gtfsErrors = ggtfs.LoadShapes(ggtfs.NewReader(reader))
+			bundle.Shapes, gtfsErrors = ggtfs.LoadShapes(ggtfs.NewReader(reader))
 		case "municipalities.txt":
-			context.Municipalities, municipalityError = readMunicipalities(gtfsPath)
+			bundle.Municipalities, municipalityError = readMunicipalities(gtfsPath)
 		}
 
-		context.Errors = append(context.Errors, gtfsErrors...)
+		bundle.Errors = append(bundle.Errors, gtfsErrors...)
 		if municipalityError != nil {
-			context.Errors = append(context.Errors, municipalityError)
+			bundle.Errors = append(bundle.Errors, municipalityError)
 		}
 	}
 
 	if !skipValidation {
-		context.ValidationNotices = append(context.ValidationNotices, ggtfs.ValidateTrips(context.Trips, context.Routes, context.CalendarItems, context.Shapes)...)
-		context.ValidationNotices = append(context.ValidationNotices, ggtfs.ValidateShapes(context.Shapes)...)
-		context.ValidationNotices = append(context.ValidationNotices, ggtfs.ValidateCalendarDates(context.CalendarDates, context.CalendarItems)...)
-		context.ValidationNotices = append(context.ValidationNotices, ggtfs.ValidateRoutes(context.Routes, context.Agencies)...)
-		context.ValidationNotices = append(context.ValidationNotices, ggtfs.ValidateStopTimes(context.StopTimes, context.Stops)...)
+		bundle.ValidationNotices = append(bundle.ValidationNotices, ggtfs.ValidateTrips(bundle.Trips, bundle.Routes, bundle.CalendarItems, bundle.Shapes)...)
+		bundle.ValidationNotices = append(bundle.ValidationNotices, ggtfs.ValidateShapes(bundle.Shapes)...)
+		bundle.ValidationNotices = append(bundle.ValidationNotices, ggtfs.ValidateCalendarDates(bundle.CalendarDates, bundle.CalendarItems)...)
+		bundle.ValidationNotices = append(bundle.ValidationNotices, ggtfs.ValidateRoutes(bundle.Routes, bundle.Agencies)...)
+		bundle.ValidationNotices = append(bundle.ValidationNotices, ggtfs.ValidateStopTimes(bundle.StopTimes, bundle.Stops)...)
 	}
 
-	return &context
+	return &bundle
 }
 
 func createCSVReaderForFile(path string) (*csv.Reader, error) {
