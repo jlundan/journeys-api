@@ -8,7 +8,7 @@ import (
 )
 
 func TestMunicipalitiesRoutes(t *testing.T) {
-	dataService := newJourneysTestDataService()
+	dataService := newJourneysTestDataService(t)
 
 	one := handlerConfig{handler: HandleGetOneMunicipality(dataService, ""), url: "/v1/municipalities/{name}"}
 	all := handlerConfig{handler: HandleGetAllMunicipalities(dataService, ""), url: "/v1/municipalities"}

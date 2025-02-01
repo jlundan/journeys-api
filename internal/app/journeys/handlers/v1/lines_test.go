@@ -8,7 +8,7 @@ import (
 )
 
 func TestGetLines(t *testing.T) {
-	dataService := newJourneysTestDataService()
+	dataService := newJourneysTestDataService(t)
 
 	one := handlerConfig{handler: HandleGetOneLine(dataService, ""), url: "/v1/lines/{name}"}
 	all := handlerConfig{handler: HandleGetAllLines(dataService, ""), url: "/v1/lines"}

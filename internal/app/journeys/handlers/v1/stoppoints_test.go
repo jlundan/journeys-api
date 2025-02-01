@@ -8,7 +8,7 @@ import (
 )
 
 func TestStopPointRoutes(t *testing.T) {
-	dataService := newJourneysTestDataService()
+	dataService := newJourneysTestDataService(t)
 
 	one := handlerConfig{handler: HandleGetOneStopPoint(dataService, ""), url: "/v1/stop-points/{name}"}
 	all := handlerConfig{handler: HandleGetAllStopPoints(dataService, ""), url: "/v1/stop-points"}
