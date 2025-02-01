@@ -1,8 +1,13 @@
 package ggtfs
 
+import (
+	"fmt"
+)
+
 type ValidationNotice interface {
 	Code() string
 	Severity() ValidationNoticeSeverity
+	AsText() string
 }
 
 type SingleLineNotice struct {
@@ -15,209 +20,266 @@ type InvalidCharacterNotice struct {
 	SingleLineNotice
 }
 
-func (r InvalidCharacterNotice) Code() string {
+func (n InvalidCharacterNotice) Code() string {
 	return "invalid_characters"
 }
-func (r InvalidCharacterNotice) Severity() ValidationNoticeSeverity {
+func (n InvalidCharacterNotice) Severity() ValidationNoticeSeverity {
 	return SeverityViolation
+}
+func (n InvalidCharacterNotice) AsText() string {
+	return convertSingleLineNotice(n.Code(), n.FileName, n.FieldName, n.Line)
 }
 
 type InvalidURLNotice struct {
 	SingleLineNotice
 }
 
-func (r InvalidURLNotice) Code() string {
+func (n InvalidURLNotice) Code() string {
 	return "invalid_url"
 }
-func (r InvalidURLNotice) Severity() ValidationNoticeSeverity {
+func (n InvalidURLNotice) Severity() ValidationNoticeSeverity {
 	return SeverityViolation
+}
+func (n InvalidURLNotice) AsText() string {
+	return convertSingleLineNotice(n.Code(), n.FileName, n.FieldName, n.Line)
 }
 
 type InvalidColorNotice struct {
 	SingleLineNotice
 }
 
-func (r InvalidColorNotice) Code() string {
+func (n InvalidColorNotice) Code() string {
 	return "invalid_color"
 }
-func (r InvalidColorNotice) Severity() ValidationNoticeSeverity {
+func (n InvalidColorNotice) Severity() ValidationNoticeSeverity {
 	return SeverityViolation
+}
+func (n InvalidColorNotice) AsText() string {
+	return convertSingleLineNotice(n.Code(), n.FileName, n.FieldName, n.Line)
 }
 
 type InvalidIntegerNotice struct {
 	SingleLineNotice
 }
 
-func (r InvalidIntegerNotice) Code() string {
+func (n InvalidIntegerNotice) Code() string {
 	return "invalid_integer"
 }
-func (r InvalidIntegerNotice) Severity() ValidationNoticeSeverity {
+func (n InvalidIntegerNotice) Severity() ValidationNoticeSeverity {
 	return SeverityViolation
+}
+func (n InvalidIntegerNotice) AsText() string {
+	return convertSingleLineNotice(n.Code(), n.FileName, n.FieldName, n.Line)
 }
 
 type InvalidFloatNotice struct {
 	SingleLineNotice
 }
 
-func (r InvalidFloatNotice) Code() string {
+func (n InvalidFloatNotice) Code() string {
 	return "invalid_float"
 }
-func (r InvalidFloatNotice) Severity() ValidationNoticeSeverity {
+func (n InvalidFloatNotice) Severity() ValidationNoticeSeverity {
 	return SeverityViolation
+}
+func (n InvalidFloatNotice) AsText() string {
+	return convertSingleLineNotice(n.Code(), n.FileName, n.FieldName, n.Line)
 }
 
 type InvalidTimeNotice struct {
 	SingleLineNotice
 }
 
-func (r InvalidTimeNotice) Code() string {
+func (n InvalidTimeNotice) Code() string {
 	return "invalid_time"
 }
-func (r InvalidTimeNotice) Severity() ValidationNoticeSeverity {
+func (n InvalidTimeNotice) Severity() ValidationNoticeSeverity {
 	return SeverityViolation
+}
+func (n InvalidTimeNotice) AsText() string {
+	return convertSingleLineNotice(n.Code(), n.FileName, n.FieldName, n.Line)
 }
 
 type InvalidCurrencyCodeNotice struct {
 	SingleLineNotice
 }
 
-func (r InvalidCurrencyCodeNotice) Code() string {
+func (n InvalidCurrencyCodeNotice) Code() string {
 	return "invalid_currency_code"
 }
-func (r InvalidCurrencyCodeNotice) Severity() ValidationNoticeSeverity {
+func (n InvalidCurrencyCodeNotice) Severity() ValidationNoticeSeverity {
 	return SeverityViolation
+}
+func (n InvalidCurrencyCodeNotice) AsText() string {
+	return convertSingleLineNotice(n.Code(), n.FileName, n.FieldName, n.Line)
 }
 
 type InvalidCurrencyAmountNotice struct {
 	SingleLineNotice
 }
 
-func (r InvalidCurrencyAmountNotice) Code() string {
+func (n InvalidCurrencyAmountNotice) Code() string {
 	return "invalid_currency_amount"
 }
-func (r InvalidCurrencyAmountNotice) Severity() ValidationNoticeSeverity {
+func (n InvalidCurrencyAmountNotice) Severity() ValidationNoticeSeverity {
 	return SeverityViolation
+}
+func (n InvalidCurrencyAmountNotice) AsText() string {
+	return convertSingleLineNotice(n.Code(), n.FileName, n.FieldName, n.Line)
 }
 
 type InvalidDateNotice struct {
 	SingleLineNotice
 }
 
-func (r InvalidDateNotice) Code() string {
+func (n InvalidDateNotice) Code() string {
 	return "invalid_date"
 }
-func (r InvalidDateNotice) Severity() ValidationNoticeSeverity {
+func (n InvalidDateNotice) Severity() ValidationNoticeSeverity {
 	return SeverityViolation
+}
+func (n InvalidDateNotice) AsText() string {
+	return convertSingleLineNotice(n.Code(), n.FileName, n.FieldName, n.Line)
 }
 
 type InvalidLatitudeNotice struct {
 	SingleLineNotice
 }
 
-func (r InvalidLatitudeNotice) Code() string {
+func (n InvalidLatitudeNotice) Code() string {
 	return "invalid_latitude"
 }
-func (r InvalidLatitudeNotice) Severity() ValidationNoticeSeverity {
+func (n InvalidLatitudeNotice) Severity() ValidationNoticeSeverity {
 	return SeverityViolation
+}
+func (n InvalidLatitudeNotice) AsText() string {
+	return convertSingleLineNotice(n.Code(), n.FileName, n.FieldName, n.Line)
 }
 
 type InvalidLongitudeNotice struct {
 	SingleLineNotice
 }
 
-func (r InvalidLongitudeNotice) Code() string {
+func (n InvalidLongitudeNotice) Code() string {
 	return "invalid_longitude"
 }
-func (r InvalidLongitudeNotice) Severity() ValidationNoticeSeverity {
+func (n InvalidLongitudeNotice) Severity() ValidationNoticeSeverity {
 	return SeverityViolation
+}
+func (n InvalidLongitudeNotice) AsText() string {
+	return convertSingleLineNotice(n.Code(), n.FileName, n.FieldName, n.Line)
 }
 
 type InvalidLanguageCodeNotice struct {
 	SingleLineNotice
 }
 
-func (r InvalidLanguageCodeNotice) Code() string {
+func (n InvalidLanguageCodeNotice) Code() string {
 	return "invalid_language_code"
 }
-func (r InvalidLanguageCodeNotice) Severity() ValidationNoticeSeverity {
+func (n InvalidLanguageCodeNotice) Severity() ValidationNoticeSeverity {
 	return SeverityViolation
+}
+func (n InvalidLanguageCodeNotice) AsText() string {
+	return convertSingleLineNotice(n.Code(), n.FileName, n.FieldName, n.Line)
 }
 
 type InvalidPhoneNumberNotice struct {
 	SingleLineNotice
 }
 
-func (r InvalidPhoneNumberNotice) Code() string {
+func (n InvalidPhoneNumberNotice) Code() string {
 	return "invalid_phone_number"
 }
-func (r InvalidPhoneNumberNotice) Severity() ValidationNoticeSeverity {
+func (n InvalidPhoneNumberNotice) Severity() ValidationNoticeSeverity {
 	return SeverityViolation
+}
+func (n InvalidPhoneNumberNotice) AsText() string {
+	return convertSingleLineNotice(n.Code(), n.FileName, n.FieldName, n.Line)
 }
 
 type InvalidEmailNotice struct {
 	SingleLineNotice
 }
 
-func (r InvalidEmailNotice) Code() string {
+func (n InvalidEmailNotice) Code() string {
 	return "invalid_email"
 }
-func (r InvalidEmailNotice) Severity() ValidationNoticeSeverity {
+func (n InvalidEmailNotice) Severity() ValidationNoticeSeverity {
 	return SeverityViolation
+}
+func (n InvalidEmailNotice) AsText() string {
+	return convertSingleLineNotice(n.Code(), n.FileName, n.FieldName, n.Line)
 }
 
 type InvalidTimezoneNotice struct {
 	SingleLineNotice
 }
 
-func (r InvalidTimezoneNotice) Code() string {
+func (n InvalidTimezoneNotice) Code() string {
 	return "invalid_timezone"
 }
-func (r InvalidTimezoneNotice) Severity() ValidationNoticeSeverity {
+func (n InvalidTimezoneNotice) Severity() ValidationNoticeSeverity {
 	return SeverityViolation
+}
+func (n InvalidTimezoneNotice) AsText() string {
+	return convertSingleLineNotice(n.Code(), n.FileName, n.FieldName, n.Line)
 }
 
 type InvalidCalendarDayNotice struct {
 	SingleLineNotice
 }
 
-func (r InvalidCalendarDayNotice) Code() string {
+func (n InvalidCalendarDayNotice) Code() string {
 	return "invalid_calendar_day"
 }
-func (r InvalidCalendarDayNotice) Severity() ValidationNoticeSeverity {
+func (n InvalidCalendarDayNotice) Severity() ValidationNoticeSeverity {
 	return SeverityViolation
+}
+func (n InvalidCalendarDayNotice) AsText() string {
+	return convertSingleLineNotice(n.Code(), n.FileName, n.FieldName, n.Line)
 }
 
 type InvalidCalendarExceptionNotice struct {
 	SingleLineNotice
 }
 
-func (r InvalidCalendarExceptionNotice) Code() string {
+func (n InvalidCalendarExceptionNotice) Code() string {
 	return "invalid_calendar_exception"
 }
-func (r InvalidCalendarExceptionNotice) Severity() ValidationNoticeSeverity {
+func (n InvalidCalendarExceptionNotice) Severity() ValidationNoticeSeverity {
 	return SeverityViolation
+}
+func (n InvalidCalendarExceptionNotice) AsText() string {
+	return convertSingleLineNotice(n.Code(), n.FileName, n.FieldName, n.Line)
 }
 
 type MissingRequiredFieldNotice struct {
 	SingleLineNotice
 }
 
-func (r MissingRequiredFieldNotice) Code() string {
+func (n MissingRequiredFieldNotice) Code() string {
 	return "missing_required_field"
 }
-func (r MissingRequiredFieldNotice) Severity() ValidationNoticeSeverity {
+func (n MissingRequiredFieldNotice) Severity() ValidationNoticeSeverity {
 	return SeverityViolation
+}
+func (n MissingRequiredFieldNotice) AsText() string {
+	return convertSingleLineNotice(n.Code(), n.FileName, n.FieldName, n.Line)
 }
 
 type SingleAgencyRecommendedNotice struct {
 	FileName string
 }
 
-func (r SingleAgencyRecommendedNotice) Code() string {
+func (n SingleAgencyRecommendedNotice) Code() string {
 	return "single_agency_recommended"
 }
-func (r SingleAgencyRecommendedNotice) Severity() ValidationNoticeSeverity {
+func (n SingleAgencyRecommendedNotice) Severity() ValidationNoticeSeverity {
 	return SeverityRecommendation
+}
+func (n SingleAgencyRecommendedNotice) AsText() string {
+	return fmt.Sprintf("%s in %v", n.Code(), n.FileName)
 }
 
 type ValidAgencyIdRequiredWhenMultipleAgenciesNotice struct {
@@ -225,154 +287,196 @@ type ValidAgencyIdRequiredWhenMultipleAgenciesNotice struct {
 	Line     int
 }
 
-func (r ValidAgencyIdRequiredWhenMultipleAgenciesNotice) Code() string {
+func (n ValidAgencyIdRequiredWhenMultipleAgenciesNotice) Code() string {
 	return "valid_agency_id_required_when_multiple_agencies"
 }
-func (r ValidAgencyIdRequiredWhenMultipleAgenciesNotice) Severity() ValidationNoticeSeverity {
+func (n ValidAgencyIdRequiredWhenMultipleAgenciesNotice) Severity() ValidationNoticeSeverity {
 	return SeverityViolation
+}
+func (n ValidAgencyIdRequiredWhenMultipleAgenciesNotice) AsText() string {
+	return fmt.Sprintf("%s in %v -> agency_id (line %v)", n.Code(), n.FileName, n.Line)
 }
 
 type FieldIsNotUniqueNotice struct {
 	SingleLineNotice
 }
 
-func (r FieldIsNotUniqueNotice) Code() string {
+func (n FieldIsNotUniqueNotice) Code() string {
 	return "field_is_not_unique"
 }
-func (r FieldIsNotUniqueNotice) Severity() ValidationNoticeSeverity {
+func (n FieldIsNotUniqueNotice) Severity() ValidationNoticeSeverity {
 	return SeverityViolation
+}
+func (n FieldIsNotUniqueNotice) AsText() string {
+	return convertSingleLineNotice(n.Code(), n.FileName, n.FieldName, n.Line)
 }
 
 type InvalidRouteTypeNotice struct {
 	SingleLineNotice
 }
 
-func (r InvalidRouteTypeNotice) Code() string {
+func (n InvalidRouteTypeNotice) Code() string {
 	return "invalid_route_type"
 }
-func (r InvalidRouteTypeNotice) Severity() ValidationNoticeSeverity {
+func (n InvalidRouteTypeNotice) Severity() ValidationNoticeSeverity {
 	return SeverityViolation
+}
+func (n InvalidRouteTypeNotice) AsText() string {
+	return convertSingleLineNotice(n.Code(), n.FileName, n.FieldName, n.Line)
 }
 
 type InvalidContinuousPickupNotice struct {
 	SingleLineNotice
 }
 
-func (r InvalidContinuousPickupNotice) Code() string {
+func (n InvalidContinuousPickupNotice) Code() string {
 	return "invalid_continuous_pickup"
 }
-func (r InvalidContinuousPickupNotice) Severity() ValidationNoticeSeverity {
+func (n InvalidContinuousPickupNotice) Severity() ValidationNoticeSeverity {
 	return SeverityViolation
+}
+func (n InvalidContinuousPickupNotice) AsText() string {
+	return convertSingleLineNotice(n.Code(), n.FileName, n.FieldName, n.Line)
 }
 
 type InvalidContinuousDropOffNotice struct {
 	SingleLineNotice
 }
 
-func (r InvalidContinuousDropOffNotice) Code() string {
+func (n InvalidContinuousDropOffNotice) Code() string {
 	return "invalid_continuous_drop_off"
 }
-func (r InvalidContinuousDropOffNotice) Severity() ValidationNoticeSeverity {
+func (n InvalidContinuousDropOffNotice) Severity() ValidationNoticeSeverity {
 	return SeverityViolation
+}
+func (n InvalidContinuousDropOffNotice) AsText() string {
+	return convertSingleLineNotice(n.Code(), n.FileName, n.FieldName, n.Line)
 }
 
 type InvalidPickupTypeNotice struct {
 	SingleLineNotice
 }
 
-func (r InvalidPickupTypeNotice) Code() string {
+func (n InvalidPickupTypeNotice) Code() string {
 	return "invalid_pickup_type"
 }
-func (r InvalidPickupTypeNotice) Severity() ValidationNoticeSeverity {
+func (n InvalidPickupTypeNotice) Severity() ValidationNoticeSeverity {
 	return SeverityViolation
+}
+func (n InvalidPickupTypeNotice) AsText() string {
+	return convertSingleLineNotice(n.Code(), n.FileName, n.FieldName, n.Line)
 }
 
 type InvalidDropOffTypeNotice struct {
 	SingleLineNotice
 }
 
-func (r InvalidDropOffTypeNotice) Code() string {
+func (n InvalidDropOffTypeNotice) Code() string {
 	return "invalid_drop_off_type"
 }
-func (r InvalidDropOffTypeNotice) Severity() ValidationNoticeSeverity {
+func (n InvalidDropOffTypeNotice) Severity() ValidationNoticeSeverity {
 	return SeverityViolation
+}
+func (n InvalidDropOffTypeNotice) AsText() string {
+	return convertSingleLineNotice(n.Code(), n.FileName, n.FieldName, n.Line)
 }
 
 type InvalidTimepointNotice struct {
 	SingleLineNotice
 }
 
-func (r InvalidTimepointNotice) Code() string {
+func (n InvalidTimepointNotice) Code() string {
 	return "invalid_timepoint"
 }
-func (r InvalidTimepointNotice) Severity() ValidationNoticeSeverity {
+func (n InvalidTimepointNotice) Severity() ValidationNoticeSeverity {
 	return SeverityViolation
+}
+func (n InvalidTimepointNotice) AsText() string {
+	return convertSingleLineNotice(n.Code(), n.FileName, n.FieldName, n.Line)
 }
 
 type InvalidDirectionIdNotice struct {
 	SingleLineNotice
 }
 
-func (r InvalidDirectionIdNotice) Code() string {
+func (n InvalidDirectionIdNotice) Code() string {
 	return "invalid_direction_id"
 }
-func (r InvalidDirectionIdNotice) Severity() ValidationNoticeSeverity {
+func (n InvalidDirectionIdNotice) Severity() ValidationNoticeSeverity {
 	return SeverityViolation
+}
+func (n InvalidDirectionIdNotice) AsText() string {
+	return convertSingleLineNotice(n.Code(), n.FileName, n.FieldName, n.Line)
 }
 
 type InvalidWheelchairAccessibleNotice struct {
 	SingleLineNotice
 }
 
-func (r InvalidWheelchairAccessibleNotice) Code() string {
+func (n InvalidWheelchairAccessibleNotice) Code() string {
 	return "invalid_wheelchair_accessible"
 }
-func (r InvalidWheelchairAccessibleNotice) Severity() ValidationNoticeSeverity {
+func (n InvalidWheelchairAccessibleNotice) Severity() ValidationNoticeSeverity {
 	return SeverityViolation
+}
+func (n InvalidWheelchairAccessibleNotice) AsText() string {
+	return convertSingleLineNotice(n.Code(), n.FileName, n.FieldName, n.Line)
 }
 
 type InvalidBikesAllowedNotice struct {
 	SingleLineNotice
 }
 
-func (r InvalidBikesAllowedNotice) Code() string {
+func (n InvalidBikesAllowedNotice) Code() string {
 	return "invalid_bikes_allowed"
 }
-func (r InvalidBikesAllowedNotice) Severity() ValidationNoticeSeverity {
+func (n InvalidBikesAllowedNotice) Severity() ValidationNoticeSeverity {
 	return SeverityViolation
+}
+func (n InvalidBikesAllowedNotice) AsText() string {
+	return convertSingleLineNotice(n.Code(), n.FileName, n.FieldName, n.Line)
 }
 
 type MissingRouteShortNameWhenLongNameIsNotPresentNotice struct {
 	SingleLineNotice
 }
 
-func (r MissingRouteShortNameWhenLongNameIsNotPresentNotice) Code() string {
+func (n MissingRouteShortNameWhenLongNameIsNotPresentNotice) Code() string {
 	return "missing_route_short_name_when_long_name_is_not_present"
 }
-func (r MissingRouteShortNameWhenLongNameIsNotPresentNotice) Severity() ValidationNoticeSeverity {
+func (n MissingRouteShortNameWhenLongNameIsNotPresentNotice) Severity() ValidationNoticeSeverity {
 	return SeverityViolation
+}
+func (n MissingRouteShortNameWhenLongNameIsNotPresentNotice) AsText() string {
+	return convertSingleLineNotice(n.Code(), n.FileName, n.FieldName, n.Line)
 }
 
 type MissingRouteLongNameWhenShortNameIsNotPresentNotice struct {
 	SingleLineNotice
 }
 
-func (r MissingRouteLongNameWhenShortNameIsNotPresentNotice) Code() string {
+func (n MissingRouteLongNameWhenShortNameIsNotPresentNotice) Code() string {
 	return "missing_route_long_name_when_short_name_is_not_present"
 }
-func (r MissingRouteLongNameWhenShortNameIsNotPresentNotice) Severity() ValidationNoticeSeverity {
+func (n MissingRouteLongNameWhenShortNameIsNotPresentNotice) Severity() ValidationNoticeSeverity {
 	return SeverityViolation
+}
+func (n MissingRouteLongNameWhenShortNameIsNotPresentNotice) AsText() string {
+	return convertSingleLineNotice(n.Code(), n.FileName, n.FieldName, n.Line)
 }
 
 type TooLongRouteShortNameNotice struct {
 	SingleLineNotice
 }
 
-func (r TooLongRouteShortNameNotice) Code() string {
+func (n TooLongRouteShortNameNotice) Code() string {
 	return "too_long_route_short_name"
 }
-func (r TooLongRouteShortNameNotice) Severity() ValidationNoticeSeverity {
+func (n TooLongRouteShortNameNotice) Severity() ValidationNoticeSeverity {
 	return SeverityRecommendation
+}
+func (n TooLongRouteShortNameNotice) AsText() string {
+	return convertSingleLineNotice(n.Code(), n.FileName, n.FieldName, n.Line)
 }
 
 type RouteDescriptionDuplicatesNameNotice struct {
@@ -380,55 +484,70 @@ type RouteDescriptionDuplicatesNameNotice struct {
 	DuplicatingField string
 }
 
-func (r RouteDescriptionDuplicatesNameNotice) Code() string {
+func (n RouteDescriptionDuplicatesNameNotice) Code() string {
 	return "description_duplicates_route_name"
 }
-func (r RouteDescriptionDuplicatesNameNotice) Severity() ValidationNoticeSeverity {
+func (n RouteDescriptionDuplicatesNameNotice) Severity() ValidationNoticeSeverity {
 	return SeverityRecommendation
+}
+func (n RouteDescriptionDuplicatesNameNotice) AsText() string {
+	return convertSingleLineNotice(n.Code(), n.FileName, n.FieldName, n.Line)
 }
 
 type AgencyIdRequiredForRouteWhenMultipleAgenciesNotice struct {
 	SingleLineNotice
 }
 
-func (r AgencyIdRequiredForRouteWhenMultipleAgenciesNotice) Code() string {
+func (n AgencyIdRequiredForRouteWhenMultipleAgenciesNotice) Code() string {
 	return "agency_id_required_for_route_when_multiple_agencies"
 }
-func (r AgencyIdRequiredForRouteWhenMultipleAgenciesNotice) Severity() ValidationNoticeSeverity {
+func (n AgencyIdRequiredForRouteWhenMultipleAgenciesNotice) Severity() ValidationNoticeSeverity {
 	return SeverityViolation
+}
+func (n AgencyIdRequiredForRouteWhenMultipleAgenciesNotice) AsText() string {
+	return convertSingleLineNotice(n.Code(), n.FileName, n.FieldName, n.Line)
 }
 
 type AgencyIdRecommendedForRouteNotice struct {
 	SingleLineNotice
 }
 
-func (r AgencyIdRecommendedForRouteNotice) Code() string {
+func (n AgencyIdRecommendedForRouteNotice) Code() string {
 	return "agency_id_recommended_for_route"
 }
-func (r AgencyIdRecommendedForRouteNotice) Severity() ValidationNoticeSeverity {
+func (n AgencyIdRecommendedForRouteNotice) Severity() ValidationNoticeSeverity {
 	return SeverityRecommendation
+}
+func (n AgencyIdRecommendedForRouteNotice) AsText() string {
+	return convertSingleLineNotice(n.Code(), n.FileName, n.FieldName, n.Line)
 }
 
 type InvalidLocationTypeNotice struct {
 	SingleLineNotice
 }
 
-func (r InvalidLocationTypeNotice) Code() string {
+func (n InvalidLocationTypeNotice) Code() string {
 	return "invalid_location_type"
 }
-func (r InvalidLocationTypeNotice) Severity() ValidationNoticeSeverity {
+func (n InvalidLocationTypeNotice) Severity() ValidationNoticeSeverity {
 	return SeverityViolation
+}
+func (n InvalidLocationTypeNotice) AsText() string {
+	return convertSingleLineNotice(n.Code(), n.FileName, n.FieldName, n.Line)
 }
 
 type InvalidWheelchairBoardingValueNotice struct {
 	SingleLineNotice
 }
 
-func (r InvalidWheelchairBoardingValueNotice) Code() string {
+func (n InvalidWheelchairBoardingValueNotice) Code() string {
 	return "invalid_wheelchair_boarding_value"
 }
-func (r InvalidWheelchairBoardingValueNotice) Severity() ValidationNoticeSeverity {
+func (n InvalidWheelchairBoardingValueNotice) Severity() ValidationNoticeSeverity {
 	return SeverityViolation
+}
+func (n InvalidWheelchairBoardingValueNotice) AsText() string {
+	return convertSingleLineNotice(n.Code(), n.FileName, n.FieldName, n.Line)
 }
 
 type TooFewShapePointsNotice struct {
@@ -436,11 +555,14 @@ type TooFewShapePointsNotice struct {
 	ShapeId  string
 }
 
-func (r TooFewShapePointsNotice) Code() string {
+func (n TooFewShapePointsNotice) Code() string {
 	return "too_few_shape_points"
 }
-func (r TooFewShapePointsNotice) Severity() ValidationNoticeSeverity {
+func (n TooFewShapePointsNotice) Severity() ValidationNoticeSeverity {
 	return SeverityViolation
+}
+func (n TooFewShapePointsNotice) AsText() string {
+	return fmt.Sprintf("%s in %v (shape %v)", n.Code(), n.FileName, n.ShapeId)
 }
 
 type FieldRequiredForStopLocationTypeNotice struct {
@@ -450,11 +572,14 @@ type FieldRequiredForStopLocationTypeNotice struct {
 	Line          int
 }
 
-func (r FieldRequiredForStopLocationTypeNotice) Code() string {
+func (n FieldRequiredForStopLocationTypeNotice) Code() string {
 	return "field_required_for_location_type"
 }
-func (r FieldRequiredForStopLocationTypeNotice) Severity() ValidationNoticeSeverity {
+func (n FieldRequiredForStopLocationTypeNotice) Severity() ValidationNoticeSeverity {
 	return SeverityViolation
+}
+func (n FieldRequiredForStopLocationTypeNotice) AsText() string {
+	return fmt.Sprintf("%s %v in %v (line %v)", n.Code(), n.RequiredField, n.FileName, n.Line)
 }
 
 type ForeignKeyViolationNotice struct {
@@ -466,9 +591,16 @@ type ForeignKeyViolationNotice struct {
 	ReferencedAtRow      int
 }
 
-func (r ForeignKeyViolationNotice) Code() string {
+func (n ForeignKeyViolationNotice) Code() string {
 	return "foreign_key_violation"
 }
-func (r ForeignKeyViolationNotice) Severity() ValidationNoticeSeverity {
+func (n ForeignKeyViolationNotice) Severity() ValidationNoticeSeverity {
 	return SeverityViolation
+}
+func (n ForeignKeyViolationNotice) AsText() string {
+	return fmt.Sprintf("%s from %v:%v->%v(value: %v) to %v->%v", n.Code(), n.ReferencingFileName, n.ReferencedAtRow, n.ReferencingFieldName, n.OffendingValue, n.ReferencedFileName, n.ReferencedFieldName)
+}
+
+func convertSingleLineNotice(code string, fileName string, fieldName string, line int) string {
+	return fmt.Sprintf("%s in %v->%v (line %v)", code, fileName, fieldName, line)
 }
