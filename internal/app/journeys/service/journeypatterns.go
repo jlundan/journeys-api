@@ -7,7 +7,7 @@ import (
 )
 
 type JourneyPatternsService struct {
-	DataStore *repository.JourneysDataStore
+	DataStore *repository.JourneysRepository
 }
 
 func (s JourneyPatternsService) Search(params map[string]string) []*model.JourneyPattern {

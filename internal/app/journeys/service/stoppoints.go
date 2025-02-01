@@ -10,7 +10,7 @@ import (
 )
 
 type StopPointsService struct {
-	DataStore *repository.JourneysDataStore
+	DataStore *repository.JourneysRepository
 }
 
 func (s StopPointsService) Search(params map[string]string) []*model.StopPoint {

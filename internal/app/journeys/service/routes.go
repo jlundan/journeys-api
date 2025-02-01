@@ -7,7 +7,7 @@ import (
 )
 
 type RoutesService struct {
-	DataStore *repository.JourneysDataStore
+	DataStore *repository.JourneysRepository
 }
 
 func (s RoutesService) Search(params map[string]string) []*model.Route {

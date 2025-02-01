@@ -9,7 +9,7 @@ import (
 	"strconv"
 )
 
-func newStopPointDataStore(stops []*ggtfs.Stop, municipalityDataStore *JourneysMunicipalityDataStore) *JourneysStopPointDataStore {
+func newStopPointsRepository(stops []*ggtfs.Stop, municipalityDataStore *JourneysMunicipalitiesRepository) *JourneysStopPointsRepository {
 	var all = make([]*model.StopPoint, 0)
 	var byId = make(map[string]*model.StopPoint)
 
@@ -53,13 +53,13 @@ func newStopPointDataStore(stops []*ggtfs.Stop, municipalityDataStore *JourneysM
 		return all[x].ShortName < all[y].ShortName
 	})
 
-	return &JourneysStopPointDataStore{
+	return &JourneysStopPointsRepository{
 		All:  all,
 		ById: byId,
 	}
 }
 
-type JourneysStopPointDataStore struct {
+type JourneysStopPointsRepository struct {
 	All  []*model.StopPoint
 	ById map[string]*model.StopPoint
 }

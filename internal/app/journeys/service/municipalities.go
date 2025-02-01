@@ -7,7 +7,7 @@ import (
 )
 
 type MunicipalitiesService struct {
-	DataStore *repository.JourneysDataStore
+	DataStore *repository.JourneysRepository
 }
 
 func (s MunicipalitiesService) Search(params map[string]string) []*model.Municipality {

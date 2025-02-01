@@ -68,7 +68,7 @@ var MainCommand = &cobra.Command{
 		//	os.Exit(0)
 		//}
 
-		dataStore := repository.NewJourneysDataStore(gtfsPath, skipValidation)
+		dataStore := repository.NewJourneysRepository(gtfsPath, skipValidation)
 		dataService := service.NewJourneysDataService(dataStore)
 
 		r := router.New(dataService, baseUrl, vehicleActivityBaseUrl)

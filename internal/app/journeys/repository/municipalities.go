@@ -5,7 +5,7 @@ import (
 	"sort"
 )
 
-func newMunicipalityDataStore(m municipalityData) *JourneysMunicipalityDataStore {
+func newMunicipalitiesRepository(m municipalityData) *JourneysMunicipalitiesRepository {
 	var all = make([]*model.Municipality, 0)
 	var byId = make(map[string]*model.Municipality)
 
@@ -22,13 +22,13 @@ func newMunicipalityDataStore(m municipalityData) *JourneysMunicipalityDataStore
 		return all[x].PublicCode < all[y].PublicCode
 	})
 
-	return &JourneysMunicipalityDataStore{
+	return &JourneysMunicipalitiesRepository{
 		All:  all,
 		ById: byId,
 	}
 }
 
-type JourneysMunicipalityDataStore struct {
+type JourneysMunicipalitiesRepository struct {
 	All  []*model.Municipality
 	ById map[string]*model.Municipality
 }

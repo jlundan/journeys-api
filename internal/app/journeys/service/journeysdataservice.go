@@ -2,7 +2,7 @@ package service
 
 import "github.com/jlundan/journeys-api/internal/app/journeys/repository"
 
-func NewJourneysDataService(dataStore *repository.JourneysDataStore) *JourneysDataService {
+func NewJourneysDataService(dataStore *repository.JourneysRepository) *JourneysDataService {
 	return &JourneysDataService{
 		JourneyPatterns: &JourneyPatternsService{DataStore: dataStore},
 		Journeys:        &JourneysService{DataStore: dataStore},
