@@ -6,3 +6,4 @@ bin
 cover.out
 coverage.html
 compatibility/diffs
+.local
