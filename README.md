@@ -177,8 +177,7 @@ Please note that the entity contents is based on the GTFS data. The field values
 used in the API, however the response structure and field names are accurate.
 
 #### Lines
-
-```
+```json
 {
     "status" : "success",
     "data" : {
@@ -201,7 +200,7 @@ used in the API, however the response structure and field names are accurate.
 ```
 
 #### Routes
-```
+```json
 {
   "status": "success",
   "data": {
@@ -299,7 +298,7 @@ lon3: (2375085 - 177) = 2374908 =>  2374908 / 100000 = 23.74908
 And so on.
 
 #### Journeys
-```
+```json
 {
   "status": "success",
   "data": {
@@ -365,7 +364,7 @@ You can set this via the `JOURNEYS_VA_BASE_URL` environment variable. For exampl
 export JOURNEYS_VA_BASE_URL=https://data.itsfactory.fi/journeys/api/1
 ```
 #### Journey Patterns
-```
+```json
 {
   "status": "success",
   "data": {
@@ -439,7 +438,7 @@ export JOURNEYS_VA_BASE_URL=https://data.itsfactory.fi/journeys/api/1
 }
 ```
 #### Stop Points
-```
+```json
 {
   "status": "success",
   "data": {
@@ -468,7 +467,7 @@ export JOURNEYS_VA_BASE_URL=https://data.itsfactory.fi/journeys/api/1
 }
 ```
 #### Municipalities
-```
+```json
 {
   "status": "success",
   "data": {
