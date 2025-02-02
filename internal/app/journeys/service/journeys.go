@@ -9,13 +9,13 @@ import (
 )
 
 type JourneysService struct {
-	DataStore *repository.JourneysRepository
+	Repository *repository.JourneysRepository
 }
 
 func (s JourneysService) Search(params map[string]string) []*model.Journey {
 	result := make([]*model.Journey, 0)
 
-	for _, journey := range s.DataStore.Journeys.All {
+	for _, journey := range s.Repository.Journeys.All {
 		if journeyMatchesConditions(journey, params) {
 			result = append(result, journey)
 		}
@@ -27,11 +27,11 @@ func (s JourneysService) Search(params map[string]string) []*model.Journey {
 func (s JourneysService) GetOneById(id string) (*model.Journey, error) {
 	var journey *model.Journey
 
-	if j, ok := s.DataStore.Journeys.ById[id]; ok {
+	if j, ok := s.Repository.Journeys.ById[id]; ok {
 		journey = j
 	}
 
-	if j, ok := s.DataStore.Journeys.ByActivityId[id]; ok {
+	if j, ok := s.Repository.Journeys.ByActivityId[id]; ok {
 		journey = j
 	}
 

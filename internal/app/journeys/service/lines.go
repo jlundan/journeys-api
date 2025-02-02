@@ -7,13 +7,13 @@ import (
 )
 
 type LinesService struct {
-	DataStore *repository.JourneysRepository
+	Repository *repository.JourneysRepository
 }
 
 func (s LinesService) Search(params map[string]string) []*model.Line {
 	result := make([]*model.Line, 0)
 
-	for _, line := range s.DataStore.Lines.All {
+	for _, line := range s.Repository.Lines.All {
 		if lineMatchesConditions(line, params) {
 			result = append(result, line)
 		}
@@ -23,7 +23,7 @@ func (s LinesService) Search(params map[string]string) []*model.Line {
 }
 
 func (s LinesService) GetOneById(id string) (*model.Line, error) {
-	if l, ok := s.DataStore.Lines.ById[id]; ok {
+	if l, ok := s.Repository.Lines.ById[id]; ok {
 		return l, nil
 	}
 	return nil, model.ErrNoSuchElement

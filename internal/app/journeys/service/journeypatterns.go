@@ -7,13 +7,13 @@ import (
 )
 
 type JourneyPatternsService struct {
-	DataStore *repository.JourneysRepository
+	Repository *repository.JourneysRepository
 }
 
 func (s JourneyPatternsService) Search(params map[string]string) []*model.JourneyPattern {
 	result := make([]*model.JourneyPattern, 0)
 
-	for _, jp := range s.DataStore.JourneyPatterns.All {
+	for _, jp := range s.Repository.JourneyPatterns.All {
 		if journeyPatternMatchesConditions(jp, params) {
 			result = append(result, jp)
 		}
@@ -23,7 +23,7 @@ func (s JourneyPatternsService) Search(params map[string]string) []*model.Journe
 }
 
 func (s JourneyPatternsService) GetOneById(id string) (*model.JourneyPattern, error) {
-	if jp, ok := s.DataStore.JourneyPatterns.ById[id]; ok {
+	if jp, ok := s.Repository.JourneyPatterns.ById[id]; ok {
 		return jp, nil
 	}
 	return nil, model.ErrNoSuchElement

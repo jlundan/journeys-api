@@ -10,13 +10,13 @@ import (
 )
 
 type StopPointsService struct {
-	DataStore *repository.JourneysRepository
+	Repository *repository.JourneysRepository
 }
 
 func (s StopPointsService) Search(params map[string]string) []*model.StopPoint {
 	result := make([]*model.StopPoint, 0)
 
-	for _, sp := range s.DataStore.StopPoints.All {
+	for _, sp := range s.Repository.StopPoints.All {
 		if stopPointMatchesConditions(sp, params) {
 			result = append(result, sp)
 		}
@@ -26,7 +26,7 @@ func (s StopPointsService) Search(params map[string]string) []*model.StopPoint {
 }
 
 func (s StopPointsService) GetOneById(id string) (*model.StopPoint, error) {
-	if sp, ok := s.DataStore.StopPoints.ById[id]; ok {
+	if sp, ok := s.Repository.StopPoints.ById[id]; ok {
 		return sp, nil
 	}
 	return nil, model.ErrNoSuchElement

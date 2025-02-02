@@ -7,13 +7,13 @@ import (
 )
 
 type RoutesService struct {
-	DataStore *repository.JourneysRepository
+	Repository *repository.JourneysRepository
 }
 
 func (s RoutesService) Search(params map[string]string) []*model.Route {
 	result := make([]*model.Route, 0)
 
-	for _, route := range s.DataStore.Routes.All {
+	for _, route := range s.Repository.Routes.All {
 		if routeMatchesConditions(route, params) {
 			result = append(result, route)
 		}
@@ -23,7 +23,7 @@ func (s RoutesService) Search(params map[string]string) []*model.Route {
 }
 
 func (s RoutesService) GetOneById(id string) (*model.Route, error) {
-	if r, ok := s.DataStore.Routes.ById[id]; ok {
+	if r, ok := s.Repository.Routes.ById[id]; ok {
 		return r, nil
 	}
 	return nil, model.ErrNoSuchElement

@@ -8,6 +8,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/jlundan/journeys-api/internal/app/journeys/repository"
 	"github.com/jlundan/journeys-api/internal/app/journeys/service"
+	"github.com/jlundan/journeys-api/internal/testutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -79,16 +80,16 @@ func runRouterTestCases[E APIEntity](t *testing.T, testCases []routerTestCase[E]
 			Body: tc.expectedEntities,
 		}
 
-		var diffs []FieldDiff
+		var diffs []testutil.FieldDiff
 		initialTag := fmt.Sprintf("%v:Response", tc.target)
-		err = compareVariables(expectedResponse, gotResponse, initialTag, &diffs, false)
+		err = testutil.CompareVariables(expectedResponse, gotResponse, initialTag, &diffs, false)
 		if err != nil {
 			t.Error(err)
 			break
 		}
 
 		if len(diffs) > 0 {
-			printFieldDiffs(t, diffs)
+			testutil.PrintFieldDiffs(t, diffs)
 			break
 		}
 	}
