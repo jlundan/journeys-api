@@ -64,12 +64,13 @@ func TestJourneyPatternsService_GetOneById(t *testing.T) {
 			t.Error(err)
 		} else if err != nil && tc.err == nil {
 			testutil.CompareVariablesAndPrintResults(t, tc.err, err, tc.id)
+		} else {
+			testutil.CompareVariablesAndPrintResults(t, tc.expected, result, tc.id)
 		}
-		testutil.CompareVariablesAndPrintResults(t, tc.expected, result, tc.id)
 	}
 }
 
-func TestJourneyPatternMatchesConditions2(t *testing.T) {
+func TestJourneyPatternMatchesConditions(t *testing.T) {
 	testCases := []struct {
 		id         string
 		item       *model.JourneyPattern
