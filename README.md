@@ -495,15 +495,25 @@ chmod +x ./journeys.api-linux-amd64
 ./journeys.api-linux-amd64 start
 ```
 
-View help:
+View help (and supported command line options):
 
 ```bash
 ./journeys.api-linux-amd64 help
 ```
 
-## Running the development server
+## Environment variables
 
-First, download the dependencies:
+| argument             | explanation                                                  |
+|----------------------|--------------------------------------------------------------|
+| JOURNEYS_GTFS_PATH   | path to directory where the GTFS files are located           |
+| JOURNEYS_BASE_URL    | the base of the outputted URLs in responses                  |
+| JOURNEYS_VA_BASE_URL | the base of the outputted vehicle activity URLs in responses |
+| JOURNEYS_PORT        | the port where the service will run. defaults to 8080        |
+
+
+## Development Environment
+
+After cloning the repository, download the dependencies:
 
 ```bash
 go mod download
@@ -515,26 +525,23 @@ Start the server:
 go run cmd/journeys/journeys.go start
 ```
 
-View help:
+View help (and supported command line options):
 
 ```bash
 go run cmd/journeys/journeys.go help
 ```
 
-The command reads following environment variables:
+You can update dependency versions (if needed) in standard Go way:
 
-| argument             | explanation                                                  |
-|----------------------|--------------------------------------------------------------|
-| JOURNEYS_GTFS_PATH   | path to directory where the GTFS files are located           |
-| JOURNEYS_BASE_URL    | the base of the outputted URLs in responses                  |
-| JOURNEYS_VA_BASE_URL | the base of the outputted vehicle activity URLs in responses |
-| JOURNEYS_PORT        | the port where the service will run. defaults to 8080        |
+1. Update the version of the (dependency) package in the `go.mod` file
+2. Run `go get -u <package-name>` to update the package
 
-The GTFS files for the Tampere region can be downloaded
-from [ITS Factory](https://data.itsfactory.fi/journeys/files/gtfs/). We currently use the Tampere GTFS files for
-development, but you should be able to use other cities' GTFS files as well.
+## The Tampere environment
 
-There is also a Makefile command which uses defaults for the environment variables:
+The GTFS files for the Tampere region can be downloaded from [ITS Factory](https://data.itsfactory.fi/journeys/files/gtfs/). We currently use the Tampere GTFS files for
+development, but you should be able to use other cities' GTFS files as well, assuming the GTFS data is similar.
+
+There are a couple of Makefile targets to run the server with the Tampere environment:
 
 ```bash
 # Run the server with the default development environment variables (localhost for internal URL links)
@@ -545,14 +552,9 @@ make tre
 
 Using the Makefile is not required, you can run the server with `go` command and set the environment variables manually.
 
-## Updating module versions
+## Endpoint compatibility with the proprietary Journeys API for the City of Tampere 
 
-1. Update the version of the package in the `go.mod` file
-2. Run `go get -u <package-name>` to update the package
-
-## Endpoint compatibility with the proprietary Journeys API
-
-You should expect endpoint compatibility with the proprietary Journeys API according to the following table:
+This repository provides a subset of functionality that is available in the proprietary Journeys API for City of Tampere. You should expect endpoint compatibility with the proprietary Journeys API according to the following table:
 
 | Endpoint                            | Status           | Notes                   |
 |-------------------------------------|------------------|-------------------------|
@@ -574,6 +576,7 @@ You should expect endpoint compatibility with the proprietary Journeys API accor
 
 Please note:
 
+* This repository might add the missing endpoints in the future
 * You should not expect the response object properties to be in the same order as in the proprietary API
 * You should not expect the response array items to be in the same order as in the proprietary API
 * You should not expect the response page sizes to match the proprietary API. We aim to return all items in one page,
