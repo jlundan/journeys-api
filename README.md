@@ -488,8 +488,20 @@ export JOURNEYS_VA_BASE_URL=https://data.itsfactory.fi/journeys/api/1
   ]
 }
 ```
+## Running the server binary
+After downloading the binary, run 
+```bash
+chmod +x ./journeys.api-linux-amd64
+./journeys.api-linux-amd64 start
+```
 
-## Running the server
+View help:
+
+```bash
+./journeys.api-linux-amd64 help
+```
+
+## Running the development server
 
 First, download the dependencies:
 
@@ -500,7 +512,13 @@ go mod download
 Start the server:
 
 ```bash
-go run cmd/journeys/journeys.go
+go run cmd/journeys/journeys.go start
+```
+
+View help:
+
+```bash
+go run cmd/journeys/journeys.go help
 ```
 
 The command reads following environment variables:
