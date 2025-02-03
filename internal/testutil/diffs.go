@@ -26,6 +26,31 @@ func CompareVariablesAndPrintResults(t *testing.T, expected, got interface{}, ta
 }
 
 func CompareVariables(expected, got interface{}, tag string, diffs *[]FieldDiff, verbose bool) error {
+	expErr, expIsErr := expected.(error)
+	gotErr, gotIsErr := got.(error)
+
+	if expIsErr || gotIsErr {
+		// If one is an error and the other isn't, they are different.
+		if expIsErr != gotIsErr {
+			*diffs = append(*diffs, FieldDiff{
+				Tag:      tag,
+				Expected: expected,
+				Got:      got,
+			})
+			return nil
+		}
+
+		// Use errors.Is() to compare errors correctly.
+		if !errors.Is(gotErr, expErr) {
+			*diffs = append(*diffs, FieldDiff{
+				Tag:      tag,
+				Expected: expErr.Error(),
+				Got:      gotErr.Error(),
+			})
+		}
+		return nil
+	}
+
 	jsonExp, err1 := json.Marshal(expected)
 	if err1 != nil {
 		return err1
@@ -84,7 +109,6 @@ func CompareVariables(expected, got interface{}, tag string, diffs *[]FieldDiff,
 		for i := 0; i < va.NumField(); i++ {
 			fieldA := va.Field(i)
 			fieldB := vb.Field(i)
-
 			err := CompareVariables(fieldA.Interface(), fieldB.Interface(), fmt.Sprintf("%v.%v", tag, va.Type().Field(i).Name), diffs, verbose)
 			if err != nil {
 				return err
@@ -93,8 +117,7 @@ func CompareVariables(expected, got interface{}, tag string, diffs *[]FieldDiff,
 		return nil
 	}
 
-	if expected != got {
-		//fmt.Println(fmt.Sprintf("%T %T", expected, got))
+	if !reflect.DeepEqual(expected, got) {
 		*diffs = append(*diffs, FieldDiff{
 			Tag:      tag,
 			Expected: expected,
