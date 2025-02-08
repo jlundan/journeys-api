@@ -164,11 +164,6 @@ lists the zones used in the Tampere GTFS data.
 	- name: string
 	- shortName: string
 
-<base url>/v1/vehicle-activity
-	- lineRef: string or comma separated list of strings with * as wildcard, for example: lineRef=3 or lineRef=3,1*
-	- vehicleRef: string or comma separated list of strings with * as wildcard (see lineRef)
-	- journeyRef: string or comma separated list of strings with * as wildcard (see lineRef)
- 	- directionRef: string, choice of 1 or 2
 ```
 
 ### Entities
