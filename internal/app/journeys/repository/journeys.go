@@ -7,6 +7,7 @@ import (
 	"github.com/jlundan/journeys-api/internal/app/journeys/model"
 	"github.com/jlundan/journeys-api/internal/app/journeys/utils"
 	"github.com/jlundan/journeys-api/pkg/ggtfs"
+	"log"
 	"sort"
 	"strconv"
 	"strings"
@@ -27,17 +28,28 @@ func newJourneysAndJourneyPatternsRepository(stopTimes []*ggtfs.StopTime, trips 
 	var tripIdToJourneyCalls = make(map[string][]*model.JourneyCall)
 	var tripIdToStopTimes = make(map[string][]*ggtfs.StopTime)
 
-	//TODO: nil check
-	for _, st := range stopTimes {
-		tripIdToStopTimes[*st.TripId] = append(tripIdToStopTimes[*st.TripId], st)
+	for i, st := range stopTimes {
+		if st == nil {
+			log.Println(fmt.Sprintf("Nil stopTime detected, number %v in the stopTimes array, newJourneysAndJourneyPatternsRepository function", i))
+			continue
+		}
+
+		if st.TripId == nil {
+			log.Println(fmt.Sprintf("stoptime.TripId is missing, GTFS line: %v", st.LineNumber))
+			continue
+		}
+
+		tripId := strings.TrimSpace(*st.TripId)
+		tripIdToStopTimes[tripId] = append(tripIdToStopTimes[tripId], st)
 	}
 
 	usedHashes := make([]string, 0)
 
 	for tripId, stArr := range tripIdToStopTimes {
-
-		// TODO: better nil functionality
 		sort.Slice(stArr, func(x, y int) bool {
+			if stArr == nil || stArr[x] == nil || stArr[x].StopSequence == nil || stArr[y] == nil || stArr[y].StopSequence == nil {
+				return false
+			}
 			sx, err := strconv.Atoi(*stArr[x].StopSequence)
 			if err != nil {
 				return false
@@ -74,16 +86,30 @@ func newJourneysAndJourneyPatternsRepository(stopTimes []*ggtfs.StopTime, trips 
 		}
 
 		for _, stopTime := range stArr {
-			sp, spFound := stopPointDataStore.ById[*stopTime.StopId]
+			sp, spFound := stopPointDataStore.ById[*stopTime.StopId] // stArr is already filtered to contain only non-nil stopTimes
 
 			if !spFound {
 				fmt.Println(fmt.Sprintf("Unknown stop point in trip, ignoring it. trip_id:%v, stop_id:%v", tripId, stopTime.TripId))
 				continue
 			}
 
-			tripIdToJourneyCalls[tripId] = append(tripIdToJourneyCalls[tripId], &model.JourneyCall{
-				DepartureTime: *stopTime.DepartureTime,
-				ArrivalTime:   *stopTime.ArrivalTime,
+			var arrivalTime, departureTime string
+
+			if stopTime.ArrivalTime != nil {
+				arrivalTime = strings.TrimSpace(*stopTime.ArrivalTime)
+			} else {
+				log.Println(fmt.Sprintf("stoptime (on gtfs row %v): ArrivalTime is missing", stopTime.LineNumber))
+			}
+
+			if stopTime.DepartureTime != nil {
+				departureTime = strings.TrimSpace(*stopTime.DepartureTime)
+			} else {
+				log.Println(fmt.Sprintf("stoptime (on gtfs row %v): DepartureTime is missing", stopTime.LineNumber))
+			}
+
+			tripIdToJourneyCalls[tripId] = append(tripIdToJourneyCalls[tripId], &model.JourneyCall{ // tripId is already trimmed for spaces
+				DepartureTime: departureTime,
+				ArrivalTime:   arrivalTime,
 				StopPoint:     sp,
 			})
 
@@ -104,42 +130,71 @@ func newJourneysAndJourneyPatternsRepository(stopTimes []*ggtfs.StopTime, trips 
 	calendarMap := buildCalendarMap(calendarItems)
 	calendarDateMap := buildCalendarDatesMap(calendarDates)
 
-	for _, trip := range trips {
-		jp, ok := tripIdToJourneyPattern[*trip.Id]
-		if !ok {
-			fmt.Println(fmt.Sprintf("Journey with no journey pattern detected, ignoring it: %v", trip.Id))
+	for i, trip := range trips {
+		if trip == nil {
+			log.Println(fmt.Sprintf("Nil trip detected, number %v in the trips array, newJourneysAndJourneyPatternsRepository function", i))
 			continue
 		}
 
-		line, lineFound := lineDataStore.ById[*trip.RouteId]
+		if trip.Id == nil {
+			fmt.Println(fmt.Sprintf("trip with no id detected, ignoring it. GTFS trip row: %v", trip.LineNumber))
+			continue
+		}
+
+		if trip.RouteId == nil {
+			fmt.Println(fmt.Sprintf("trip with no RouteId detected, ignoring it. GTFS trip row: %v", trip.LineNumber))
+			continue
+		}
+
+		if trip.ShapeId == nil {
+			fmt.Println(fmt.Sprintf("trip with no ShapeId detected, ignoring it. GTFS trip row: %v", trip.LineNumber))
+			continue
+		}
+
+		if trip.ServiceId == nil {
+			fmt.Println(fmt.Sprintf("trip with no ServiceId detected, ignoring it. GTFS trip row: %v", trip.LineNumber))
+			continue
+		}
+
+		tripId := strings.TrimSpace(*trip.Id)
+		routeId := strings.TrimSpace(*trip.RouteId)
+		shapeId := strings.TrimSpace(*trip.ShapeId)
+		serviceId := strings.TrimSpace(*trip.ServiceId)
+
+		jp, ok := tripIdToJourneyPattern[tripId]
+		if !ok {
+			fmt.Println(fmt.Sprintf("Journey with no journey pattern detected, ignoring it: %v", tripId))
+			continue
+		}
+
+		line, lineFound := lineDataStore.ById[routeId]
 		if !lineFound {
-			fmt.Println(fmt.Sprintf("Journey with no line detected, ignoring it: %v", trip.Id))
+			fmt.Println(fmt.Sprintf("Journey with no line detected, ignoring it: %v", tripId))
 			continue
 		}
 
-		if ggtfs.StringIsNilOrEmpty(trip.ShapeId) {
-			fmt.Println(fmt.Sprintf("Journey with no route detected, ignoring it: %v", trip.Id))
-			continue
-		}
-
-		route, routeFound := routeDataStore.ById[*trip.ShapeId]
+		route, routeFound := routeDataStore.ById[shapeId]
 		if !routeFound {
-			fmt.Println(fmt.Sprintf("Journey with no route detected, ignoring it: %v", trip.Id))
+			fmt.Println(fmt.Sprintf("Journey with no route detected, ignoring it: %v", tripId))
 			continue
 		}
 
-		cMapItem, ok := calendarMap[*trip.ServiceId]
+		cMapItem, ok := calendarMap[serviceId]
 		if !ok {
-			fmt.Println(fmt.Sprintf("Journey with no service detected, ignoring it: %v", trip.Id))
+			fmt.Println(fmt.Sprintf("Journey with no service detected, ignoring it: %v", tripId))
 			continue
 		}
 
-		cdMapItem, ok := calendarDateMap[*trip.ServiceId]
+		cdMapItem, ok := calendarDateMap[serviceId]
 		if !ok {
 			cdMapItem = make([]*model.DayTypeException, 0)
 		}
 
-		calls := tripIdToJourneyCalls[*trip.Id]
+		calls := tripIdToJourneyCalls[tripId]
+		if len(calls) == 0 {
+			fmt.Println(fmt.Sprintf("Journey with no calls detected, ignoring it: %v", tripId))
+			continue
+		}
 
 		dtParts := strings.Split(calls[0].DepartureTime, ":")
 		dt := strings.Join(dtParts[:2], "")
@@ -149,13 +204,33 @@ func newJourneysAndJourneyPatternsRepository(stopTimes []*ggtfs.StopTime, trips 
 
 		activityId := fmt.Sprintf("%v_%v_%v_%v", line.Name, dt, lastCall.StopPoint.ShortName, firstCall.StopPoint.ShortName)
 
+		var headSign, directionId, wheelChairAccessible string
+
+		if trip.HeadSign != nil {
+			headSign = strings.TrimSpace(*trip.HeadSign)
+		} else {
+			log.Println(fmt.Sprintf("trip (on gtfs row %v): HeadSign is missing", trip.LineNumber))
+		}
+
+		if trip.DirectionId != nil {
+			directionId = strings.TrimSpace(*trip.DirectionId)
+		} else {
+			log.Println(fmt.Sprintf("trip (on gtfs row %v): DirectionId is missing", trip.LineNumber))
+		}
+
+		if trip.WheelchairAccessible != nil {
+			wheelChairAccessible = strings.TrimSpace(*trip.WheelchairAccessible)
+		} else {
+			log.Println(fmt.Sprintf("trip (on gtfs row %v): WheelchairAccessible is missing", trip.LineNumber))
+		}
+
 		journey := model.Journey{
-			Id:                   *trip.Id,
-			HeadSign:             *trip.HeadSign,
-			Direction:            *trip.DirectionId,
-			WheelchairAccessible: *trip.WheelchairAccessible == "1",
+			Id:                   tripId,
+			HeadSign:             headSign,
+			Direction:            directionId,
+			WheelchairAccessible: wheelChairAccessible == "1",
 			GtfsInfo: &model.JourneyGtfsInfo{
-				TripId: *trip.Id,
+				TripId: tripId,
 			},
 			DayTypes:          cMapItem.dayTypes,
 			DayTypeExceptions: cdMapItem,
@@ -171,10 +246,8 @@ func newJourneysAndJourneyPatternsRepository(stopTimes []*ggtfs.StopTime, trips 
 		}
 
 		jp.Route = route
-		// jp.Name = fmt.Sprintf("%s - %s", jp.StopPoints[0].Name, jp.StopPoints[len(jp.StopPoints)-1].Name)
 
 		route.Journeys = append(route.Journeys, &journey)
-		// route.Name = jp.Name
 		route.Line = line
 
 		if !routeContainsJourneyPattern(route, jp) {
@@ -237,56 +310,74 @@ type calendarFileRow struct {
 
 func buildCalendarMap(calendarItems []*ggtfs.CalendarItem) map[string]calendarFileRow {
 	result := make(map[string]calendarFileRow)
-	for _, calendarItem := range calendarItems {
+	for i, ci := range calendarItems {
+		if ci == nil {
+			log.Println(fmt.Sprintf("Nil calendar item detected, number %v in the calendarItems array, buildCalendarMap function", i))
+			continue
+		}
+
+		if ci.ServiceId == nil || ci.Monday == nil || ci.Tuesday == nil || ci.Wednesday == nil || ci.Thursday == nil ||
+			ci.Friday == nil || ci.Saturday == nil || ci.Sunday == nil || ci.StartDate == nil || ci.EndDate == nil {
+			log.Println(fmt.Sprintf("malformed calendar item, GTFS row: %v", ci.LineNumber))
+			continue
+		}
+
+		serviceId := strings.TrimSpace(*ci.ServiceId)
+		monday := strings.TrimSpace(*ci.Monday)
+		tuesday := strings.TrimSpace(*ci.Tuesday)
+		wednesday := strings.TrimSpace(*ci.Wednesday)
+		thursday := strings.TrimSpace(*ci.Thursday)
+		friday := strings.TrimSpace(*ci.Friday)
+		saturday := strings.TrimSpace(*ci.Saturday)
+		sunday := strings.TrimSpace(*ci.Sunday)
+		startDate := strings.TrimSpace(*ci.StartDate)
+		endDate := strings.TrimSpace(*ci.EndDate)
+
 		days := make([]string, 0)
-		if *calendarItem.Monday == "1" {
+		if monday == "1" {
 			days = append(days, "monday")
 		}
-		if *calendarItem.Tuesday == "1" {
+		if tuesday == "1" {
 			days = append(days, "tuesday")
 		}
-		if *calendarItem.Wednesday == "1" {
+		if wednesday == "1" {
 			days = append(days, "wednesday")
 		}
-		if *calendarItem.Thursday == "1" {
+		if thursday == "1" {
 			days = append(days, "thursday")
 		}
-		if *calendarItem.Friday == "1" {
+		if friday == "1" {
 			days = append(days, "friday")
 		}
-		if *calendarItem.Saturday == "1" {
+		if saturday == "1" {
 			days = append(days, "saturday")
 		}
-		if *calendarItem.Sunday == "1" {
+		if sunday == "1" {
 			days = append(days, "sunday")
 		}
 
-		var startDate string
-		parsedStartDate, err := time.Parse("20060102", *calendarItem.StartDate)
+		var formattedStartDate string
+		parsedStartDate, err := time.Parse("20060102", startDate)
 		if err != nil {
-			fmt.Println("Error parsing date:", err)
-			// TODO: nil check
-			startDate = *calendarItem.StartDate
+			log.Println(fmt.Sprintf("Error parsing start date for calendar item, GTFS row: %v", ci.LineNumber))
+			formattedStartDate = startDate
 		} else {
-			startDate = parsedStartDate.Format("2006-01-02")
+			formattedStartDate = parsedStartDate.Format("2006-01-02")
 		}
 
-		var endDate string
-		parsedEndDate, err := time.Parse("20060102", *calendarItem.EndDate)
+		var formattedEndDate string
+		parsedEndDate, err := time.Parse("20060102", endDate)
 		if err != nil {
-			fmt.Println("Error parsing date:", err)
-			// TODO: nil check
-			endDate = *calendarItem.EndDate
+			log.Println(fmt.Sprintf("Error parsing end date for calendar item, GTFS row: %v", ci.LineNumber))
+			formattedEndDate = endDate
 		} else {
-			endDate = parsedEndDate.Format("2006-01-02")
+			formattedEndDate = parsedEndDate.Format("2006-01-02")
 		}
 
-		serviceId := calendarItem.ServiceId
-		//TODO: nil check
-		result[*serviceId] = calendarFileRow{
-			serviceId: *serviceId,
-			startDate: startDate,
-			endDate:   endDate,
+		result[serviceId] = calendarFileRow{
+			serviceId: serviceId,
+			startDate: formattedStartDate,
+			endDate:   formattedEndDate,
 			dayTypes:  days,
 		}
 	}
@@ -297,33 +388,55 @@ func buildCalendarMap(calendarItems []*ggtfs.CalendarItem) map[string]calendarFi
 func buildCalendarDatesMap(calendarDates []*ggtfs.CalendarDate) map[string][]*model.DayTypeException {
 	result := make(map[string][]*model.DayTypeException)
 
-	for _, calendarDate := range calendarDates {
-		var date string
-
-		parsedTime, err := time.Parse("20060102", *calendarDate.Date)
-		if err != nil {
-			fmt.Println("Error parsing date:", err)
-			// TODO: nil check
-			date = *calendarDate.Date
-		} else {
-			date = parsedTime.Format("2006-01-02")
+	for i, cd := range calendarDates {
+		if cd == nil {
+			log.Println(fmt.Sprintf("Nil calendar date detected, number %v in the calendarDates array, buildCalendarDatesMap function", i))
+			continue
 		}
 
-		// TODO: nil check
-		result[*calendarDate.ServiceId] = append(result[*calendarDate.ServiceId], &model.DayTypeException{
-			From: date,
-			To:   date,
-			Runs: *calendarDate.ExceptionType == "1",
+		if cd.ServiceId == nil || cd.ExceptionType == nil {
+			log.Println(fmt.Sprintf("malformed calendar date, GTFS row: %v", cd.LineNumber))
+			continue
+		}
+
+		date := strings.TrimSpace(*cd.Date)
+		serviceId := strings.TrimSpace(*cd.ServiceId)
+		exceptionType := strings.TrimSpace(*cd.ExceptionType)
+
+		var formattedDate string
+
+		parsedTime, err := time.Parse("20060102", date)
+		if err != nil {
+			log.Println(fmt.Sprintf("Error parsing start date for calendar date, GTFS row: %v", cd.LineNumber))
+			formattedDate = date
+		} else {
+			formattedDate = parsedTime.Format("2006-01-02")
+		}
+
+		result[serviceId] = append(result[serviceId], &model.DayTypeException{
+			From: formattedDate,
+			To:   formattedDate,
+			Runs: exceptionType == "1",
 		})
 	}
 
 	return result
 }
 
-func stopPointIdsToMd5(arr []*ggtfs.StopTime) string {
+func stopPointIdsToMd5(stopTimes []*ggtfs.StopTime) string {
 	bucket := md5.New()
-	for _, v := range arr {
-		bucket.Write([]byte(*v.StopId))
+	for i, st := range stopTimes {
+		if st == nil {
+			log.Println(fmt.Sprintf("Nil stopTime detected, number %v in the stopTimes array, stopPointIdsToMd5 function", i))
+			continue
+		}
+
+		if st.StopId == nil {
+			log.Println(fmt.Sprintf("stoptime.StopId is missing, GTFS line: %v", st.LineNumber))
+			continue
+		}
+
+		bucket.Write([]byte(strings.TrimSpace(*st.StopId)))
 	}
 
 	return hex.EncodeToString(bucket.Sum(nil))
