@@ -4,35 +4,40 @@ import (
 	"fmt"
 	"github.com/jlundan/journeys-api/internal/app/journeys/model"
 	"github.com/jlundan/journeys-api/pkg/ggtfs"
+	"log"
 	"sort"
+	"strings"
 )
 
 func newLinesRepository(routes []*ggtfs.Route) *JourneysLinesRepository {
 	var all = make([]*model.Line, 0)
 	var byId = make(map[string]*model.Line)
 
-	for _, r := range routes {
-		id := r.Id
-
-		if id == nil || len(*id) == 0 {
-			fmt.Println(fmt.Sprintf("skipping malformed line from routes.txt on line: %v", r.LineNumber))
+	for i, r := range routes {
+		if r == nil {
+			fmt.Println(fmt.Sprintf("Nil route detected, number %v in the routes array, newLinesRepository function", i))
 			continue
 		}
 
-		var shortName, longName string
-
-		ln := r.LongName
-		if ln == nil || len(*ln) == 0 {
-			longName = ""
-		} else {
-			longName = *ln
+		if r.Id == nil {
+			fmt.Println(fmt.Sprintf("Line.Id is missing, GTFS route: %v", r.LineNumber))
+			continue
 		}
 
-		sn := r.ShortName
-		if sn == nil || len(*sn) == 0 {
-			shortName = ""
+		id := strings.TrimSpace(*r.Id)
+
+		var shortName, longName string
+
+		if r.LongName == nil {
+			log.Println(fmt.Sprintf("line (on gtfs line %v): LongName is missing", r.LineNumber))
 		} else {
-			shortName = *sn
+			longName = strings.TrimSpace(*r.LongName)
+		}
+
+		if r.ShortName == nil {
+			log.Println(fmt.Sprintf("line (on gtfs line %v): ShortName is missing", r.LineNumber))
+		} else {
+			shortName = strings.TrimSpace(*r.ShortName)
 		}
 
 		l := model.Line{
@@ -41,7 +46,7 @@ func newLinesRepository(routes []*ggtfs.Route) *JourneysLinesRepository {
 		}
 
 		all = append(all, &l)
-		byId[*id] = &l
+		byId[id] = &l
 	}
 
 	sort.Slice(all, func(x, y int) bool {
