@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"github.com/jlundan/journeys-api/internal/app/journeys/model"
 	"github.com/jlundan/journeys-api/pkg/ggtfs"
+	"log"
 	"sort"
 	"strconv"
+	"strings"
 )
 
 func newRoutesRepository(shapes []*ggtfs.Shape) *JourneysRoutesRepository {
@@ -13,21 +15,45 @@ func newRoutesRepository(shapes []*ggtfs.Shape) *JourneysRoutesRepository {
 	var byId = make(map[string]*model.Route)
 
 	var shapeIdToCoords = make(map[string][][]float64)
-	for _, shape := range shapes {
-		// TODO: nil check
-		if _, ok := shapeIdToCoords[*shape.Id]; !ok {
-			shapeIdToCoords[*shape.Id] = make([][]float64, 0)
-		}
-		lat, err := strconv.ParseFloat(*shape.PtLat, 64)
-		if err != nil {
-			fmt.Println(fmt.Sprintf("Error parsing shape.PtLat: %v, line: %v", shape.PtLat, shape.LineNumber))
-		}
-		lon, err := strconv.ParseFloat(*shape.PtLon, 64)
-		if err != nil {
-			fmt.Println(fmt.Sprintf("Error parsing shape.PtLon: %v, line: %v", shape.PtLon, shape.LineNumber))
+	for i, shape := range shapes {
+		if shape == nil {
+			fmt.Println(fmt.Sprintf("Nil shape detected, number %v in the shapes array, newRoutesRepository function", i))
+			continue
 		}
 
-		shapeIdToCoords[*shape.Id] = append(shapeIdToCoords[*shape.Id], []float64{lat, lon})
+		if shape.Id == nil {
+			fmt.Println(fmt.Sprintf("Shape.Id is missing, GTFS line: %v", shape.LineNumber))
+			continue
+		}
+
+		shapeId := strings.TrimSpace(*shape.Id)
+
+		var lat, lon float64
+		if shape.PtLat != nil {
+			lf, err := strconv.ParseFloat(*shape.PtLat, 64)
+			if err != nil {
+				log.Println(fmt.Sprintf("shape (on gtfs line %v): cannot parse lat float value", shape.LineNumber))
+			}
+			lat = lf
+		} else {
+			log.Println(fmt.Sprintf("shape (on gtfs line %v): lat is missing", shape.LineNumber))
+		}
+
+		if shape.PtLon != nil {
+			lf, err := strconv.ParseFloat(*shape.PtLon, 64)
+			if err != nil {
+				log.Println(fmt.Sprintf("shape (on gtfs line %v): cannot parse lon float value", shape.LineNumber))
+			}
+			lon = lf
+		} else {
+			log.Println(fmt.Sprintf("shape (on gtfs line %v): lon is missing", shape.LineNumber))
+		}
+
+		if _, ok := shapeIdToCoords[shapeId]; !ok {
+			shapeIdToCoords[shapeId] = make([][]float64, 0)
+		}
+
+		shapeIdToCoords[shapeId] = append(shapeIdToCoords[shapeId], []float64{lat, lon})
 	}
 
 	for shapeId, coords := range shapeIdToCoords {
@@ -56,6 +82,10 @@ func newRoutesRepository(shapes []*ggtfs.Shape) *JourneysRoutesRepository {
 }
 
 func createCoordinateProjection(coords [][]float64) (string, error) {
+	if coords == nil || len(coords) == 0 {
+		return "", nil
+	}
+
 	projection := ""
 	var lastLat int64
 	var lastLon int64
