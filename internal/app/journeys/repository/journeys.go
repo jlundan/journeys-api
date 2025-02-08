@@ -261,12 +261,32 @@ func buildCalendarMap(calendarItems []*ggtfs.CalendarItem) map[string]calendarFi
 			days = append(days, "sunday")
 		}
 
+		var startDate string
+		parsedStartDate, err := time.Parse("20060102", *calendarItem.StartDate)
+		if err != nil {
+			fmt.Println("Error parsing date:", err)
+			// TODO: nil check
+			startDate = *calendarItem.StartDate
+		} else {
+			startDate = parsedStartDate.Format("2006-01-02")
+		}
+
+		var endDate string
+		parsedEndDate, err := time.Parse("20060102", *calendarItem.EndDate)
+		if err != nil {
+			fmt.Println("Error parsing date:", err)
+			// TODO: nil check
+			endDate = *calendarItem.EndDate
+		} else {
+			endDate = parsedEndDate.Format("2006-01-02")
+		}
+
 		serviceId := calendarItem.ServiceId
 		//TODO: nil check
 		result[*serviceId] = calendarFileRow{
 			serviceId: *serviceId,
-			startDate: *calendarItem.StartDate,
-			endDate:   *calendarItem.EndDate,
+			startDate: startDate,
+			endDate:   endDate,
 			dayTypes:  days,
 		}
 	}
