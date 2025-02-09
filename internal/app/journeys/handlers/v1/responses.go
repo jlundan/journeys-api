@@ -52,6 +52,10 @@ func sendResponse(response []byte, w http.ResponseWriter) {
 }
 
 func newSuccessResponse(body []map[string]any) apiSuccessResponse {
+	if body == nil {
+		body = []map[string]any{}
+	}
+
 	return apiSuccessResponse{
 		Status: "success",
 		Data: apiSuccessData{Headers: apiHeaders{Paging: apiHeadersPaging{
