@@ -7,6 +7,7 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"testing"
 )
 
@@ -54,5 +55,28 @@ func TestSendResponse(t *testing.T) {
 	sendResponse([]byte{}, &erw)
 	if status := erw.Code; status != http.StatusInternalServerError {
 		t.Errorf("sendResponse() status code = %v, want %v", status, http.StatusInternalServerError)
+	}
+}
+
+func TestNewSuccessResponse(t *testing.T) {
+	// Test successful response
+	body := []map[string]interface{}{{"key": "value"}}
+	expected := apiSuccessResponse{"success", apiSuccessData{apiHeaders{apiHeadersPaging{
+		StartIndex: 0,
+		PageSize:   1,
+		MoreData:   false,
+	}}}, body}
+	if response := newSuccessResponse(body); !reflect.DeepEqual(response, expected) {
+		t.Errorf("newSuccessResponse() = %v, want %v", response, expected)
+	}
+
+	// Test that nil bodies are returned as empty arrays
+	expected = apiSuccessResponse{"success", apiSuccessData{apiHeaders{apiHeadersPaging{
+		StartIndex: 0,
+		PageSize:   0,
+		MoreData:   false,
+	}}}, []map[string]interface{}{}}
+	if response := newSuccessResponse(nil); !reflect.DeepEqual(response, expected) {
+		t.Errorf("newSuccessResponse() = %v, want %v", response, expected)
 	}
 }
