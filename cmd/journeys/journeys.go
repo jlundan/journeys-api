@@ -3,8 +3,9 @@ package main
 import (
 	"fmt"
 	"github.com/bradfitz/gomemcache/memcache"
+	"github.com/gorilla/mux"
+	v1 "github.com/jlundan/journeys-api/internal/app/journeys/handlers/v1"
 	"github.com/jlundan/journeys-api/internal/app/journeys/repository"
-	"github.com/jlundan/journeys-api/internal/app/journeys/router"
 	"github.com/jlundan/journeys-api/internal/app/journeys/server"
 	"github.com/jlundan/journeys-api/internal/app/journeys/service"
 	"github.com/spf13/cobra"
@@ -61,23 +62,36 @@ var StartCommand = &cobra.Command{
 			os.Exit(0)
 		}
 
-		dataService := service.NewJourneysDataService(dataStore)
+		router := mux.NewRouter()
 
-		r := router.New(dataService, baseUrl, vehicleActivityBaseUrl)
+		router.Use(server.CorsMiddleware)
 
 		if !disableCache {
 			memcached, err := server.NewMemcachedCacheMiddleware(memcache.New(os.Getenv("MEMCACHED_URL")))
 			if err != nil {
 				log.Fatal(err)
 			}
-			r.Use(memcached.Middleware)
+			router.Use(memcached.Middleware)
 
 			log.Println("Using cache")
 		}
 
-		r.Use(server.CorsMiddleware)
+		dataService := service.NewJourneysDataService(dataStore)
 
-		server.Start(r, serverPort, onServerStartupSuccess, onServerStartupFailure, onServerShutdown)
+		router.HandleFunc("/v1/lines", v1.HandleGetAllLines(dataService, baseUrl)).Methods("GET")
+		router.HandleFunc(`/v1/lines/{name}`, v1.HandleGetOneLine(dataService, baseUrl)).Methods("GET")
+		router.HandleFunc("/v1/journeys", v1.HandleGetAllJourneys(dataService, baseUrl, vehicleActivityBaseUrl)).Methods("GET")
+		router.HandleFunc(`/v1/journeys/{name}`, v1.HandleGetOneJourney(dataService, baseUrl, vehicleActivityBaseUrl)).Methods("GET")
+		router.HandleFunc("/v1/journey-patterns", v1.HandleGetAllJourneyPatterns(dataService, baseUrl)).Methods("GET")
+		router.HandleFunc(`/v1/journey-patterns/{name}`, v1.HandleGetOneJourneyPattern(dataService, baseUrl)).Methods("GET")
+		router.HandleFunc("/v1/routes", v1.HandleGetAllRoutes(dataService, baseUrl)).Methods("GET")
+		router.HandleFunc(`/v1/routes/{name}`, v1.HandleGetOneRoute(dataService, baseUrl)).Methods("GET")
+		router.HandleFunc("/v1/stop-points", v1.HandleGetAllStopPoints(dataService, baseUrl)).Methods("GET")
+		router.HandleFunc(`/v1/stop-points/{name}`, v1.HandleGetOneStopPoint(dataService, baseUrl)).Methods("GET")
+		router.HandleFunc("/v1/municipalities", v1.HandleGetAllMunicipalities(dataService, baseUrl)).Methods("GET")
+		router.HandleFunc(`/v1/municipalities/{name}`, v1.HandleGetOneMunicipality(dataService, baseUrl)).Methods("GET")
+
+		server.Start(router, serverPort, onServerStartupSuccess, onServerStartupFailure, onServerShutdown)
 	},
 }
 
