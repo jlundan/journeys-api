@@ -270,7 +270,7 @@ func journeyJourneyPatternUrl(name string) string {
 }
 
 func journeyActivityUrl(name string) string {
-	return fmt.Sprintf("%v/vehicle-activity/%v", "", name)
+	return fmt.Sprintf("%v/vehicle-activity?journeyRef=%v", "", name)
 }
 
 func journeysMunicipalityUrl(name string) string {
