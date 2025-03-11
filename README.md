@@ -483,6 +483,9 @@ export JOURNEYS_VA_BASE_URL=https://data.itsfactory.fi/journeys/api/1
   ]
 }
 ```
+## About caching
+Journeys API supports caching of responses. The cache has two modes: short cache and long cache. Short cache can be enabled for a specific time period (defined in hours), for example from 0 to 5. This can be used to fine tune the cache expiration close to the time when the current service day ends and a new service day begins. The service day change should ideally fall between the short cache period, and the short cache duration should be set so that it is shorter than the time between the stop of the last journey of the current service day and the start of the first journey on the next service day. This allows the cache to evict the previous day's journeys before the new journeys on the next service day start (with possibly on a different schedule), so that stale items from the previous day are no longer in the cache. Please see the "Environment variables" section for the environment variables that control the cache. 
+
 ## Running the server binary
 After downloading the binary, run 
 ```bash
@@ -498,12 +501,16 @@ View help (and supported command line options):
 
 ## Environment variables
 
-| argument             | explanation                                                  |
-|----------------------|--------------------------------------------------------------|
-| JOURNEYS_GTFS_PATH   | path to directory where the GTFS files are located           |
-| JOURNEYS_BASE_URL    | the base of the outputted URLs in responses                  |
-| JOURNEYS_VA_BASE_URL | the base of the outputted vehicle activity URLs in responses |
-| JOURNEYS_PORT        | the port where the service will run. defaults to 8080        |
+| argument                         | explanation                                                  |
+|----------------------------------|--------------------------------------------------------------|
+| JOURNEYS_GTFS_PATH               | path to directory where the GTFS files are located           |
+| JOURNEYS_BASE_URL                | the base of the outputted URLs in responses                  |
+| JOURNEYS_VA_BASE_URL             | the base of the outputted vehicle activity URLs in responses |
+| JOURNEYS_PORT                    | the port where the service will run. defaults to 8080        |
+| JOURNEYS_SHORT_CACHE_LOWER_BOUND | the lower hour of short cache period. defaults to 0          |
+| JOURNEYS_SHORT_CACHE_UPPER_BOUND | the upper hour of short cache period. defaults to 5          |
+| JOURNEYS_SHORT_CACHE_DURATION    | the short cache duration. defaults to 30 minutes             |
+| JOURNEYS_LONG_CACHE_DURATION     | the long cache duration. defaults to 2 hours                 |
 
 
 ## Development Environment
