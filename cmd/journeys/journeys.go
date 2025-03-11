@@ -12,9 +12,14 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"time"
 )
 
 const defaultPort = 8080
+const defaultShortCacheDuration = 30 * time.Minute
+const defaultLongCacheDuration = 2 * time.Hour
+const defaultShortCacheLowerBound = 0
+const defaultShortCacheUpperBound = 5
 
 // This variable is set at build time
 //
@@ -47,7 +52,7 @@ var StartCommand = &cobra.Command{
 			log.Fatal("JOURNEYS_GTFS_PATH not set in environment. Cannot proceed.")
 		}
 
-		serverPort, err := parsePort(os.Getenv("JOURNEYS_PORT"), defaultPort)
+		serverPort, err := parseIntFromString(os.Getenv("JOURNEYS_PORT"), defaultPort)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -67,13 +72,30 @@ var StartCommand = &cobra.Command{
 		router.Use(server.CorsMiddleware)
 
 		if !disableCache {
-			memcached, err := server.NewMemcachedCacheMiddleware(memcache.New(os.Getenv("MEMCACHED_URL")))
+			scLowerBound, err := parseIntFromString(os.Getenv("JOURNEYS_SHORT_CACHE_LOWER_BOUND"), defaultShortCacheLowerBound)
+			if err != nil {
+				log.Println(fmt.Sprintf("Error parsing short-cache lower bound: %s. Using default value: %v", err.Error(), defaultShortCacheLowerBound))
+			}
+
+			scUpperBound, err := parseIntFromString(os.Getenv("JOURNEYS_SHORT_CACHE_UPPER_BOUND"), defaultShortCacheUpperBound)
+			if err != nil {
+				log.Println(fmt.Sprintf("Error parsing short-cache upper bound: %s. Using default value: %v", err.Error(), defaultShortCacheUpperBound))
+			}
+
+			memcached, err := server.NewMemcachedCacheMiddleware(memcache.New(os.Getenv("MEMCACHED_URL")), getShortCacheDuration(), getLongCacheDuration(), scLowerBound, scUpperBound)
 			if err != nil {
 				log.Fatal(err)
 			}
+
+			flushErr := memcached.Flush()
+			if flushErr != nil {
+				log.Println(flushErr)
+				os.Exit(1)
+			}
+
 			router.Use(memcached.Middleware)
 
-			log.Println("Using cache")
+			log.Println(fmt.Sprintf("Using cache. Short cache duration: %v, Long cache duration: %v. Short cache duration hours %v -> %v", getShortCacheDuration(), getLongCacheDuration(), scLowerBound, scUpperBound))
 		}
 
 		dataService := service.NewJourneysDataService(dataStore)
@@ -107,20 +129,50 @@ func onServerShutdown() {
 	log.Println("shutting down")
 }
 
-func parsePort(envPort string, defaultPort int) (int, error) {
-	var serverPort int
+func parseIntFromString(source string, defaultValue int) (int, error) {
+	var result int
 
-	if envPort == "" {
-		serverPort = defaultPort
+	if source == "" {
+		result = defaultValue
 	} else {
-		p, err := strconv.Atoi(envPort)
+		v, err := strconv.Atoi(source)
 		if err != nil {
-			return 0, err
+			return defaultValue, err
 		}
-		serverPort = p
+		result = v
 	}
 
-	return serverPort, nil
+	return result, nil
+}
+
+func getShortCacheDuration() time.Duration {
+	cacheDurationStr := os.Getenv("JOURNEYS_SHORT_CACHE_DURATION")
+	if cacheDurationStr == "" {
+		return defaultShortCacheDuration
+	}
+
+	duration, err := time.ParseDuration(cacheDurationStr)
+	if err != nil {
+		fmt.Printf("Invalid JOURNEYS_SHORT_CACHE_DURATION format: %s, using default %v\n", cacheDurationStr, defaultShortCacheDuration)
+		return defaultShortCacheDuration
+	}
+
+	return duration
+}
+
+func getLongCacheDuration() time.Duration {
+	cacheDurationStr := os.Getenv("JOURNEYS_LONG_CACHE_DURATION")
+	if cacheDurationStr == "" {
+		return defaultLongCacheDuration
+	}
+
+	duration, err := time.ParseDuration(cacheDurationStr)
+	if err != nil {
+		fmt.Printf("Invalid JOURNEYS_LONG_CACHE_DURATION format: %s, using default %v\n", cacheDurationStr, defaultLongCacheDuration)
+		return defaultLongCacheDuration
+	}
+
+	return duration
 }
 
 func main() {
