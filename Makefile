@@ -1,42 +1,45 @@
-.PHONY: build, test
+.PHONY: build, test, vendor
 
 mods:
 	go mod download
 
+vendor:
+	go mod vendor
+
 build:
-	go build -o ./bin/journeys.api cmd/journeys/journeys.go
+	GOFLAGS="-mod=vendor" go build -o ./bin/journeys.api cmd/journeys/journeys.go
 
 test:
-	JOURNEYS_BASE_URL=http://localhost:5678 JOURNEYS_VA_BASE_URL="https://data.itsfactory.fi/journeys/api/1" go test --count=1 -tags=all_tests ./...
+	GOFLAGS="-mod=vendor" JOURNEYS_BASE_URL=http://localhost:5678 JOURNEYS_VA_BASE_URL="https://data.itsfactory.fi/journeys/api/1" go test --count=1 -tags=all_tests ./...
 
 test-v:
-	JOURNEYS_BASE_URL=http://localhost:5678 JOURNEYS_VA_BASE_URL="https://data.itsfactory.fi/journeys/api/1" go test --count=1 -v -tags=all_tests ./...
+	GOFLAGS="-mod=vendor" JOURNEYS_BASE_URL=http://localhost:5678 JOURNEYS_VA_BASE_URL="https://data.itsfactory.fi/journeys/api/1" go test --count=1 -v -tags=all_tests ./...
 
 test-v-ggtfs:
-	go test --count=1 -v -tags=ggtfs_tests ./internal/pkg/ggtfs
+	GOFLAGS="-mod=vendor" go test --count=1 -v -tags=ggtfs_tests ./internal/pkg/ggtfs
 
 test-v-journeys:
-	go test --count=1 -v -tags=journeys_tests ./internal/app/journeys/...
+	GOFLAGS="-mod=vendor" go test --count=1 -v -tags=journeys_tests ./internal/app/journeys/...
 
 test-v-ggtfs-common:
-	go test --count=1 -v -tags=ggtfs_tests_common ./internal/pkg/ggtfs
+	GOFLAGS="-mod=vendor" go test --count=1 -v -tags=ggtfs_tests_common ./internal/pkg/ggtfs
 
 coverage:
-	JOURNEYS_BASE_URL=http://localhost:5678 JOURNEYS_VA_BASE_URL="https://data.itsfactory.fi/journeys/api/1" go test -count=1 -tags=all_tests -coverprofile cover.out ./...
+	GOFLAGS="-mod=vendor" JOURNEYS_BASE_URL=http://localhost:5678 JOURNEYS_VA_BASE_URL="https://data.itsfactory.fi/journeys/api/1" go test -count=1 -tags=all_tests -coverprofile cover.out ./...
 
 coverage-html:
-	JOURNEYS_BASE_URL=http://localhost:5678 JOURNEYS_VA_BASE_URL="https://data.itsfactory.fi/journeys/api/1" go test -count=1 -tags=all_tests -coverprofile cover.out ./... && go tool cover -html=cover.out -o coverage.html
+	GOFLAGS="-mod=vendor" JOURNEYS_BASE_URL=http://localhost:5678 JOURNEYS_VA_BASE_URL="https://data.itsfactory.fi/journeys/api/1" go test -count=1 -tags=all_tests -coverprofile cover.out ./... && go tool cover -html=cover.out -o coverage.html
 tre:
-	MEMCACHED_URL="localhost:11211" JOURNEYS_GTFS_PATH=.gtfs JOURNEYS_BASE_URL="https://data.itsfactory.fi/journeys/api/1" JOURNEYS_VA_BASE_URL="https://data.itsfactory.fi/journeys/api/1" go run cmd/journeys/journeys.go start
+	GOFLAGS="-mod=vendor" MEMCACHED_URL="localhost:11211" JOURNEYS_GTFS_PATH=.gtfs JOURNEYS_BASE_URL="https://data.itsfactory.fi/journeys/api/1" JOURNEYS_VA_BASE_URL="https://data.itsfactory.fi/journeys/api/1" go run cmd/journeys/journeys.go start
 tre-custom-cache:
-	MEMCACHED_URL="localhost:11211" JOURNEYS_GTFS_PATH=.gtfs JOURNEYS_BASE_URL="https://data.itsfactory.fi/journeys/api/1" JOURNEYS_VA_BASE_URL="https://data.itsfactory.fi/journeys/api/1" JOURNEYS_SHORT_CACHE_LOWER_BOUND="0" JOURNEYS_SHORT_CACHE_UPPER_BOUND="5" JOURNEYS_SHORT_CACHE_DURATION="10s" JOURNEYS_LONG_CACHE_DURATION="30s" go run cmd/journeys/journeys.go start
+	GOFLAGS="-mod=vendor" MEMCACHED_URL="localhost:11211" JOURNEYS_GTFS_PATH=.gtfs JOURNEYS_BASE_URL="https://data.itsfactory.fi/journeys/api/1" JOURNEYS_VA_BASE_URL="https://data.itsfactory.fi/journeys/api/1" JOURNEYS_SHORT_CACHE_LOWER_BOUND="0" JOURNEYS_SHORT_CACHE_UPPER_BOUND="5" JOURNEYS_SHORT_CACHE_DURATION="10s" JOURNEYS_LONG_CACHE_DURATION="30s" go run cmd/journeys/journeys.go start
 tre-no-cache:
-	MEMCACHED_URL="localhost:11211" JOURNEYS_GTFS_PATH=.gtfs JOURNEYS_BASE_URL="https://data.itsfactory.fi/journeys/api/1" JOURNEYS_VA_BASE_URL="https://data.itsfactory.fi/journeys/api/1" go run cmd/journeys/journeys.go start --disable-cache
+	GOFLAGS="-mod=vendor" MEMCACHED_URL="localhost:11211" JOURNEYS_GTFS_PATH=.gtfs JOURNEYS_BASE_URL="https://data.itsfactory.fi/journeys/api/1" JOURNEYS_VA_BASE_URL="https://data.itsfactory.fi/journeys/api/1" go run cmd/journeys/journeys.go start --disable-cache
 tre-dry:
-	MEMCACHED_URL="localhost:11211" JOURNEYS_GTFS_PATH=.gtfs JOURNEYS_BASE_URL="https://data.itsfactory.fi/journeys/api/1" JOURNEYS_VA_BASE_URL="https://data.itsfactory.fi/journeys/api/1" go run cmd/journeys/journeys.go start --dry-run
+	GOFLAGS="-mod=vendor" MEMCACHED_URL="localhost:11211" JOURNEYS_GTFS_PATH=.gtfs JOURNEYS_BASE_URL="https://data.itsfactory.fi/journeys/api/1" JOURNEYS_VA_BASE_URL="https://data.itsfactory.fi/journeys/api/1" go run cmd/journeys/journeys.go start --dry-run
 tre-dev:
-	JOURNEYS_GTFS_PATH=.gtfs JOURNEYS_PORT=5678 JOURNEYS_BASE_URL=http://localhost:5678/v1 JOURNEYS_VA_BASE_URL="https://data.itsfactory.fi/journeys/api/1" go run cmd/journeys/journeys.go start --disable-cache
+	GOFLAGS="-mod=vendor" JOURNEYS_GTFS_PATH=.gtfs JOURNEYS_PORT=5678 JOURNEYS_BASE_URL=http://localhost:5678/v1 JOURNEYS_VA_BASE_URL="https://data.itsfactory.fi/journeys/api/1" go run cmd/journeys/journeys.go start --disable-cache
 tre-dev-no-val:
-	JOURNEYS_GTFS_PATH=.gtfs JOURNEYS_PORT=5678 JOURNEYS_BASE_URL=http://localhost:5678/v1 JOURNEYS_VA_BASE_URL="https://data.itsfactory.fi/journeys/api/1" go run cmd/journeys/journeys.go start --disable-cache --skip-validation
+	GOFLAGS="-mod=vendor" JOURNEYS_GTFS_PATH=.gtfs JOURNEYS_PORT=5678 JOURNEYS_BASE_URL=http://localhost:5678/v1 JOURNEYS_VA_BASE_URL="https://data.itsfactory.fi/journeys/api/1" go run cmd/journeys/journeys.go start --disable-cache --skip-validation
 vet:
-	go vet ./...
+	GOFLAGS="-mod=vendor" go vet ./...
