@@ -66,7 +66,7 @@ func convertJourney(j *model.Journey, baseUrl string, vehicleActivityBaseUrl str
 
 	return Journey{
 		Url:                  fmt.Sprintf("%v%v/%v", baseUrl, journeysPrefix, j.Id),
-		ActivityUrl:          fmt.Sprintf("%v%v/%v", vehicleActivityBaseUrl, "/vehicle-activity", j.ActivityId),
+		ActivityUrl:          fmt.Sprintf("%v%v?journeyRef=%v", vehicleActivityBaseUrl, "/vehicle-activity", j.ActivityId),
 		HeadSign:             j.HeadSign,
 		Direction:            j.Direction,
 		WheelchairAccessible: j.WheelchairAccessible,
