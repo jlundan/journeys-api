@@ -5,6 +5,8 @@ You can find more information about the original project in
 the [ITS Factory Wiki](https://wiki.itsfactory.fi/index.php/Journeys_API), where the current closed source API is
 discussed. This open source version of the API tries to match the proprietary version as much as possible.
 
+You can participate freely in [discussions](https://github.com/jlundan/journeys-api/discussions) if you have questions about the API, create bug reports or join the discord server at [https://discord.gg/CvSAeH3J](https://discord.gg/CvSAeH3J) if you want to discuss the API in less formal setting (we speak English and Finnish). 
+
 ## API
 ### Introduction
 
