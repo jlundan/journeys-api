@@ -7,7 +7,7 @@ import (
 )
 
 type APIEntity interface {
-	Line | Journey | JourneyPattern | Route | StopPoint | Municipality
+	Line | Journey | JourneyPattern | Route | StopPoint | Municipality | StopPointJourney
 }
 
 func sendSuccessResponse[T APIEntity](body []T, fieldExclusions string, w http.ResponseWriter) {

@@ -110,6 +110,7 @@ var StartCommand = &cobra.Command{
 		router.HandleFunc(`/v1/routes/{name}`, v1.HandleGetOneRoute(dataService, baseUrl)).Methods("GET")
 		router.HandleFunc("/v1/stop-points", v1.HandleGetAllStopPoints(dataService, baseUrl)).Methods("GET")
 		router.HandleFunc(`/v1/stop-points/{name}`, v1.HandleGetOneStopPoint(dataService, baseUrl)).Methods("GET")
+		router.HandleFunc(`/v1/stop-points/{name}/journeys`, v1.HandleGetJourneysForStopPoint(dataService, baseUrl, vehicleActivityBaseUrl)).Methods("GET")
 		router.HandleFunc("/v1/municipalities", v1.HandleGetAllMunicipalities(dataService, baseUrl)).Methods("GET")
 		router.HandleFunc(`/v1/municipalities/{name}`, v1.HandleGetOneMunicipality(dataService, baseUrl)).Methods("GET")
 
