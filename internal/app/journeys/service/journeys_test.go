@@ -71,7 +71,7 @@ func TestJourneyMatchesConditions(t *testing.T) {
 		{id: "26", item: &validJourney, conditions: map[string]string{"lastStopPointId": "3"}, expected: true},
 	}
 	for _, tc := range testCases {
-		matches := journeyMatchesConditions(tc.item, tc.conditions)
+		matches := journeyMatchesConditions(tc.item, tc.conditions, true)
 		testutil.CompareVariablesAndPrintResults(t, tc.expected, matches, tc.id)
 	}
 }
@@ -105,7 +105,7 @@ func TestJourneysService_Search(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		result := service.Search(tc.params)
+		result := service.Search(tc.params, true)
 		testutil.CompareVariablesAndPrintResults(t, tc.expected, len(result), tc.id)
 	}
 }
@@ -183,7 +183,7 @@ func TestJourneyMatchesConditions2(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		matches := journeyMatchesConditions(tc.journey, tc.conditions)
+		matches := journeyMatchesConditions(tc.journey, tc.conditions, true)
 		testutil.CompareVariablesAndPrintResults(t, tc.expected, matches, tc.id)
 	}
 }

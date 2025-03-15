@@ -12,11 +12,11 @@ type JourneysService struct {
 	Repository *repository.JourneysRepository
 }
 
-func (s JourneysService) Search(params map[string]string) []*model.Journey {
+func (s JourneysService) Search(params map[string]string, excludeInactive bool) []*model.Journey {
 	result := make([]*model.Journey, 0)
 
 	for _, journey := range s.Repository.Journeys.All {
-		if journeyMatchesConditions(journey, params) {
+		if journeyMatchesConditions(journey, params, excludeInactive) {
 			result = append(result, journey)
 		}
 	}
@@ -42,11 +42,11 @@ func (s JourneysService) GetOneById(id string) (*model.Journey, error) {
 	return nil, model.ErrNoSuchElement
 }
 
-func journeyMatchesConditions(journey *model.Journey, conditions map[string]string) bool {
+func journeyMatchesConditions(journey *model.Journey, conditions map[string]string, excludeInactive bool) bool {
 	now := time.Now()
 	curDay := fmt.Sprintf("%d-%02d-%02d", now.Year(), now.Month(), now.Day())
 
-	if journey == nil || !(journey.ValidFrom <= curDay && journey.ValidTo >= curDay) {
+	if journey == nil || (excludeInactive && !(journey.ValidFrom <= curDay && journey.ValidTo >= curDay)) {
 		return false
 	}
 
