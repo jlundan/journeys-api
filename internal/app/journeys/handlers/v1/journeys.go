@@ -10,7 +10,7 @@ import (
 
 func HandleGetAllJourneys(service *service.JourneysDataService, baseUrl string, vehicleActivityBaseUrl string) func(http.ResponseWriter, *http.Request) {
 	return func(rw http.ResponseWriter, req *http.Request) {
-		modelJourneys := service.Journeys.Search(getQueryParameters(req))
+		modelJourneys := service.Journeys.Search(getQueryParameters(req), true)
 
 		var journeys []Journey
 		for _, mj := range modelJourneys {
