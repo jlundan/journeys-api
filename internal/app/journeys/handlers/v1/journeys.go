@@ -79,8 +79,6 @@ func convertJourney(j *model.Journey, baseUrl string, vehicleActivityBaseUrl str
 		DayTypeExceptions:    dayTypeExceptions,
 		DepartureTime:        j.DepartureTime,
 		ArrivalTime:          j.ArrivalTime,
-		ValidFrom:            j.ValidFrom,
-		ValidTo:              j.ValidTo,
 	}
 }
 
@@ -137,8 +135,6 @@ type Journey struct {
 	DayTypes             []string           `json:"dayTypes"`
 	DayTypeExceptions    []DayTypeException `json:"dayTypeExceptions"`
 	Calls                []JourneyCall      `json:"calls"`
-	ValidFrom            string             `json:"validFrom"`
-	ValidTo              string             `json:"validTo"`
 }
 
 type JourneyGtfsInfo struct {

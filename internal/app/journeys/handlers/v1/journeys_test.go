@@ -92,8 +92,6 @@ func getJourneyMap() map[string]Journey {
 		dayTypes             []string
 		dayTypeExceptions    []DayTypeException
 		calls                []JourneyCall
-		validFrom            string
-		validTo              string
 	}{
 		{
 			"111111111",
@@ -113,8 +111,6 @@ func getJourneyMap() map[string]Journey {
 				{"07:20:00", "07:20:00", getJourneyStopPointMap()["3615"]},
 				{"07:21:00", "07:21:00", getJourneyStopPointMap()["7017"]},
 			},
-			"2000-01-01",
-			"2000-01-01",
 		},
 		{
 			"7020205685",
@@ -134,8 +130,6 @@ func getJourneyMap() map[string]Journey {
 				{"14:43:00", "14:43:00", getJourneyStopPointMap()["7017"]},
 				{"14:44:45", "14:44:45", getJourneyStopPointMap()["7015"]},
 			},
-			"2000-01-01",
-			"2099-01-01",
 		},
 		{
 			"7020295685",
@@ -156,8 +150,6 @@ func getJourneyMap() map[string]Journey {
 				{"06:31:30", "06:31:30", getJourneyStopPointMap()["8171"]},
 				{"06:32:30", "06:32:30", getJourneyStopPointMap()["8149"]},
 			},
-			"2000-01-01",
-			"2099-01-01",
 		},
 		{
 			"7024545685",
@@ -177,8 +169,6 @@ func getJourneyMap() map[string]Journey {
 				{"07:20:00", "07:20:00", getJourneyStopPointMap()["3615"]},
 				{"07:21:00", "07:21:00", getJourneyStopPointMap()["3607"]},
 			},
-			"2000-01-01",
-			"2099-01-01",
 		},
 	}
 
@@ -198,8 +188,6 @@ func getJourneyMap() map[string]Journey {
 			DayTypes:             tc.dayTypes,
 			DayTypeExceptions:    tc.dayTypeExceptions,
 			Calls:                tc.calls,
-			ValidFrom:            tc.validFrom,
-			ValidTo:              tc.validTo,
 		}
 	}
 
