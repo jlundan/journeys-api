@@ -187,6 +187,14 @@ func getRouteMap() map[string]Route {
 						},
 					},
 				},
+				{
+					Url:               journeyPatternJourneyUrl("123456789"),
+					JourneyPatternUrl: journeyPatternUrl("65f51d2f85284af2fad1305c0ce71033"),
+					DepartureTime:     "07:20:00",
+					ArrivalTime:       "07:21:00",
+					DayTypes:          []string{"saturday", "sunday"},
+					DayTypeExceptions: []DayTypeException{},
+				},
 			},
 		},
 	}

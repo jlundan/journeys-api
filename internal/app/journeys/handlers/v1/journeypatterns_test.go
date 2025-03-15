@@ -140,6 +140,15 @@ func getJourneyPatternMap() map[string]JourneyPattern {
 					DayTypes:          []string{"monday", "tuesday", "wednesday", "thursday", "friday"},
 					DayTypeExceptions: []DayTypeException{{"2021-04-05", "2021-04-05", "yes"}, {"2021-05-13", "2021-05-13", "no"}},
 				},
+				{
+					Url:               journeyPatternJourneyUrl("123456789"),
+					JourneyPatternUrl: journeyPatternUrl("65f51d2f85284af2fad1305c0ce71033"),
+					DepartureTime:     "07:20:00",
+					ArrivalTime:       "07:21:00",
+					HeadSign:          "Lentävänniemi",
+					DayTypes:          []string{"saturday", "sunday"},
+					DayTypeExceptions: []DayTypeException{},
+				},
 			}},
 
 		{"9bc7403ad27267edbfbd63c3e92e5afa", "1A", "1501146007035", "4600",
