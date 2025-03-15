@@ -5,6 +5,7 @@ package v1
 import (
 	"fmt"
 	"testing"
+	"time"
 )
 
 func TestStopPointRoutes(t *testing.T) {
@@ -128,4 +129,120 @@ func stopPointUrl(name string) string {
 }
 func stopPointMunicipalityUrl(name string) string {
 	return fmt.Sprintf("%v/municipalities/%v", "", name)
+}
+
+func TestStopPointJourneyRoutes(t *testing.T) {
+	dataService := newJourneysTestDataService(t)
+
+	journeys := handlerConfig{handler: HandleGetJourneysForStopPoint(dataService, "", "", false), url: "/v1/stop-points/{name}/journeys"}
+	activeJourneys := handlerConfig{handler: HandleGetJourneysForStopPoint(dataService, "", "", true), url: "/v1/stop-points/{name}/journeys/active"}
+
+	// Get sample journeys for specific stop points
+	stopPoint3607Journeys := getJourneysForStopPoint("3607")
+	stopPoint7015Journeys := getJourneysForStopPoint("7015")
+
+	testCases := []routerTestCase[StopPointJourney]{
+		{"/v1/stop-points/3607/journeys", stopPoint3607Journeys, false, journeys},
+		{"/v1/stop-points/7015/journeys", stopPoint7015Journeys, false, journeys},
+		{"/v1/stop-points/3607/journeys/active", filterActiveJourneys(stopPoint3607Journeys), false, activeJourneys},
+		{"/v1/stop-points/7015/journeys/active", filterActiveJourneys(stopPoint7015Journeys), false, activeJourneys},
+		{"/v1/stop-points/nonexistent/journeys", []StopPointJourney{}, false, journeys},
+		{"/v1/stop-points/nonexistent/journeys/active", []StopPointJourney{}, false, activeJourneys},
+	}
+
+	runRouterTestCases(t, testCases)
+}
+
+// Helper function to get journeys for a specific stop point
+func getJourneysForStopPoint(stopPointId string) []StopPointJourney {
+	// This would normally be populated from your test data
+	// For this example I'll create sample data based on the structure in convertStopPointJourney
+
+	if stopPointId == "3607" {
+		return []StopPointJourney{
+			{
+				JourneyUrl:           "/journeys/123456789",
+				StopPointUrl:         "/stop-points/3607",
+				ActivityUrl:          "/vehicle-activity?journeyRef=3A_0720_3607_3615",
+				LineUrl:              "/lines/3A",
+				RouteUrl:             "/routes/1517136151028",
+				JourneyPatternUrl:    "/journey-patterns/65f51d2f85284af2fad1305c0ce71033",
+				LineId:               "3A",
+				DepartureTime:        "07:21:00",
+				ArrivalTime:          "07:21:00",
+				HeadSign:             "Lentävänniemi",
+				Direction:            "0",
+				WheelchairAccessible: false,
+				GtfsInfo:             StopPointJourneyGtfsInfo{TripId: "123456789"},
+				DayTypes:             []string{"saturday", "sunday"},
+				DayTypeExceptions:    []StopPointDayTypeException{},
+				ActiveFrom:           "2000-01-01",
+				ActiveTo:             "2000-01-02",
+			},
+			{
+				JourneyUrl:           "/journeys/7024545685",
+				StopPointUrl:         "/stop-points/3607",
+				ActivityUrl:          "/vehicle-activity?journeyRef=3A_0720_3607_3615",
+				LineUrl:              "/lines/3A",
+				RouteUrl:             "/routes/1517136151028",
+				JourneyPatternUrl:    "/journey-patterns/65f51d2f85284af2fad1305c0ce71033",
+				LineId:               "3A",
+				DepartureTime:        "07:21:00",
+				ArrivalTime:          "07:21:00",
+				HeadSign:             "Lentävänniemi",
+				Direction:            "0",
+				WheelchairAccessible: false,
+				GtfsInfo:             StopPointJourneyGtfsInfo{TripId: "7024545685"},
+				DayTypes:             []string{"monday", "tuesday", "wednesday", "thursday", "friday"},
+				DayTypeExceptions: []StopPointDayTypeException{
+					{From: "2021-04-05", To: "2021-04-05", Runs: "yes"},
+					{From: "2021-05-13", To: "2021-05-13", Runs: "no"},
+				},
+				ActiveFrom: "2000-01-01",
+				ActiveTo:   "2099-01-01",
+			},
+		}
+	} else if stopPointId == "7015" {
+		return []StopPointJourney{
+			{
+				JourneyUrl:           "/journeys/7020205685",
+				StopPointUrl:         "/stop-points/7015",
+				ActivityUrl:          "/vehicle-activity?journeyRef=1_1443_7015_7017",
+				LineUrl:              "/lines/1",
+				RouteUrl:             "/routes/1504270174600",
+				JourneyPatternUrl:    "/journey-patterns/047b0afc973ee2fd4fe92b128c3a932a",
+				LineId:               "1",
+				DepartureTime:        "14:44:45",
+				ArrivalTime:          "14:44:45",
+				HeadSign:             "Vatiala",
+				Direction:            "1",
+				WheelchairAccessible: false,
+				GtfsInfo:             StopPointJourneyGtfsInfo{TripId: "7020205685"},
+				DayTypes:             []string{"monday", "tuesday", "wednesday", "thursday", "friday"},
+				DayTypeExceptions: []StopPointDayTypeException{
+					{From: "2021-04-05", To: "2021-04-05", Runs: "yes"},
+					{From: "2021-05-13", To: "2021-05-13", Runs: "no"},
+				},
+				ActiveFrom: "2000-01-01",
+				ActiveTo:   "2099-01-01",
+			},
+		}
+	}
+
+	return []StopPointJourney{}
+}
+
+// Helper function to filter active journeys
+func filterActiveJourneys(journeys []StopPointJourney) []StopPointJourney {
+	now := time.Now()
+	currentDate := fmt.Sprintf("%d%02d%02d", now.Year(), now.Month(), now.Day())
+
+	var activeJourneys []StopPointJourney
+	for _, journey := range journeys {
+		if journey.ActiveFrom <= currentDate && journey.ActiveTo >= currentDate {
+			activeJourneys = append(activeJourneys, journey)
+		}
+	}
+
+	return activeJourneys
 }
