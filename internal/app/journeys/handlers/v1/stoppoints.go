@@ -34,13 +34,13 @@ func HandleGetOneStopPoint(service *service.JourneysDataService, baseUrl string)
 	}
 }
 
-func HandleGetJourneysForStopPoint(service *service.JourneysDataService, baseUrl string, vehicleActivityBaseUrl string) func(http.ResponseWriter, *http.Request) {
+func HandleGetJourneysForStopPoint(service *service.JourneysDataService, baseUrl string, vehicleActivityBaseUrl string, excludeInactive bool) func(http.ResponseWriter, *http.Request) {
 	return func(rw http.ResponseWriter, req *http.Request) {
 		stopPointId := mux.Vars(req)["name"]
 
 		searchParams := map[string]string{}
 		searchParams["stopPointId"] = stopPointId
-		modelJourneys := service.Journeys.Search(searchParams)
+		modelJourneys := service.Journeys.Search(searchParams, excludeInactive)
 
 		var stopPointJourneys []StopPointJourney
 		for _, mj := range modelJourneys {
@@ -115,6 +115,8 @@ func convertStopPointJourney(stopPointId string, j *model.Journey, baseUrl strin
 		DayTypeExceptions:    dayTypeExceptions,
 		DepartureTime:        departureTime,
 		ArrivalTime:          arrivalTime,
+		ActiveFrom:           j.ValidFrom,
+		ActiveTo:             j.ValidTo,
 	}
 }
 
@@ -149,6 +151,8 @@ type StopPointJourney struct {
 	GtfsInfo             StopPointJourneyGtfsInfo    `json:"gtfs"`
 	DayTypes             []string                    `json:"dayTypes"`
 	DayTypeExceptions    []StopPointDayTypeException `json:"dayTypeExceptions"`
+	ActiveFrom           string                      `json:"activeFrom"`
+	ActiveTo             string                      `json:"activeTo"`
 }
 
 type StopPointJourneyGtfsInfo struct {
