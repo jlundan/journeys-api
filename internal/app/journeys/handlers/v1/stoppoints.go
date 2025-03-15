@@ -115,8 +115,8 @@ func convertStopPointJourney(stopPointId string, j *model.Journey, baseUrl strin
 		DayTypeExceptions:    dayTypeExceptions,
 		DepartureTime:        departureTime,
 		ArrivalTime:          arrivalTime,
-		ActiveFrom:           j.ValidFrom,
-		ActiveTo:             j.ValidTo,
+		ValidFrom:            j.ValidFrom,
+		ValidTo:              j.ValidTo,
 	}
 }
 
@@ -151,8 +151,8 @@ type StopPointJourney struct {
 	GtfsInfo             StopPointJourneyGtfsInfo    `json:"gtfs"`
 	DayTypes             []string                    `json:"dayTypes"`
 	DayTypeExceptions    []StopPointDayTypeException `json:"dayTypeExceptions"`
-	ActiveFrom           string                      `json:"activeFrom"`
-	ActiveTo             string                      `json:"activeTo"`
+	ValidFrom            string                      `json:"validFrom"`
+	ValidTo              string                      `json:"validTo"`
 }
 
 type StopPointJourneyGtfsInfo struct {

@@ -176,8 +176,8 @@ func getJourneysForStopPoint(stopPointId string) []StopPointJourney {
 				GtfsInfo:             StopPointJourneyGtfsInfo{TripId: "123456789"},
 				DayTypes:             []string{"saturday", "sunday"},
 				DayTypeExceptions:    []StopPointDayTypeException{},
-				ActiveFrom:           "2000-01-01",
-				ActiveTo:             "2000-01-02",
+				ValidFrom:            "2000-01-01",
+				ValidTo:              "2000-01-02",
 			},
 			{
 				JourneyUrl:           "/journeys/7024545685",
@@ -198,8 +198,8 @@ func getJourneysForStopPoint(stopPointId string) []StopPointJourney {
 					{From: "2021-04-05", To: "2021-04-05", Runs: "yes"},
 					{From: "2021-05-13", To: "2021-05-13", Runs: "no"},
 				},
-				ActiveFrom: "2000-01-01",
-				ActiveTo:   "2099-01-01",
+				ValidFrom: "2000-01-01",
+				ValidTo:   "2099-01-01",
 			},
 		}
 	} else if stopPointId == "7015" {
@@ -223,8 +223,8 @@ func getJourneysForStopPoint(stopPointId string) []StopPointJourney {
 					{From: "2021-04-05", To: "2021-04-05", Runs: "yes"},
 					{From: "2021-05-13", To: "2021-05-13", Runs: "no"},
 				},
-				ActiveFrom: "2000-01-01",
-				ActiveTo:   "2099-01-01",
+				ValidFrom: "2000-01-01",
+				ValidTo:   "2099-01-01",
 			},
 		}
 	}
@@ -239,7 +239,7 @@ func filterActiveJourneys(journeys []StopPointJourney) []StopPointJourney {
 
 	var activeJourneys []StopPointJourney
 	for _, journey := range journeys {
-		if journey.ActiveFrom <= currentDate && journey.ActiveTo >= currentDate {
+		if journey.ValidFrom <= currentDate && journey.ValidTo >= currentDate {
 			activeJourneys = append(activeJourneys, journey)
 		}
 	}
