@@ -23,7 +23,7 @@ jobs:
 
       - name: Build Binary
         run: |
-          GOOS=linux GOARCH=amd64 go build -ldflags "-X main.version=${{ github.ref_name }}" -o ./journeys.api-linux-amd64 cmd/journeys/journeys.go
+          GOFLAGS="-mod=vendor" GOOS=linux GOARCH=amd64 go build -ldflags "-X main.version=${{ github.ref_name }}" -o ./journeys.api-linux-amd64 cmd/journeys/journeys.go
           tar -czf journeys.api-linux-amd64.tar.gz ./journeys.api-linux-amd64
 
       - name: Release
