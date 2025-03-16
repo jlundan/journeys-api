@@ -482,7 +482,7 @@ export JOURNEYS_VA_BASE_URL=https://data.itsfactory.fi/journeys/api/1
     "headers": {
       "paging": {
         "startIndex": 0,
-        "pageSize": 2,
+        "pageSize": 1,
         "moreData": false
       }
     }
@@ -516,7 +516,7 @@ The `<stop-point shortName>` should match to a `shortName` field in the `<base u
     "headers": {
       "paging": {
         "startIndex": 0,
-        "pageSize": 2,
+        "pageSize": 1,
         "moreData": false
       }
     }
