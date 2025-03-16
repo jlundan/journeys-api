@@ -154,7 +154,7 @@ Endpoints in experimental state may still change during upcoming updates. There 
 	- firstStopPointId : string
 	- lastStopPointId : string
 	- stopPointId : string
-    - gtfsTripId: string
+	- gtfsTripId: string
 
 <base url>/v1/stop-points (stable)
 	- name: string 
@@ -172,7 +172,7 @@ Endpoints in experimental state may still change during upcoming updates. There 
 	- arrivalTime : hh:mm or hh:mm:ss
 	- firstStopPointId : string
 	- lastStopPointId : string
-    - gtfsTripId: string
+	- gtfsTripId: string
     
 <base url>/v1/stop-points/<stop-point shortName>/journeys/active (experimental)
 	- lineId : string
@@ -183,7 +183,7 @@ Endpoints in experimental state may still change during upcoming updates. There 
 	- arrivalTime : hh:mm or hh:mm:ss
 	- firstStopPointId : string
 	- lastStopPointId : string
-    - gtfsTripId: string
+	- gtfsTripId: string
 
 <base url>/v1/municipalities (stable)
 	- name: string
