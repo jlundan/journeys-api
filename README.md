@@ -162,6 +162,28 @@ lists the zones used in the Tampere GTFS data.
 	- municipalityName: string
 	- municipalityShortName: string
 
+<base url>/v1/stop-points/:stopPointId/journeys
+	- lineId : string
+	- routeId : string
+	- journeyPatternId : string
+	- dayTypes : comma separated list of: monday, tuesday, wednesday, friday, saturday, sunday
+	- departureTime : hh:mm or hh:mm:ss
+	- arrivalTime : hh:mm or hh:mm:ss
+	- firstStopPointId : string
+	- lastStopPointId : string
+    - gtfsTripId: string
+    
+<base url>/v1/stop-points/:stopPointId/journeys/active
+	- lineId : string
+	- routeId : string
+	- journeyPatternId : string
+	- dayTypes : comma separated list of: monday, tuesday, wednesday, friday, saturday, sunday
+	- departureTime : hh:mm or hh:mm:ss
+	- arrivalTime : hh:mm or hh:mm:ss
+	- firstStopPointId : string
+	- lastStopPointId : string
+    - gtfsTripId: string
+
 <base url>/v1/municipalities
 	- name: string
 	- shortName: string
