@@ -522,7 +522,7 @@ The response includes all journeys for the stop point, including active and inac
   },
   "body": [
     {
-      "activityUrl": "https://data.itsfactory.fi/journeys/api/1/vehicle-activity?journeyRef=40A_1905_8166_0001",
+      "activityUrl": "<base url>/v1/vehicle-activity?journeyRef=40A_1905_8166_0001",
       "arrivalTime": "19:05:00",
       "dayTypeExceptions": [],
       "dayTypes": [
@@ -534,12 +534,12 @@ The response includes all journeys for the stop point, including active and inac
         "tripId": "78_15453_8651235"
       },
       "headSign": "Pikonlinna",
-      "journeyPatternUrl": "http://localhost:5678/v1/journey-patterns/147773b7a88c9e53637a5589948b2c8d",
-      "journeyUrl": "http://localhost:5678/v1/journeys/78_15453_8651235",
+      "journeyPatternUrl": "<base url>/v1/journey-patterns/147773b7a88c9e53637a5589948b2c8d",
+      "journeyUrl": "<base url>/v1/journeys/78_15453_8651235",
       "lineId": "40A",
-      "lineUrl": "http://localhost:5678/v1/lines/40A",
-      "routeUrl": "http://localhost:5678/v1/routes/2497870624",
-      "stopPointUrl": "http://localhost:5678/v1/stop-points/0001",
+      "lineUrl": "<base url>/v1/lines/40A",
+      "routeUrl": "<base url>/v1/routes/2497870624",
+      "stopPointUrl": "<base url>/v1/stop-points/0001",
       "validFrom": "2025-03-01",
       "validTo": "2025-03-01",
       "wheelchairAccessible": true
@@ -566,7 +566,7 @@ The response includes only the active journeys for the stop point. The active jo
   },
   "body": [
     {
-      "activityUrl": "https://data.itsfactory.fi/journeys/api/1/vehicle-activity?journeyRef=40A_1905_8166_0001",
+      "activityUrl": "<base url>/v1/vehicle-activity?journeyRef=40A_1905_8166_0001",
       "arrivalTime": "19:05:00",
       "dayTypeExceptions": [],
       "dayTypes": [
@@ -578,12 +578,12 @@ The response includes only the active journeys for the stop point. The active jo
         "tripId": "78_15453_8651235"
       },
       "headSign": "Pikonlinna",
-      "journeyPatternUrl": "http://localhost:5678/v1/journey-patterns/147773b7a88c9e53637a5589948b2c8d",
-      "journeyUrl": "http://localhost:5678/v1/journeys/78_15453_8651235",
+      "journeyPatternUrl": "<base url>/v1/journey-patterns/147773b7a88c9e53637a5589948b2c8d",
+      "journeyUrl": "<base url>/v1/journeys/78_15453_8651235",
       "lineId": "40A",
-      "lineUrl": "http://localhost:5678/v1/lines/40A",
-      "routeUrl": "http://localhost:5678/v1/routes/2497870624",
-      "stopPointUrl": "http://localhost:5678/v1/stop-points/0001",
+      "lineUrl": "<base url>/v1/lines/40A",
+      "routeUrl": "<base url>/v1/routes/2497870624",
+      "stopPointUrl": "<base url>/v1/stop-points/0001",
       "validFrom": "2025-03-01",
       "validTo": "2025-03-01",
       "wheelchairAccessible": true
