@@ -121,29 +121,30 @@ body": [
 The reference format is
 
 ```
-[endpoint]
+[endpoint] (experimental | stable)
     - [parameter] : [description]
 ```
 
-The endpoints and the query parameters are listed below. Tariff Zones depend on the GTFS data itself, the reference
-lists the zones used in the Tampere GTFS data.
+The endpoints and the query parameters are listed below. Tariff Zones depend on the GTFS data itself, the reference lists the zones used in the Tampere GTFS data. 
+
+Endpoints in experimental state may still change during upcoming updates. There is no generic timeline for reaching a stable state. Usually, when a beta endpoint has been in use for a while, it will be declared as stable. You can ask about the stabilisation timeline for an experimental endpoint in the repository's [discussions](https://github.com/jlundan/journeys-api/discussions) section.
 
 ```
-<base url>/v1/lines
+<base url>/v1/lines (stable)
 	- description : string
 
-<base url>/v1/routes
+<base url>/v1/routes (stable)
 	- lineId : string
 	- name : string
 
-<base url>/v1/journey-patterns
+<base url>/v1/journey-patterns (stable)
 	- lineId : string
 	- name : string
 	- firstStopPointId : string
 	- lastStopPointId : string
 	- stopPointId : string
 
-<base url>/v1/journeys
+<base url>/v1/journeys (stable)
 	- lineId : string
 	- routeId : string
 	- journeyPatternId : string
@@ -155,14 +156,14 @@ lists the zones used in the Tampere GTFS data.
 	- stopPointId : string
     - gtfsTripId: string
 
-<base url>/v1/stop-points
+<base url>/v1/stop-points (stable)
 	- name: string 
 	- location: lat,lon or lat1,lon1:lat2,lon2 (upper left corner of a box : lower right corner of a box)
 	- tariffZone : one of: A,B or C (https://www.nysse.fi/en/tickets-and-fares/zones.html)
 	- municipalityName: string
 	- municipalityShortName: string
 
-<base url>/v1/stop-points/:stopPointId/journeys
+<base url>/v1/stop-points/:stopPointId/journeys (experimental)
 	- lineId : string
 	- routeId : string
 	- journeyPatternId : string
@@ -173,7 +174,7 @@ lists the zones used in the Tampere GTFS data.
 	- lastStopPointId : string
     - gtfsTripId: string
     
-<base url>/v1/stop-points/:stopPointId/journeys/active
+<base url>/v1/stop-points/:stopPointId/journeys/active (experimental)
 	- lineId : string
 	- routeId : string
 	- journeyPatternId : string
@@ -184,7 +185,7 @@ lists the zones used in the Tampere GTFS data.
 	- lastStopPointId : string
     - gtfsTripId: string
 
-<base url>/v1/municipalities
+<base url>/v1/municipalities (stable)
 	- name: string
 	- shortName: string
 
