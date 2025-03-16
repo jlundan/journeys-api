@@ -37,6 +37,14 @@ func TestJourneyMatchesConditions(t *testing.T) {
 		ValidFrom: "19700101", ValidTo: "20300101", Route: &model.Route{Id: "123"}, ArrivalTime: "02:00", DepartureTime: "01:00", ActivityId: "",
 	}
 
+	// validJourneyWithPostFixedTimes has post-fixed arrival and departure times
+	validJourneyWithPostFixedTimes := model.Journey{Id: "", HeadSign: "", Direction: "", WheelchairAccessible: false, GtfsInfo: &model.JourneyGtfsInfo{TripId: "1111"},
+		DayTypes: []string{"monday", "tuesday"}, DayTypeExceptions: nil, Calls: []*model.JourneyCall{
+			{StopPoint: &model.StopPoint{ShortName: "1"}}, {StopPoint: &model.StopPoint{ShortName: "2"}}, {StopPoint: &model.StopPoint{ShortName: "3"}}},
+		Line: &model.Line{Description: "Foobar", Name: "1A"}, JourneyPattern: &model.JourneyPattern{Id: "123"},
+		ValidFrom: "19700101", ValidTo: "20300101", Route: &model.Route{Id: "123"}, ArrivalTime: "02:00:00", DepartureTime: "01:00:00", ActivityId: "",
+	}
+
 	testCases := []struct {
 		id         string
 		item       *model.Journey
@@ -66,9 +74,11 @@ func TestJourneyMatchesConditions(t *testing.T) {
 		{id: "21", item: &validJourney, conditions: map[string]string{"dayTypes": "monday,tuesday"}, expected: true},
 		{id: "22", item: &validJourney, conditions: map[string]string{"departureTime": "01:00"}, expected: true},
 		{id: "23", item: &validJourney, conditions: map[string]string{"arrivalTime": "02:00"}, expected: true},
-		{id: "24", item: &validJourney, conditions: map[string]string{"firstStopPointId": "1"}, expected: true},
-		{id: "25", item: &validJourney, conditions: map[string]string{"stopPointId": "2"}, expected: true},
-		{id: "26", item: &validJourney, conditions: map[string]string{"lastStopPointId": "3"}, expected: true},
+		{id: "24", item: &validJourneyWithPostFixedTimes, conditions: map[string]string{"departureTime": "01:00:00"}, expected: true},
+		{id: "25", item: &validJourneyWithPostFixedTimes, conditions: map[string]string{"arrivalTime": "02:00:00"}, expected: true},
+		{id: "26", item: &validJourney, conditions: map[string]string{"firstStopPointId": "1"}, expected: true},
+		{id: "27", item: &validJourney, conditions: map[string]string{"stopPointId": "2"}, expected: true},
+		{id: "28", item: &validJourney, conditions: map[string]string{"lastStopPointId": "3"}, expected: true},
 	}
 	for _, tc := range testCases {
 		matches := journeyMatchesConditions(tc.item, tc.conditions, true)

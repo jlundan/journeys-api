@@ -83,11 +83,12 @@ func journeyMatchesConditions(journey *model.Journey, conditions map[string]stri
 				return false
 			}
 		case "departureTime":
-			if journey.DepartureTime != v {
+			// Check also with ":00" postfix to be backwards compatible with the old API
+			if journey.DepartureTime != v && fmt.Sprintf("%v:00", v) != journey.DepartureTime {
 				return false
 			}
 		case "arrivalTime":
-			if journey.ArrivalTime != v {
+			if journey.ArrivalTime != v && fmt.Sprintf("%v:00", v) != journey.ArrivalTime {
 				return false
 			}
 		case "firstStopPointId":
