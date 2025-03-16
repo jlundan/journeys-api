@@ -38,7 +38,7 @@ func HandleGetJourneysForStopPoint(service *service.JourneysDataService, baseUrl
 	return func(rw http.ResponseWriter, req *http.Request) {
 		stopPointId := mux.Vars(req)["name"]
 
-		searchParams := map[string]string{}
+		searchParams := getQueryParameters(req)
 		searchParams["stopPointId"] = stopPointId
 		modelJourneys := service.Journeys.Search(searchParams, excludeInactive)
 
