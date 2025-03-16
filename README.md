@@ -196,6 +196,10 @@ Please note that the entity contents is based on the GTFS data. The field values
 used in the API, however the response structure and field names are accurate.
 
 #### Lines
+```
+<base url>/v1/lines
+```
+
 ```json
 {
     "status" : "success",
@@ -219,6 +223,9 @@ used in the API, however the response structure and field names are accurate.
 ```
 
 #### Routes
+```
+<base url>/v1/routes
+```
 ```json
 {
   "status": "success",
@@ -317,6 +324,9 @@ lon3: (2375085 - 177) = 2374908 =>  2374908 / 100000 = 23.74908
 And so on.
 
 #### Journeys
+```
+<base url>/v1/journeys
+```
 ```json
 {
   "status": "success",
@@ -383,6 +393,9 @@ You can set this via the `JOURNEYS_VA_BASE_URL` environment variable. For exampl
 export JOURNEYS_VA_BASE_URL=https://data.itsfactory.fi/journeys/api/1
 ```
 #### Journey Patterns
+```
+<base url>/v1/journey-patterns
+```
 ```json
 {
   "status": "success",
@@ -457,6 +470,10 @@ export JOURNEYS_VA_BASE_URL=https://data.itsfactory.fi/journeys/api/1
 }
 ```
 #### Stop Points
+##### List stop points
+```
+<base url>/v1/stop-points
+```
 ```json
 {
   "status": "success",
@@ -464,7 +481,7 @@ export JOURNEYS_VA_BASE_URL=https://data.itsfactory.fi/journeys/api/1
     "headers": {
       "paging": {
         "startIndex": 0,
-        "pageSize": 3446,
+        "pageSize": 2,
         "moreData": false
       }
     }
@@ -485,7 +502,98 @@ export JOURNEYS_VA_BASE_URL=https://data.itsfactory.fi/journeys/api/1
   ]
 }
 ```
+##### List schedules (journeys) for stop points
+The response includes all journeys for the stop point, including active and inactive journeys. The active journeys include the date of the query in their validity period. Inactive journeys are not valid on the date of the query. This is determined by the validFrom and validTo fields in the response.
+```
+<base url>/v1/stop-points/:stopPointId/journeys
+```
+```json
+{
+  "status": "success",
+  "data": {
+    "headers": {
+      "paging": {
+        "startIndex": 0,
+        "pageSize": 2,
+        "moreData": false
+      }
+    }
+  },
+  "body": [
+    {
+      "activityUrl": "https://data.itsfactory.fi/journeys/api/1/vehicle-activity?journeyRef=40A_1905_8166_0001",
+      "arrivalTime": "19:05:00",
+      "dayTypeExceptions": [],
+      "dayTypes": [
+        "saturday"
+      ],
+      "departureTime": "19:05:00",
+      "directionId": "1",
+      "gtfs": {
+        "tripId": "78_15453_8651235"
+      },
+      "headSign": "Pikonlinna",
+      "journeyPatternUrl": "http://localhost:5678/v1/journey-patterns/147773b7a88c9e53637a5589948b2c8d",
+      "journeyUrl": "http://localhost:5678/v1/journeys/78_15453_8651235",
+      "lineId": "40A",
+      "lineUrl": "http://localhost:5678/v1/lines/40A",
+      "routeUrl": "http://localhost:5678/v1/routes/2497870624",
+      "stopPointUrl": "http://localhost:5678/v1/stop-points/0001",
+      "validFrom": "2025-03-01",
+      "validTo": "2025-03-01",
+      "wheelchairAccessible": true
+    }
+  ]
+}
+```
+##### List active schedules (journeys) for stop points
+The response includes only the active journeys for the stop point. The active journeys include the date of the query in their validity period. Inactive journeys are not valid on the date of the query. This is determined by the validFrom and validTo fields in the response.
+```
+<base url>/v1/stop-points/:stopPointId/journeys/active
+```
+```json
+{
+  "status": "success",
+  "data": {
+    "headers": {
+      "paging": {
+        "startIndex": 0,
+        "pageSize": 1,
+        "moreData": false
+      }
+    }
+  },
+  "body": [
+    {
+      "activityUrl": "https://data.itsfactory.fi/journeys/api/1/vehicle-activity?journeyRef=40A_1905_8166_0001",
+      "arrivalTime": "19:05:00",
+      "dayTypeExceptions": [],
+      "dayTypes": [
+        "saturday"
+      ],
+      "departureTime": "19:05:00",
+      "directionId": "1",
+      "gtfs": {
+        "tripId": "78_15453_8651235"
+      },
+      "headSign": "Pikonlinna",
+      "journeyPatternUrl": "http://localhost:5678/v1/journey-patterns/147773b7a88c9e53637a5589948b2c8d",
+      "journeyUrl": "http://localhost:5678/v1/journeys/78_15453_8651235",
+      "lineId": "40A",
+      "lineUrl": "http://localhost:5678/v1/lines/40A",
+      "routeUrl": "http://localhost:5678/v1/routes/2497870624",
+      "stopPointUrl": "http://localhost:5678/v1/stop-points/0001",
+      "validFrom": "2025-03-01",
+      "validTo": "2025-03-01",
+      "wheelchairAccessible": true
+    }
+  ]
+}
+```
 #### Municipalities
+```
+<base url>/v1/municipalities
+```
 ```json
 {
   "status": "success",
