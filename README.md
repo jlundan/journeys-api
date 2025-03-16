@@ -148,8 +148,8 @@ lists the zones used in the Tampere GTFS data.
 	- routeId : string
 	- journeyPatternId : string
 	- dayTypes : comma separated list of: monday, tuesday, wednesday, friday, saturday, sunday
-	- departureTime : hh:mm
-	- arrivalTime : hh:mm
+	- departureTime : hh:mm or hh:mm:ss
+	- arrivalTime : hh:mm or hh:mm:ss
 	- firstStopPointId : string
 	- lastStopPointId : string
 	- stopPointId : string
