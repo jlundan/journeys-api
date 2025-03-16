@@ -163,7 +163,7 @@ Endpoints in experimental state may still change during upcoming updates. There 
 	- municipalityName: string
 	- municipalityShortName: string
 
-<base url>/v1/stop-points/:stopPointId/journeys (experimental)
+<base url>/v1/stop-points/<stop-point shortName>/journeys (experimental)
 	- lineId : string
 	- routeId : string
 	- journeyPatternId : string
@@ -174,7 +174,7 @@ Endpoints in experimental state may still change during upcoming updates. There 
 	- lastStopPointId : string
     - gtfsTripId: string
     
-<base url>/v1/stop-points/:stopPointId/journeys/active (experimental)
+<base url>/v1/stop-points/<stop-point shortName>/journeys/active (experimental)
 	- lineId : string
 	- routeId : string
 	- journeyPatternId : string
@@ -506,8 +506,9 @@ export JOURNEYS_VA_BASE_URL=https://data.itsfactory.fi/journeys/api/1
 ##### List schedules (journeys) for stop points
 The response includes all journeys for the stop point, including active and inactive journeys. The active journeys include the date of the query in their validity period. Inactive journeys are not valid on the date of the query. This is determined by the validFrom and validTo fields in the response.
 ```
-<base url>/v1/stop-points/:stopPointId/journeys
+<base url>/v1/stop-points/<stop-point shortName>/journeys
 ```
+The `<stop-point shortName>` should match to a `shortName` field in the `<base url>/v1/stop-points` endpoint response for a stop-point.
 ```json
 {
   "status": "success",
@@ -550,8 +551,9 @@ The response includes all journeys for the stop point, including active and inac
 ##### List active schedules (journeys) for stop points
 The response includes only the active journeys for the stop point. The active journeys include the date of the query in their validity period. Inactive journeys are not valid on the date of the query. This is determined by the validFrom and validTo fields in the response.
 ```
-<base url>/v1/stop-points/:stopPointId/journeys/active
+<base url>/v1/stop-points/<stop-point shortName>/journeys/active
 ```
+The `<stop-point shortName>` should match to a `shortName` field in the `<base url>/v1/stop-points` endpoint response for a stop-point.
 ```json
 {
   "status": "success",
