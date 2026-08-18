@@ -4,14 +4,15 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
-	"github.com/jlundan/journeys-api/internal/app/journeys/model"
-	"github.com/jlundan/journeys-api/internal/app/journeys/utils"
-	"github.com/jlundan/journeys-api/pkg/ggtfs"
 	"log"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/jlundan/journeys-api/internal/app/journeys/model"
+	"github.com/jlundan/journeys-api/internal/app/journeys/utils"
+	"github.com/jlundan/journeys-api/pkg/ggtfs"
 )
 
 func newJourneysAndJourneyPatternsRepository(stopTimes []*ggtfs.StopTime, trips []*ggtfs.Trip, calendarItems []*ggtfs.CalendarItem,
@@ -89,7 +90,7 @@ func newJourneysAndJourneyPatternsRepository(stopTimes []*ggtfs.StopTime, trips 
 			sp, spFound := stopPointDataStore.ById[*stopTime.StopId] // stArr is already filtered to contain only non-nil stopTimes
 
 			if !spFound {
-				fmt.Println(fmt.Sprintf("Unknown stop point in trip, ignoring it. trip_id:%v, stop_id:%v", tripId, stopTime.TripId))
+				fmt.Println(fmt.Sprintf("Unknown stop point in trip, ignoring it. trip_id:%v, stop_id:%v", tripId, *stopTime.StopId))
 				continue
 			}
 
